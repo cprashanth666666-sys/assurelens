@@ -1,0 +1,852 @@
+# AssureLens control library — Digital Personal Data Protection
+#
+# This file is the intellectual core of the project. It lives in git, not in
+# the database, so it is reviewable as a diff. [TRD ADR-008]
+#
+# Rules:
+#   * Every control cites exactly one PRIMARY clause. If it maps to nothing,
+#     it is a good practice, not a control, and is labelled that way. [PRD P2]
+#   * `verbatim_text` is copied from the instrument, never paraphrased. The UI
+#     renders it so the reader sees the statute. [UX 4.3]
+#   * Anything not traceable in SOURCES.md does not appear here. [PRD P5]
+
+framework:
+  code: DPDP
+  name: Digital Personal Data Protection Act 2023 and Rules 2025
+  version: "Act 22 of 2023; Rules G.S.R. 846(E)"
+  authority: Ministry of Electronics and Information Technology, Government of India
+  source_url: https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa
+
+# ---------------------------------------------------------------------------
+# Clauses. in_force_from follows Rule 1's commencement schedule: Rules 3 and
+# 5-16 commence eighteen months after publication of G.S.R. 846(E) on
+# 13 Nov 2025, i.e. 2027-05-13. Rule 4 commences 2026-11-13. The Act is
+# already in force. [SOURCES A1.1]
+# ---------------------------------------------------------------------------
+clauses:
+  - ref: "Act s.6(6)"
+    title: Withdrawal of consent
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      The Data Principal shall have the right to withdraw her consent at any
+      time, with the ease of doing so being comparable to the ease with which
+      consent was given.
+    source_status: VERIFIED
+
+  - ref: "Act s.8(2)"
+    title: Engagement of a Data Processor only under a valid contract
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      A Data Fiduciary may engage, appoint, use or otherwise involve a Data
+      Processor to process personal data on its behalf for any activity
+      related to offering of goods or services to Data Principals only under a
+      valid contract.
+    source_status: VERIFIED
+
+  - ref: "Act s.8(5)"
+    title: Reasonable security safeguards
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      A Data Fiduciary shall protect personal data in its possession or under
+      its control, including in respect of any processing undertaken by it or
+      on its behalf by a Data Processor, by taking reasonable security
+      safeguards to prevent personal data breach.
+    source_status: VERIFIED
+
+  - ref: "Act s.8(7)(a)"
+    title: Erasure on withdrawal or cessation of purpose
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      A Data Fiduciary shall, unless retention is necessary for compliance
+      with any law for the time being in force, erase personal data, upon the
+      Data Principal withdrawing her consent or as soon as it is reasonable to
+      assume that the specified purpose is no longer being served, whichever
+      is earlier.
+    source_status: VERIFIED
+    # Illustration (II) to s.8(7) is a bank: a ten-year record-keeping duty
+    # makes continued retention lawful. The testable question for Meridian is
+    # therefore not "how old is this record" but "is there a recorded legal
+    # basis for still holding it". [SOURCES A2.1]
+
+  - ref: "Act s.8(7)(b)"
+    title: Processor erasure cascade
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      A Data Fiduciary shall ... cause its Data Processor to erase any
+      personal data that was made available by the Data Fiduciary for
+      processing to such Data Processor.
+    source_status: VERIFIED
+
+  - ref: "Act s.8(8)"
+    title: When a specified purpose is deemed no longer served
+    in_force_from: "2023-08-11"
+    verbatim_text: >-
+      The purpose referred to in clause (a) of sub-section (7) shall be deemed
+      to no longer be served, if the Data Principal does not (a) approach the
+      Data Fiduciary for the performance of the specified purpose; and
+      (b) exercise any of her rights in relation to such processing, for such
+      time period as may be prescribed.
+    source_status: VERIFIED
+
+  - ref: "R3"
+    title: Notice given by Data Fiduciary to Data Principal
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      The notice given by the Data Fiduciary to the Data Principal shall ...
+      give, the particular communication link for accessing the website or
+      app, or both, of such Data Fiduciary, and a description of other means,
+      if any, using which such Data Principal may (i) withdraw her consent,
+      with the ease of doing so being comparable to that with which such
+      consent was given; (ii) exercise her rights under the Act; and
+      (iii) make a complaint to the Board.
+    source_status: VERIFIED
+
+  - ref: "R4"
+    title: Registration and obligations of Consent Manager
+    in_force_from: "2026-11-13"
+    verbatim_text: >-
+      A person who fulfils the conditions for registration of Consent Managers
+      set out in Part A of First Schedule may apply to the Board for
+      registration as a Consent Manager ... The Consent Manager shall have
+      obligations as specified in Part B of First Schedule.
+    source_status: UNVERIFIED
+    source_note: >-
+      First Schedule Parts A and B have not been extracted in full. See
+      SOURCES.md open item D4. Controls resting on this clause gate on
+      G7_SOURCE_UNVERIFIED rather than asserting a result.
+
+  - ref: "R6(1)(a)"
+    title: Data security measures — encryption, obfuscation, masking, tokenisation
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      appropriate data security measures, such as securing of personal data
+      through encryption, obfuscation, masking or the use of virtual tokens
+      mapped to that personal data;
+    source_status: VERIFIED
+
+  - ref: "R6(1)(b)"
+    title: Measures to control access to computer resources
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      appropriate measures to control access to the computer resources used by
+      such Data Fiduciary or such a Data Processor, wherever applicable;
+    source_status: VERIFIED
+
+  - ref: "R6(1)(c)"
+    title: Visibility of access through logs, monitoring and review
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      visibility on the accessing of such personal data, through appropriate
+      logs, monitoring and review, for enabling detection of unauthorised
+      access, its investigation and remediation to prevent recurrence;
+    source_status: VERIFIED
+
+  - ref: "R6(1)(d)"
+    title: Continued processing — backups
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      reasonable measures for continued processing in the event of
+      confidentiality, integrity or availability of such personal data being
+      compromised as a result of destruction or loss of access to personal
+      data or otherwise, such as by way of data-backups;
+    source_status: VERIFIED
+
+  - ref: "R7(1)"
+    title: Intimation of personal data breach to the Data Principal
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      On becoming aware of any personal data breach, the Data Fiduciary shall,
+      to the best of its knowledge, intimate to each affected Data Principal,
+      in a concise, clear and plain manner and without delay, through her user
+      account or any mode of communication registered by her with the Data
+      Fiduciary, (a) a description of the breach, including its nature, extent
+      and the timing of its occurrence; (b) the consequences relevant to her,
+      that are likely to arise from the breach; (c) the measures implemented
+      and being implemented by the Data Fiduciary, if any, to mitigate risk;
+      (d) the safety measures that she may take to protect her interests; and
+      (e) business contact information of a person who is able to respond on
+      behalf of the Data Fiduciary, to queries, if any, of the Data Principal.
+    source_status: VERIFIED
+
+  - ref: "R8(1)"
+    title: Third Schedule erasure timetable
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      A Data Fiduciary, who is of such class and is processing personal data
+      for such corresponding purposes as are specified in Third Schedule,
+      shall erase such personal data, unless its retention is necessary for
+      compliance with any law for the time being in force, or, for the
+      corresponding time period specified in the Third Schedule, if the Data
+      Principal neither approaches such Data Fiduciary for the performance of
+      the specified purpose nor exercises her rights in relation to such
+      processing.
+    source_status: VERIFIED
+    # The Third Schedule names three classes only: e-commerce >= 2 crore
+    # users, online gaming intermediary >= 50 lakh users, social media
+    # intermediary >= 2 crore users. A BFSI captive GCC is none of them.
+    # [SOURCES A1.3 correction]
+
+  - ref: "R8(2)"
+    title: Forty-eight hour pre-erasure notice
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      At least forty-eight hours before completion of the time period for
+      erasure of personal data under this rule, the Data Fiduciary shall
+      inform the Data Principal that such personal data shall be erased upon
+      completion of such period, unless she logs into her user account or
+      otherwise initiates contact with the Data Fiduciary for the performance
+      of the specified purpose or exercises her rights in relation to the
+      processing of such personal data.
+    source_status: VERIFIED
+
+  - ref: "R8(3)"
+    title: Minimum one-year retention of personal data and processing logs
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      Without prejudice to sub-rules (1) and (2), a Data Fiduciary shall
+      retain, in respect of any processing of personal data undertaken by it
+      or on its behalf by a Data Processor, such personal data, associated
+      traffic data and other logs of the processing for a minimum period of
+      one year from the date of such processing.
+    source_status: VERIFIED
+    # Drafted generally — no class restriction — so unlike 8(1) and 8(2) this
+    # binds Meridian. It also pulls against s.8(7): a naive "delete
+    # everything" implementation breaches 8(3) while looking maximally
+    # privacy-friendly. AssureLens tests both directions.
+
+  - ref: "R9"
+    title: Contact information of person answering questions about processing
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      Every Data Fiduciary shall prominently publish on its website or app,
+      and mention in every response to a communication for the exercise of the
+      rights of a Data Principal under the Act, the business contact
+      information of the Data Protection Officer, if applicable, or a person
+      who is able to answer on behalf of the Data Fiduciary the questions of
+      the Data Principal about the processing of her personal data.
+    source_status: VERIFIED
+
+  - ref: "R13(1)"
+    title: Annual DPIA and audit by a Significant Data Fiduciary
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      A Significant Data Fiduciary shall, once in every period of twelve
+      months from the date on which it is notified as such or is included in
+      the class of Data Fiduciaries notified as such, undertake a Data
+      Protection Impact Assessment and an audit to ensure effective observance
+      of the provisions of this Act and the rules made thereunder.
+    source_status: VERIFIED
+
+  - ref: "R13(3)"
+    title: Algorithmic due diligence
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      A Significant Data Fiduciary shall observe due diligence to verify that
+      technical measures including algorithmic software adopted by it for
+      hosting, display, uploading, modification, publishing, transmission,
+      storage, updating or sharing of personal data processed by it are not
+      likely to pose a risk to the rights of Data Principals.
+    source_status: VERIFIED
+    # The hinge of the whole project: this makes fairness, drift and input
+    # validation testing a statutory obligation for an SDF rather than a
+    # voluntary good practice. [PRD 5.2]
+
+  - ref: "R14(1)"
+    title: Publication of the means to exercise rights
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      For enabling Data Principals to exercise their rights under the Act, the
+      Data Fiduciary and, where applicable, the Consent Manager, shall
+      prominently publish on its website or app, or both, as the case may be,
+      (a) the details of the means using which a Data Principal may make a
+      request for the exercise of such rights; and (b) the particulars, if
+      any, such as the username or other identifier of such a Data Principal,
+      which may be required to identify her under its terms of service.
+    source_status: VERIFIED
+
+  - ref: "R14(3)"
+    title: Grievance redressal period
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      Every Data Fiduciary and Consent Manager shall prominently publish on
+      its website or app, or both, as the case may be, within a reasonable
+      period not exceeding ninety days under its grievance redressal system
+      for responding to the grievances of Data Principals and shall, for
+      ensuring the effectiveness of the system in responding within such
+      period, implement appropriate technical and organisational measures.
+    source_status: VERIFIED
+
+  - ref: "R15"
+    title: Transfer of personal data outside the territory of India
+    in_force_from: "2027-05-13"
+    verbatim_text: >-
+      Any personal data processed by a Data Fiduciary under the Act may be
+      transferred outside the territory of India subject to the restriction
+      that the Data Fiduciary shall meet such requirements as the Central
+      Government may, by general or special order, specify in respect of
+      making such personal data available to any foreign State, or to any
+      person or entity under the control of or any agency of such a State.
+    source_status: UNVERIFIED
+    source_note: >-
+      The obligation is defined by reference to an order the Central
+      Government "may" specify. No such order has been confirmed as issued.
+      Until one exists there is no concrete requirement to test against, so
+      the control gates on G7_SOURCE_UNVERIFIED. See SOURCES.md open item D5.
+
+# ---------------------------------------------------------------------------
+# Controls. 25 total, 13 executable.
+# ---------------------------------------------------------------------------
+controls:
+
+  # --- Notice and consent -------------------------------------------------
+  - ref: DPDP-03-01
+    title: Notice describes withdrawal, rights and complaint routes
+    domain: NOTICE_CONSENT
+    objective: >-
+      The consent notice given to each Data Principal states the means by
+      which she may withdraw consent, exercise her rights under the Act, and
+      complain to the Board.
+    procedure_text: >-
+      Obtain the current consent notice for each processing purpose. Confirm
+      each notice carries a communication link and a description of the means
+      to withdraw consent, exercise rights, and complain to the Board.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R3", primary: true, rationale: "Rule 3 prescribes the notice content."}
+      - {ref: "A.5.34", framework: ISO27001}
+
+  - ref: DPDP-03-02
+    title: Withdrawing consent is as easy as giving it
+    domain: NOTICE_CONSENT
+    objective: >-
+      The effort required to withdraw consent — steps, fields and channels —
+      is comparable to the effort required to give it.
+    procedure_text: >-
+      Compare the grant and withdrawal journeys for each purpose: count
+      interaction steps, required fields and available channels. Withdrawal
+      requiring more of any of these than granting is an exception.
+    inference_mode: CENSUS
+    is_executable: true
+    suite: consent
+    plugin_key: consent.withdrawal_effort_parity
+    evidence_contract:
+      required:
+        - {name: grant_journey, kind: HTTP_PROBE}
+        - {name: withdrawal_journey, kind: HTTP_PROBE}
+    clauses:
+      - {ref: "Act s.6(6)", primary: true, rationale: "Section 6(6) sets the ease-parity standard directly."}
+      - {ref: "R3", framework: DPDP}
+
+  - ref: DPDP-03-03
+    title: Consent withdrawal stops downstream processing
+    domain: NOTICE_CONSENT
+    objective: >-
+      When a Data Principal withdraws consent, processing for that purpose
+      actually stops in the downstream systems, not merely in the consent
+      record.
+    procedure_text: >-
+      Sample principals with active consent for a purpose. Record downstream
+      state, withdraw consent through the production path, then re-probe the
+      downstream system. Classify each as propagated within the service level,
+      lagged, or not propagated.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: consent
+    plugin_key: consent.withdrawal_propagation
+    evidence_contract:
+      required:
+        - {name: consent_records, kind: DB_QUERY}
+        - {name: downstream_segment, kind: HTTP_PROBE}
+      population_source: consent_records
+      max_age_days: 30
+    clauses:
+      - {ref: "Act s.6(6)", primary: true, rationale: "A withdrawal that does not stop processing is not a withdrawal."}
+      - {ref: "Act s.8(7)(a)", framework: DPDP}
+    # This is where privacy tooling most often fails silently: the consent
+    # store updates instantly and the downstream refreshes on a batch, so the
+    # record looks compliant while the principal keeps being processed. The
+    # control tests the outcome, not the record.
+
+  - ref: DPDP-04-01
+    title: Consent Manager interoperability readiness
+    domain: NOTICE_CONSENT
+    objective: >-
+      Where consent is to be managed through a registered Consent Manager, the
+      organisation can give, manage, review and withdraw consent through that
+      interoperable platform.
+    procedure_text: >-
+      Obtain the design for Consent Manager integration and evidence of
+      readiness against the First Schedule Part B obligations.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R4", primary: true, rationale: "Rule 4 and First Schedule govern Consent Managers."}
+    # Rule 4 commences 2026-11-13, ahead of the main tranche. Its clause is
+    # UNVERIFIED pending extraction of First Schedule Part B, so this control
+    # gates on G7 rather than asserting a result.
+
+  # --- Security safeguards ------------------------------------------------
+  - ref: DPDP-06-01
+    title: Personal data is encrypted, masked or tokenised at rest
+    domain: SECURITY_SAFEGUARDS
+    objective: >-
+      Every asset holding personal data applies at least one of encryption,
+      obfuscation, masking or virtual tokenisation.
+    procedure_text: >-
+      Scan each declared data asset for identifier classes. Compare detected
+      classes against the data inventory and against the asset's declared
+      encryption-at-rest posture. An asset holding identifiers in clear, or
+      holding a class absent from the inventory, is an exception.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: pii_retention
+    plugin_key: pii.discovery_and_protection
+    evidence_contract:
+      required:
+        - {name: data_assets, kind: DB_QUERY}
+        - {name: asset_records, kind: DB_QUERY}
+      population_source: asset_records
+    clauses:
+      - {ref: "R6(1)(a)", primary: true, rationale: "Rule 6(1)(a) names encryption, obfuscation, masking and tokenisation as the minimum measures."}
+      - {ref: "Act s.8(5)", framework: DPDP}
+      - {ref: "A.8.11", framework: ISO27001}
+      - {ref: "A.8.24", framework: ISO27001}
+
+  - ref: DPDP-06-02
+    title: Access to personal data is restricted to authorised principals
+    domain: SECURITY_SAFEGUARDS
+    objective: >-
+      A principal — internal or third-party — can reach only the personal data
+      its role entitles it to, under adversarial conditions.
+    procedure_text: >-
+      Authenticate to the application as each principal class and attempt
+      ownership override, identifier enumeration, privilege escalation and
+      mass assignment against personal-data endpoints. Any deviation from the
+      expected authorisation decision is an exception, evidenced by the
+      request and response.
+    inference_mode: CENSUS
+    is_executable: true
+    suite: access_probes
+    plugin_key: access.authorisation_probes
+    evidence_contract:
+      required:
+        - {name: probe_exchanges, kind: HTTP_PROBE}
+    clauses:
+      - {ref: "R6(1)(b)", primary: true, rationale: "Rule 6(1)(b) requires measures controlling access to the computer resources used."}
+      - {ref: "Act s.8(5)", framework: DPDP}
+      - {ref: "A.5.15", framework: ISO27001}
+      - {ref: "A.8.3", framework: ISO27001}
+
+  - ref: DPDP-06-03
+    title: Personal-data endpoints validate input at the boundary
+    domain: SECURITY_SAFEGUARDS
+    objective: >-
+      Limits and controls guarding personal data cannot be bypassed by
+      malformed, boundary or type-confused input.
+    procedure_text: >-
+      Submit non-finite values, negatives, zero and integer-overflow values to
+      fields that enforce a limit on access to or use of personal data. A
+      value that passes a limit check it should fail is an exception.
+    inference_mode: CENSUS
+    is_executable: true
+    suite: access_probes
+    plugin_key: access.input_validation_probes
+    evidence_contract:
+      required:
+        - {name: probe_exchanges, kind: HTTP_PROBE}
+    clauses:
+      - {ref: "R6(1)(b)", primary: true, rationale: "A limit that can be bypassed is not a measure controlling access."}
+      - {ref: "A.8.28", framework: ISO27001}
+    # IEEE-754 makes every comparison with NaN false, so a naive
+    # `if value > cap: reject` passes NaN straight through. One line, unbounded
+    # blast radius, invisible to a reviewer skimming for logic errors.
+
+  - ref: DPDP-06-04
+    title: Access to personal data is logged and reviewable
+    domain: SECURITY_SAFEGUARDS
+    objective: >-
+      Access to personal data — including unauthorised attempts — produces a
+      log entry sufficient to detect, investigate and remediate.
+    procedure_text: >-
+      After executing authorisation probes, query the access log for a
+      corresponding entry for each attempt. An unauthorised access that was
+      correctly refused but not recorded is still an exception.
+    inference_mode: CENSUS
+    is_executable: true
+    suite: access_probes
+    plugin_key: access.log_visibility
+    evidence_contract:
+      required:
+        - {name: probe_exchanges, kind: HTTP_PROBE}
+        - {name: access_logs, kind: DB_QUERY}
+    clauses:
+      - {ref: "R6(1)(c)", primary: true, rationale: "Rule 6(1)(c) requires visibility on accessing, through logs, monitoring and review."}
+      - {ref: "A.8.15", framework: ISO27001}
+      - {ref: "A.8.16", framework: ISO27001}
+    # Tests the control on the control: if an unauthorised access is not
+    # logged, Rule 6(1)(c) fails even where access control itself held.
+
+  - ref: DPDP-06-05
+    title: Backups support continued processing after compromise
+    domain: SECURITY_SAFEGUARDS
+    objective: >-
+      Backups exist and are exercised, such that processing continues if
+      confidentiality, integrity or availability of personal data is
+      compromised.
+    procedure_text: >-
+      Obtain the backup schedule, the most recent restoration test result, and
+      the recovery objectives. Absence of an exercised restoration is an
+      exception regardless of backup frequency.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R6(1)(d)", primary: true, rationale: "Rule 6(1)(d) names data-backups as the measure for continued processing."}
+      - {ref: "A.8.13", framework: ISO27001}
+
+  # --- Retention and erasure ----------------------------------------------
+  - ref: DPDP-08-01
+    title: Personal data is erased once its purpose ends, absent a legal basis
+    domain: RETENTION_ERASURE
+    objective: >-
+      Personal data whose specified purpose has ceased, or whose consent has
+      been withdrawn, is erased unless a recorded legal obligation requires
+      its retention.
+    procedure_text: >-
+      Identify principals whose specified purpose has ceased under s.8(8) or
+      who have withdrawn consent. For each, determine whether the data has
+      been erased, and if not, whether a legal retention basis is recorded.
+      Continued retention without a recorded basis is an exception. Retention
+      with a recorded basis is compliant regardless of age.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: pii_retention
+    plugin_key: retention.erasure_on_purpose_cessation
+    evidence_contract:
+      required:
+        - {name: data_principals, kind: DB_QUERY}
+        - {name: processing_activities, kind: DB_QUERY}
+      population_source: data_principals
+    clauses:
+      - {ref: "Act s.8(7)(a)", primary: true, rationale: "Section 8(7)(a) is the operative erasure duty for a Data Fiduciary outside the Third Schedule classes."}
+      - {ref: "Act s.8(8)", framework: DPDP}
+      - {ref: "A.8.10", framework: ISO27001}
+    # Deliberately tests for a recorded basis rather than for age. The Act
+    # illustrates its own carve-out with a bank retaining client identity
+    # records for ten years, so "old" and "non-compliant" are not the same
+    # thing here. [SOURCES A2.1]
+
+  - ref: DPDP-08-02
+    title: Erasure cascades to Data Processors
+    domain: RETENTION_ERASURE
+    objective: >-
+      When the Data Fiduciary erases personal data, it causes each processor
+      that received that data to erase it too.
+    procedure_text: >-
+      For principals erased in the period, confirm an erasure instruction was
+      issued to each processor that received their data, and that confirmation
+      of erasure was received. Erasure at the fiduciary alone is an exception.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: third_party
+    plugin_key: retention.processor_erasure_cascade
+    evidence_contract:
+      required:
+        - {name: erased_principals, kind: DB_QUERY}
+        - {name: third_parties, kind: DB_QUERY}
+      population_source: erased_principals
+    clauses:
+      - {ref: "Act s.8(7)(b)", primary: true, rationale: "Section 8(7)(b) extends the erasure duty to data made available to a processor."}
+      - {ref: "A.5.20", framework: ISO27001}
+
+  - ref: DPDP-08-03
+    title: Processing logs are retained for at least one year
+    domain: RETENTION_ERASURE
+    objective: >-
+      Personal data, associated traffic data and processing logs are retained
+      for a minimum of one year from the date of processing.
+    procedure_text: >-
+      For each processing activity, obtain the configured log retention period
+      and the age of the oldest retained log. A configured period below one
+      year, or an oldest log younger than one year where processing is older,
+      is an exception.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: pii_retention
+    plugin_key: retention.minimum_log_retention
+    evidence_contract:
+      required:
+        - {name: processing_activities, kind: DB_QUERY}
+        - {name: access_logs, kind: DB_QUERY}
+      population_source: processing_activities
+    clauses:
+      - {ref: "R8(3)", primary: true, rationale: "Rule 8(3) sets a one-year floor and is drafted generally, without class restriction."}
+      - {ref: "A.5.33", framework: ISO27001}
+    # The counterweight to DPDP-08-01. Over-deletion is as much a finding as
+    # under-deletion, and most tools only look in one direction.
+
+  - ref: DPDP-08-04
+    title: Third Schedule erasure timetable
+    domain: RETENTION_ERASURE
+    objective: >-
+      Where the organisation falls within a Third Schedule class, personal
+      data is erased on the prescribed timetable and a forty-eight hour notice
+      precedes erasure.
+    procedure_text: >-
+      Determine whether the organisation is an e-commerce entity, online
+      gaming intermediary or social media intermediary meeting the Third
+      Schedule user thresholds. If so, test the timetable and the pre-erasure
+      notice. If not, scope out with a written reason.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R8(1)", primary: true, rationale: "Rule 8(1) binds only the classes named in the Third Schedule."}
+      - {ref: "R8(2)", framework: DPDP}
+    # Retained in the library on purpose. An assessor should be able to see
+    # that this rule was considered and why it does not bind, rather than find
+    # it silently absent. Scoped NOT_APPLICABLE for Meridian in
+    # meridian_scope.yaml.
+
+  # --- Data principal rights ----------------------------------------------
+  - ref: DPDP-09-01
+    title: A named contact answers questions about processing
+    domain: PRINCIPAL_RIGHTS
+    objective: >-
+      Business contact information for the Data Protection Officer, or a
+      person able to answer on the fiduciary's behalf, is prominently
+      published and included in every response to a rights request.
+    procedure_text: >-
+      Confirm the contact is published on the website or app. Sample
+      responses to rights requests and confirm each carries the contact.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R9", primary: true, rationale: "Rule 9 prescribes publication and inclusion in every response."}
+
+  - ref: DPDP-14-01
+    title: The means to exercise rights are published
+    domain: PRINCIPAL_RIGHTS
+    objective: >-
+      The website or app prominently publishes how a Data Principal makes a
+      rights request and what particulars identify her.
+    procedure_text: >-
+      Inspect the published rights information for the request means and the
+      identifying particulars required under the terms of service.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R14(1)", primary: true, rationale: "Rule 14(1) prescribes what must be published."}
+
+  - ref: DPDP-14-02
+    title: Grievances are answered within the published period
+    domain: PRINCIPAL_RIGHTS
+    objective: >-
+      The grievance redressal system responds within its published period, not
+      exceeding ninety days, and its effectiveness is measured.
+    procedure_text: >-
+      Obtain the published period and the log of grievances with their
+      response times. Compute the proportion answered within the period.
+      Absence of a response-time record is itself an exception: an
+      unmeasured service level cannot be evidenced as effective.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R14(3)", primary: true, rationale: "Rule 14(3) requires measures ensuring effectiveness within the published period."}
+    # Expected to gate on G4: the system exists but its response times are
+    # not recorded, so there is nothing to conclude from. That is the honest
+    # verdict, and the gap is the finding.
+
+  # --- Breach response ----------------------------------------------------
+  - ref: DPDP-07-01
+    title: Breach intimation to Data Principals carries the prescribed content
+    domain: BREACH_RESPONSE
+    objective: >-
+      On becoming aware of a personal data breach, the organisation can
+      intimate each affected Data Principal without delay, with all five
+      content elements Rule 7(1) prescribes.
+    procedure_text: >-
+      Obtain the breach runbook and any intimation template. Confirm the
+      template carries the description, the consequences, the mitigations, the
+      safety measures she may take, and a named responder's contact. Confirm
+      the process has been exercised.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R7(1)", primary: true, rationale: "Rule 7(1) enumerates the required content of the intimation."}
+      - {ref: "A.5.26", framework: ISO27001}
+    # A runbook that has never been exercised is an attestation, not evidence
+    # of an operating control, so this is expected to gate on G4.
+
+  - ref: DPDP-07-02
+    title: Breach detection triggers the intimation process
+    domain: BREACH_RESPONSE
+    objective: >-
+      Monitoring detects a personal data breach and initiates the intimation
+      process, so that "becoming aware" is a designed event rather than an
+      accident.
+    procedure_text: >-
+      Trace the path from detection to intimation. Confirm a defined trigger,
+      an owner, and evidence from an exercise or a real incident.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R7(1)", primary: true, rationale: "The Rule 7(1) duty is triggered by becoming aware; detection is what makes awareness reliable."}
+      - {ref: "A.5.24", framework: ISO27001}
+
+  # --- Third parties and transfers ----------------------------------------
+  - ref: DPDP-TP-01
+    title: Processor access is contracted, proportionate and current
+    domain: THIRD_PARTY_TRANSFER
+    objective: >-
+      Each processor with access to personal data is engaged under a valid
+      contract, holds only the scopes it exercises, and its credentials are
+      current and in use.
+    procedure_text: >-
+      For each processor, confirm a processor agreement reference exists;
+      compare granted against exercised scopes; test credential age against
+      the rotation period and last use against the staleness period; and
+      confirm access is revoked where the relationship has ended.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: third_party
+    plugin_key: third_party.access_posture
+    evidence_contract:
+      required:
+        - {name: third_parties, kind: DB_QUERY}
+      population_source: third_parties
+    clauses:
+      - {ref: "Act s.8(2)", primary: true, rationale: "Section 8(2) permits engaging a processor only under a valid contract."}
+      - {ref: "R6(1)(b)", framework: DPDP}
+      - {ref: "A.5.19", framework: ISO27001}
+      - {ref: "A.5.20", framework: ISO27001}
+
+  - ref: DPDP-TP-02
+    title: Stale processor credentials are refused
+    domain: THIRD_PARTY_TRANSFER
+    objective: >-
+      A processor credential that has not been used within the staleness
+      period no longer authenticates.
+    procedure_text: >-
+      Attempt authentication using a credential whose last use precedes the
+      staleness period. Acceptance is an exception, evidenced by the exchange.
+    inference_mode: CENSUS
+    is_executable: true
+    suite: access_probes
+    plugin_key: access.stale_credential_probe
+    evidence_contract:
+      required:
+        - {name: probe_exchanges, kind: HTTP_PROBE}
+        - {name: third_parties, kind: DB_QUERY}
+    clauses:
+      - {ref: "R6(1)(b)", primary: true, rationale: "A credential that outlives its use is an uncontrolled access path."}
+      - {ref: "A.5.18", framework: ISO27001}
+
+  - ref: DPDP-15-01
+    title: Cross-border transfer meets prescribed requirements
+    domain: THIRD_PARTY_TRANSFER
+    objective: >-
+      Personal data transferred outside India meets the requirements the
+      Central Government specifies by general or special order.
+    procedure_text: >-
+      Identify transfers outside India and the receiving jurisdictions.
+      Determine whether any order under Rule 15 applies and test against its
+      requirements.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R15", primary: true, rationale: "Rule 15 defines the restriction by reference to a government order."}
+      - {ref: "A.5.14", framework: ISO27001}
+    # The clause is UNVERIFIED because the obligation is defined by an order
+    # that may not have been issued. There is no concrete requirement to test,
+    # so the control gates on G7 rather than inventing a standard. Meridian
+    # transfers to a US parent and an EU subsidiary, so the exposure is real
+    # even though the test is not yet possible.
+
+  # --- AI governance ------------------------------------------------------
+  - ref: DPDP-13-01
+    title: Consequential models are inventoried and owned
+    domain: AI_GOVERNANCE
+    objective: >-
+      Every algorithmic system processing personal data to make or inform a
+      decision affecting a Data Principal is recorded, with an owner, a
+      purpose and a training baseline.
+    procedure_text: >-
+      Reconcile the model inventory against systems observed to process
+      personal data. Confirm each consequential model records a purpose, an
+      owner and a training snapshot against which drift can be measured.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R13(3)", primary: true, rationale: "Due diligence over algorithmic software presupposes knowing which software is in scope."}
+      - {ref: "GOVERN 1.2", framework: NIST_AI_RMF}
+
+  - ref: DPDP-13-02
+    title: Model outcomes do not disadvantage a group of Data Principals
+    domain: AI_GOVERNANCE
+    objective: >-
+      Selection rates across Data Principal groups do not differ to a degree
+      that poses a risk to their rights.
+    procedure_text: >-
+      Compute the selection rate per group and the ratio of lowest to highest.
+      Compute demographic parity difference, and equal-opportunity difference
+      where ground truth exists. Report per-group confidence intervals. A
+      group below the minimum size is reported as insufficient evidence, not
+      as a disparity.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: ai_assurance
+    plugin_key: ai.fairness_selection_rate
+    evidence_contract:
+      required:
+        - {name: model_predictions, kind: DB_QUERY}
+        - {name: model_registry, kind: DB_QUERY}
+      population_source: model_predictions
+    clauses:
+      - {ref: "R13(3)", primary: true, rationale: "Rule 13(3) requires due diligence that algorithmic software is not likely to pose a risk to the rights of Data Principals."}
+      - {ref: "MEASURE 2.11", framework: NIST_AI_RMF}
+    # The four-fifths ratio is a US EEOC convention adopted here as a
+    # documented, arguable default. It is not a DPDP requirement and the
+    # product says so rather than implying legal force.
+
+  - ref: DPDP-13-03
+    title: Model inputs are monitored for drift from the training distribution
+    domain: AI_GOVERNANCE
+    objective: >-
+      Input distributions are monitored against the training baseline, so that
+      a model whose behaviour has shifted is detected before it affects
+      Data Principals.
+    procedure_text: >-
+      Compute the Population Stability Index per feature against the training
+      snapshot over quantile bins. Report features above the moderate and
+      significant thresholds. Absence of any drift monitoring is itself an
+      exception.
+    inference_mode: POPULATION
+    is_executable: true
+    suite: ai_assurance
+    plugin_key: ai.input_drift_psi
+    evidence_contract:
+      required:
+        - {name: model_predictions, kind: DB_QUERY}
+        - {name: model_registry, kind: DB_QUERY}
+      population_source: model_predictions
+    clauses:
+      - {ref: "R13(3)", primary: true, rationale: "A model that has drifted from its validated baseline is no longer the software the due diligence covered."}
+      - {ref: "MEASURE 2.4", framework: NIST_AI_RMF}
+
+  # --- Governance and accountability --------------------------------------
+  - ref: DPDP-13-04
+    title: Annual DPIA and audit are undertaken and reported
+    domain: GOVERNANCE_ACCOUNTABILITY
+    objective: >-
+      As a Significant Data Fiduciary, the organisation undertakes a Data
+      Protection Impact Assessment and an audit every twelve months, and
+      furnishes significant observations to the Board.
+    procedure_text: >-
+      Obtain the most recent DPIA and audit, their dates, and evidence that
+      significant observations were furnished to the Board. Confirm the
+      interval since the previous cycle does not exceed twelve months.
+    inference_mode: POPULATION
+    is_executable: false
+    clauses:
+      - {ref: "R13(1)", primary: true, rationale: "Rule 13(1) sets the twelve-month DPIA and audit obligation for a Significant Data Fiduciary."}
+      - {ref: "GOVERN 1.1", framework: NIST_AI_RMF}

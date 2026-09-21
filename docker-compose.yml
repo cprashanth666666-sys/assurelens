@@ -8,7 +8,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-locally}
       POSTGRES_DB: ${POSTGRES_DB:-assurelens}
     ports:
-      - "5432:5432"
+      # 5433 on the host, not 5432. A locally installed PostgreSQL service
+      # commonly owns 5432 on a developer machine; when it does, connections
+      # to localhost:5432 silently reach that instance instead of this
+      # container and fail authentication against credentials that are
+      # perfectly correct. Inside the compose network the backend still
+      # reaches "postgres:5432" — only the host mapping moves.
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

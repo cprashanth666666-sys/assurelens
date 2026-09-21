@@ -71,6 +71,33 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 
 > **Tension worth surfacing in the product:** Rule 8(1) compels erasure while Rule 8(3) compels a one-year minimum log retention. A naive "delete everything" implementation breaks 8(3). AssureLens tests both directions.
 
+> **CORRECTION (Day 2) — the Third Schedule does not apply to Meridian.**
+> Rule 8(1) binds a Data Fiduciary "who is of such class and is processing personal data for such corresponding purposes as are specified in Third Schedule." The Third Schedule names exactly **three** classes:
+> 1. e-commerce entity with **≥ 2 crore** registered users in India
+> 2. online gaming intermediary with **≥ 50 lakh** registered users in India
+> 3. social media intermediary with **≥ 2 crore** registered users in India
+>
+> A BFSI captive GCC is none of these. The three-year timetable therefore does **not** bind Meridian, and a control that tested it would be testing an inapplicable rule. Rules 8(1) and 8(2) are scoped **NOT_APPLICABLE** for this engagement with a written reason. Rule 8(3) is drafted generally and **does** apply. This closes open item D3.
+
+### A2.1 DPDP Act 2023, s.8(7) and s.8(8) — what actually governs erasure for a bank
+- **Source:** https://www.dpdpa.com/dpdpa2023/chapter-2/section8.html (statutory text of Act 22 of 2023). Accessed 2026-09-21.
+
+> "(7) A Data Fiduciary shall, unless retention is necessary for compliance with any law for the time being in force,—
+> (a) erase personal data, upon the Data Principal withdrawing her consent or as soon as it is reasonable to assume that the specified purpose is no longer being served, whichever is earlier; and
+> (b) cause its Data Processor to erase any personal data that was made available by the Data Fiduciary for processing to such Data Processor."
+
+> "(8) The purpose referred to in clause (a) of sub-section (7) shall be deemed to no longer be served, if the Data Principal does not— (a) approach the Data Fiduciary for the performance of the specified purpose; and (b) exercise any of her rights in relation to such processing, for such time period as may be prescribed."
+
+**Illustration (II) to s.8(7), verbatim — the Act's own banking example:**
+
+> "X, an individual, decides to close her savings account with Y, a bank. Y is required by law applicable to banks to maintain the record of the identity of its clients for a period of ten years beyond closing of accounts. Since retention is necessary for compliance with law, Y shall retain X's personal data for the said period."
+
+> **Why this is the spine of the retention controls.** The Act illustrates its own legal-retention carve-out with a bank. For Meridian the testable question is therefore *not* "is this record older than three years" but **"is this record still held after its purpose ceased, and is there a recorded legal basis for continuing to hold it?"** A record retained without a recorded basis is a finding; a record retained *with* one is compliant however old it is. The `legal_hold` column on `est_data_principals` carries that basis.
+>
+> s.8(7)(b) extends the same duty to processors, which is what makes the third-party suite a retention control and not only an access one.
+>
+> *Unverified:* the specific ten-year period comes from the Act's illustration, not from a provision of PMLA or an RBI Master Direction that this project has read. Controls cite the Act's illustration, never a banking-law period. See open item D7.
+
 **Rule 13 — Significant Data Fiduciary.** Verbatim obligations:
 - 13(1): "once in every period of twelve months … undertake a Data Protection Impact Assessment and an audit."
 - 13(2): furnish to the Board a report containing significant observations from the DPIA and audit.
@@ -158,9 +185,10 @@ The following were searched for and **no credible public source was found**. The
 |---|---|---|
 | D1 | Review the **16 December 2025 corrigendum** and reconcile against the rule inventory in A1.2 | Read the corrigendum PDF; amend controls if rule numbering or text changed |
 | D2 | Confirm the **₹250 crore** penalty entry maps to the breach types AssureLens names | Read the Schedule to the Act, entry by entry |
-| D3 | Extract **Third Schedule** retention classes and periods in full | Currently only the three-year illustrative class is captured |
+| ~~D3~~ | ~~Extract **Third Schedule** retention classes and periods in full~~ | **CLOSED Day 2.** All three classes extracted. Meridian matches none; Rules 8(1)/8(2) scoped N/A with a written reason. See A1.3. |
 | D4 | Extract **First Schedule Part B** Consent Manager obligations in full | Needed for the consent-manager control family |
 | D5 | Confirm whether any **Rule 15 special order** on cross-border transfer has been issued since notification | Affects control DPDP-15-01's testability |
 | D6 | Verify the GCC Pulse figures against the **report PDF**, not only the press release | Press release is a secondary rendering of the survey |
+| D7 | Confirm the statutory retention period applicable to an Indian bank (PMLA s.12 / RBI KYC Master Direction) | The Act's Illustration (II) says ten years; that is the Act illustrating itself, not a banking-law provision this project has read. No control cites a banking-law period until this is closed. |
 
 Until an open item is closed, any control that depends on it ships with an explicit `source_status: unverified` flag, and the UI renders it as **Insufficient Evidence — source unverified** rather than asserting a result. The product's own honesty rule applies to the product's own claims.

@@ -1,0 +1,49 @@
+# NIST AI Risk Management Framework 1.0 cross-references.
+#
+# Why these exist: Rule 13(3) requires a Significant Data Fiduciary to verify
+# that its algorithmic software is "not likely to pose a risk to the rights of
+# Data Principals" — but it prescribes no method. The AI RMF supplies the
+# vocabulary for what that due diligence looks like in practice, which is how
+# the DPDP obligation becomes a testable control rather than an aspiration.
+# [PRD 5.2]
+#
+# ---------------------------------------------------------------------------
+# HONESTY NOTE — marked UNVERIFIED, like the ISO mappings.
+#
+# NIST AI RMF 1.0 is freely published, but the category identifiers below were
+# recorded from working knowledge and have not been checked against
+# NIST AI 100-1 in this project. They are secondary cross-references:
+# G7_SOURCE_UNVERIFIED considers only a control's PRIMARY clause, which is
+# always a DPDP provision read from the gazette.
+#
+# Cheaper to close than the ISO set, since the document is free. Tracked as
+# SOURCES.md open item D8.
+# ---------------------------------------------------------------------------
+
+framework:
+  code: NIST_AI_RMF
+  name: NIST AI Risk Management Framework 1.0
+  version: "1.0 (NIST AI 100-1)"
+  authority: National Institute of Standards and Technology, US Department of Commerce
+  source_url: https://www.nist.gov/itl/ai-risk-management-framework
+
+clauses:
+  - ref: "GOVERN 1.1"
+    title: Legal and regulatory requirements involving AI are understood, managed and documented
+    source_status: UNVERIFIED
+    source_note: Category identifier recorded from working knowledge; not checked against NIST AI 100-1.
+
+  - ref: "GOVERN 1.2"
+    title: Trustworthy AI characteristics are integrated into organisational policies, processes and procedures
+    source_status: UNVERIFIED
+    source_note: Category identifier recorded from working knowledge; not checked against NIST AI 100-1.
+
+  - ref: "MEASURE 2.4"
+    title: Deployed AI system performance is monitored, including for degradation and drift from the baseline
+    source_status: UNVERIFIED
+    source_note: Category identifier recorded from working knowledge; not checked against NIST AI 100-1.
+
+  - ref: "MEASURE 2.11"
+    title: Fairness and bias are evaluated, and results are documented
+    source_status: UNVERIFIED
+    source_note: Category identifier recorded from working knowledge; not checked against NIST AI 100-1.

@@ -1,0 +1,55 @@
+"""Shared fixtures.
+
+Tests that need the control library run against a real PostgreSQL, because
+the schema depends on PostgreSQL-specific types — JSONB, native enums and a
+partial unique index. Verifying them against SQLite would prove nothing about
+what actually ships.
+"""
+
+from __future__ import annotations
+
+import os
+from collections.abc import Iterator
+
+import pytest
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session, sessionmaker
+
+from app.seed.controls import load_control_library, load_engagement_scope
+
+# Default matches docker-compose, which publishes on host port 5433 to avoid
+# a locally installed PostgreSQL service that usually owns 5432.
+TEST_DATABASE_URL = os.environ.get(
+    "TEST_DATABASE_URL",
+    "postgresql+psycopg://assurelens:change-me-locally@localhost:5433/assurelens",
+)
+
+
+@pytest.fixture(scope="session")
+def db_available() -> bool:
+    try:
+        engine = create_engine(TEST_DATABASE_URL, connect_args={"connect_timeout": 3})
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except Exception:  # noqa: BLE001 — absence of a database is a skip, not an error.
+        return False
+
+
+@pytest.fixture(scope="session")
+def seeded_db(db_available: bool) -> Iterator[Session]:
+    """A session against a database seeded with the real control library.
+
+    Skips rather than fails when no database is reachable, so the fast unit
+    suite still runs on a machine without Docker.
+    """
+    if not db_available:
+        pytest.skip(f"No database at {TEST_DATABASE_URL}; run `docker compose up -d postgres`")
+
+    engine = create_engine(TEST_DATABASE_URL)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    with factory() as db:
+        load_control_library(db)
+        load_engagement_scope(db)
+        db.commit()
+        yield db

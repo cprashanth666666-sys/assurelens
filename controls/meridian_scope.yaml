@@ -1,0 +1,47 @@
+# Engagement scoping — Meridian Financial Services India GCC.
+#
+# The control library above is engagement-agnostic. Scoping is not: whether a
+# control binds depends on what the entity is. This file records that judgment
+# and, where a control is scoped out, the reason.
+#
+# The schema enforces this: `CHECK (in_scope OR na_reason IS NOT NULL)`. A
+# control cannot be dropped from scope without a written reason, because
+# unexplained exclusions are how assurance scope quietly shrinks to whatever
+# passes. [SCHEMA 3.3]
+
+engagement:
+  organization: Meridian Financial Services India GCC
+  name: DPDP + AI Controls Readiness Assessment
+  compliance_deadline: "2027-05-13"
+  scope_note: >-
+    Readiness assessment against the Digital Personal Data Protection Act 2023
+    and Rules 2025, with ISO/IEC 27001:2022 and NIST AI RMF cross-references,
+    covering the India retail customer estate and the MFS-CPS-v3 credit
+    pre-screening model. Meridian expects to be notified a Significant Data
+    Fiduciary, so Rule 13 obligations are treated as in scope.
+
+# Every control defaults to in_scope: true with the evidence owner named.
+# Only exceptions are listed here.
+evidence_owners:
+  NOTICE_CONSENT: Privacy Office, Meridian India
+  SECURITY_SAFEGUARDS: Information Security, Meridian India
+  RETENTION_ERASURE: Data Engineering, Meridian India
+  PRINCIPAL_RIGHTS: Privacy Office, Meridian India
+  BREACH_RESPONSE: Security Operations, Meridian India
+  THIRD_PARTY_TRANSFER: Vendor Management, Meridian India
+  AI_GOVERNANCE: Model Risk, Meridian Group
+  GOVERNANCE_ACCOUNTABILITY: Data Protection Officer, Meridian India
+
+out_of_scope:
+  - control: DPDP-08-04
+    na_reason: >-
+      Rule 8(1) binds only a Data Fiduciary "who is of such class ... as are
+      specified in Third Schedule". The Third Schedule names three classes:
+      an e-commerce entity with not less than two crore registered users in
+      India, an online gaming intermediary with not less than fifty lakh, and
+      a social media intermediary with not less than two crore. Meridian is a
+      captive financial-services GCC and is none of these, so neither the
+      three-year erasure timetable nor the forty-eight hour pre-erasure notice
+      in Rule 8(2) binds it. Erasure for Meridian is governed by
+      Act s.8(7)(a), tested by DPDP-08-01. Scoped out on legal
+      applicability, not on absence of evidence.
