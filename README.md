@@ -47,6 +47,7 @@ The **target service** is a separate process carrying intentional defects. The a
 | [docs/UX_BRIEF.md](docs/UX_BRIEF.md) | Design tokens, screens, the binding "not this" list |
 | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | 10 days, acceptance criteria, pre-decided cut order |
 | [SOURCES.md](SOURCES.md) | Every external figure and legal citation, with verbatim quotes |
+| [DEPLOY.md](DEPLOY.md) | Render + Vercel setup, in the order the dependencies allow |
 
 ## Running locally
 

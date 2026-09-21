@@ -20,8 +20,10 @@ if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_API_BASE_U
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Standalone output keeps the container image small for the Render deploy.
-  output: "standalone",
+  // Standalone keeps the Docker image small, but Vercel builds its own output
+  // and does not want it. Vercel sets VERCEL=1 during the build, so the two
+  // targets are distinguished without a separate config file.
+  ...(process.env.VERCEL ? {} : { output: "standalone" }),
 };
 
 export default nextConfig;
