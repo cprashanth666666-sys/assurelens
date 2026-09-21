@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     # Suite 3 reaches the deliberately-vulnerable target over HTTP only. [TRD 1.2]
     target_service_url: str = "http://localhost:8001"
 
+    # Where the control library YAML lives. Empty means "derive from the
+    # source tree", which is right for a venv checkout. It is set explicitly
+    # in the container, because deriving it there produced "/controls" — a
+    # path that only existed because docker-compose happened to bind-mount it
+    # at exactly that spot, and which does not exist on a real deployment.
+    controls_dir: str = ""
+
     # Every run records the seed it used, so results are reproducible. [TRD 3.4]
     default_seed: int = 42
 

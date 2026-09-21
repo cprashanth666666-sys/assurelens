@@ -18,6 +18,7 @@ import yaml
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.models.control import (
     Control,
     ControlClauseMapping,
@@ -30,7 +31,14 @@ from app.models.control import (
     User,
 )
 
-CONTROLS_DIR = Path(__file__).resolve().parents[3] / "controls"
+# Repo-root-relative default, correct for a source checkout. Overridden by
+# CONTROLS_DIR in the container, where the source tree is not the repo tree.
+_DEFAULT_CONTROLS_DIR = Path(__file__).resolve().parents[3] / "controls"
+
+
+def controls_directory() -> Path:
+    configured = get_settings().controls_dir
+    return Path(configured) if configured else _DEFAULT_CONTROLS_DIR
 
 # Files carrying a framework plus its clauses. dpdp.yaml also carries the
 # controls themselves.
@@ -194,7 +202,7 @@ def _sync_procedure(db: Session, control: Control, spec: dict[str, Any]) -> None
 
 def load_control_library(db: Session, controls_dir: Path | None = None) -> dict[str, int]:
     """Load frameworks, clauses, controls and mappings. Idempotent."""
-    directory = controls_dir or CONTROLS_DIR
+    directory = controls_dir or controls_directory()
     clause_index: dict[tuple[str, str], FrameworkClause] = {}
     control_specs: list[tuple[dict[str, Any], str]] = []
 
@@ -227,7 +235,7 @@ def load_engagement_scope(
     db: Session, controls_dir: Path | None = None
 ) -> dict[str, int]:
     """Create the demo organisation, users and engagement, and scope controls."""
-    directory = controls_dir or CONTROLS_DIR
+    directory = controls_dir or controls_directory()
     data = _load_yaml(directory / "meridian_scope.yaml")
     spec = data["engagement"]
 

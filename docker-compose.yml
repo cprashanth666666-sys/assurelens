@@ -24,7 +24,10 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
+    build:
+      # Repo root: the image needs both backend/ and controls/.
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-assurelens}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-assurelens}
       CORS_ALLOW_ORIGINS: http://localhost:3000
@@ -37,9 +40,13 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
-      - ./controls:/controls:ro
+      # Mounted at the path CONTROLS_DIR names, so an edit to the library is
+      # picked up without a rebuild. The image also carries its own copy.
+      - ./controls:/opt/assurelens/controls:ro
+    # Mirrors the Render start command, so local and deployed behave the same.
     command: >
       sh -c "alembic upgrade head &&
+             python -m app.seed &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   # Deliberately vulnerable. Isolated: no database credentials, no route to

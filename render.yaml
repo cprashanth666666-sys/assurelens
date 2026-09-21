@@ -17,11 +17,17 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    # Repo root: the image needs controls/ as well as backend/.
+    dockerContext: .
     healthCheckPath: /api/health
     # Migrations apply on every deploy, so the schema can never lag the code.
+    # Seeding runs too: the control library is the product's content, not test
+    # fixtures, and it is idempotent. Without this a deployed backend comes up
+    # with an empty library and /api/engagement 404s — the schema would be
+    # right and the application useless.
     dockerCommand: >-
       sh -c "alembic upgrade head &&
+             python -m app.seed &&
              uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: DATABASE_URL
