@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# Environment — never commit real values
+.env
+.env.local
+.env.*.local
+
+# Build artefacts
+dist/
+build/
+*.docx
+!backend/app/reporting/templates/*.docx
+
+# Uploads are ephemeral by design (24h TTL)
+uploads/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test output
+coverage/
+htmlcov/
+.coverage
+playwright-report/
+test-results/

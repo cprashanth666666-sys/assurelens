@@ -1,0 +1,194 @@
+/* AssureLens design tokens.
+ *
+ * Implements docs/UX_BRIEF.md §2. Nothing in this project hardcodes a hex.
+ *
+ * Aesthetic: audit-grade restraint. The reference points are the printed
+ * workpaper, the statistical table and the regulatory filing — not the SaaS
+ * dashboard. See UX_BRIEF §1.1 for the binding list of what this must not be.
+ */
+
+:root {
+  /* --- Neutral -----------------------------------------------------------
+   * Deliberately WARM. A cool grey ramp is the default-SaaS tell; warmth
+   * reads as paper. [UX 2.1]
+   */
+  --n-0:   #ffffff;
+  --n-25:  #fcfcfb;   /* page ground */
+  --n-50:  #f7f6f4;   /* table zebra, inset panels */
+  --n-100: #eeece8;   /* hairlines, dividers */
+  --n-200: #dedbd5;   /* borders */
+  --n-300: #c2beb6;   /* disabled */
+  --n-400: #9b968c;   /* placeholder */
+  --n-500: #6f6a61;   /* secondary text */
+  --n-600: #55504a;   /* body on light */
+  --n-700: #3b3733;   /* headings */
+  --n-800: #262320;   /* primary text */
+  --n-900: #14120f;   /* max contrast */
+
+  /* --- Accent ------------------------------------------------------------
+   * Deep ink blue. Interactive and structural only, never decorative.
+   */
+  --accent-700: #1b3a5c;
+  --accent-600: #24506f;
+  --accent-500: #2f6690;
+  --accent-100: #dce7ef;
+  --accent-50:  #eef4f8;
+
+  /* --- Severity — four steps, muted. Never neon. ------------------------- */
+  --sev-critical: #8c2f2a;
+  --sev-high:     #b4612c;
+  --sev-medium:   #8a7124;
+  --sev-low:      #4a6b52;
+  --sev-critical-bg: #f7e9e8;
+  --sev-high-bg:     #faefe4;
+  --sev-medium-bg:   #f7f2e0;
+  --sev-low-bg:      #eaf1ec;
+
+  /* --- Verdicts ----------------------------------------------------------
+   * INSUFFICIENT is NEUTRAL INK by design. It is a peer verdict, not a soft
+   * fail, and must never be styled as a warning. [PRD 6.5, UX 6.1]
+   */
+  --verdict-pass:         #3f6b4a;
+  --verdict-fail:         #8c2f2a;
+  --verdict-insufficient: #55504a;
+  --verdict-na:           #9b968c;
+
+  /* --- Semantic surfaces ------------------------------------------------- */
+  --surface-page:    var(--n-25);
+  --surface-panel:   var(--n-0);
+  --surface-inset:   var(--n-50);
+  --text-primary:    var(--n-800);
+  --text-secondary:  var(--n-500);
+  --text-heading:    var(--n-700);
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-sans:  "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, sans-serif;
+  --font-mono:  "JetBrains Mono", "SF Mono", "Cascadia Mono", Consolas,
+                "Liberation Mono", monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+
+  --fs-2xs:  0.6875rem;  /* 11px — table meta, captions */
+  --fs-xs:   0.75rem;    /* 12px — dense table body */
+  --fs-sm:   0.8125rem;  /* 13px — default UI */
+  --fs-base: 0.875rem;   /* 14px — body prose */
+  --fs-md:   1rem;
+  --fs-lg:   1.25rem;
+  --fs-xl:   1.5rem;
+  --fs-2xl:  1.875rem;   /* largest on screen — no 48px hero numbers */
+
+  --lh-tight: 1.35;
+  --lh-table: 1.5;
+  --lh-prose: 1.6;
+
+  /* --- Spacing ----------------------------------------------------------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+
+  /* --- Borders and radius ------------------------------------------------
+   * No radius above 4px anywhere. rounded-2xl is the templated look.
+   */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+
+  --border-hair:   1px solid var(--n-100);
+  --border-strong: 1px solid var(--n-200);
+
+  /* The ONLY shadow token. Overlays only — modals, popovers, dropdowns.
+   * Panels are defined by a 1px border and a background shift, never by a
+   * drop shadow. This single rule does most of the work of not looking
+   * templated. [UX 2.3]
+   */
+  --shadow-overlay: 0 4px 16px rgb(20 18 15 / 0.10);
+
+  --content-max: 1440px;
+
+  color-scheme: light;
+}
+
+/* --- Dark theme -----------------------------------------------------------
+ * Inverts the neutral ramp and desaturates severity further. Dark mode must
+ * not become the security-ops-console look that UX 1.1 rejects. Light is the
+ * primary design.
+ *
+ * Declared twice so an explicit user choice wins in both directions.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --n-0:   #14120f;
+    --n-25:  #191714;
+    --n-50:  #201e1a;
+    --n-100: #2b2823;
+    --n-200: #3a3630;
+    --n-300: #524d45;
+    --n-400: #6f6a61;
+    --n-500: #948f85;
+    --n-600: #b3aea3;
+    --n-700: #d0cbc2;
+    --n-800: #e8e4dc;
+    --n-900: #f7f6f4;
+
+    --accent-700: #9dc2dd;
+    --accent-600: #8ab4d2;
+    --accent-500: #74a4c6;
+    --accent-100: #22333f;
+    --accent-50:  #1b2831;
+
+    --sev-critical: #d99b96;
+    --sev-high:     #d9a877;
+    --sev-medium:   #cfbc7e;
+    --sev-low:      #9cbda6;
+    --sev-critical-bg: #2e1d1c;
+    --sev-high-bg:     #2e241a;
+    --sev-medium-bg:   #2b271a;
+    --sev-low-bg:      #1d2a21;
+
+    --verdict-pass:         #8fb89a;
+    --verdict-fail:         #d99b96;
+    --verdict-insufficient: #b3aea3;
+    --verdict-na:           #6f6a61;
+
+    --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.45);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --n-0:   #14120f;
+  --n-25:  #191714;
+  --n-50:  #201e1a;
+  --n-100: #2b2823;
+  --n-200: #3a3630;
+  --n-300: #524d45;
+  --n-400: #6f6a61;
+  --n-500: #948f85;
+  --n-600: #b3aea3;
+  --n-700: #d0cbc2;
+  --n-800: #e8e4dc;
+  --n-900: #f7f6f4;
+
+  --accent-700: #9dc2dd;
+  --accent-600: #8ab4d2;
+  --accent-500: #74a4c6;
+  --accent-100: #22333f;
+  --accent-50:  #1b2831;
+
+  --sev-critical: #d99b96;
+  --sev-high:     #d9a877;
+  --sev-medium:   #cfbc7e;
+  --sev-low:      #9cbda6;
+  --sev-critical-bg: #2e1d1c;
+  --sev-high-bg:     #2e241a;
+  --sev-medium-bg:   #2b271a;
+  --sev-low-bg:      #1d2a21;
+
+  --verdict-pass:         #8fb89a;
+  --verdict-fail:         #d99b96;
+  --verdict-insufficient: #b3aea3;
+  --verdict-na:           #6f6a61;
+
+  --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.45);
+
+  color-scheme: dark;
+}

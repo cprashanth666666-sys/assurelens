@@ -1,0 +1,53 @@
+# Render blueprint — backend, target service and database.
+# The frontend deploys to Vercel.
+#
+# Day 1 requirement: all three services live before any feature exists. A
+# first deployment on the last day is the most common way a project ends up
+# local-only. [PLAN §1]
+
+databases:
+  - name: assurelens-db
+    databaseName: assurelens
+    user: assurelens
+    plan: free
+
+services:
+  - type: web
+    name: assurelens-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    # Migrations apply on every deploy, so the schema can never lag the code.
+    dockerCommand: >-
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: assurelens-db
+          property: connectionString
+      - key: CORS_ALLOW_ORIGINS
+        sync: false          # set to the Vercel origin — never "*"
+      - key: TARGET_SERVICE_URL
+        fromService:
+          name: assurelens-target
+          type: web
+          property: hostport
+      - key: LOG_LEVEL
+        value: INFO
+
+  # Deliberately vulnerable. Deployed separately and reached only over HTTP,
+  # so a defect that is not network-reachable is not found — same as reality.
+  # It holds no database credentials. [TRD 1.2, 9]
+  - type: web
+    name: assurelens-target
+    runtime: docker
+    plan: free
+    dockerfilePath: ./target_service/Dockerfile
+    dockerContext: ./target_service
+    healthCheckPath: /health
+    envVars:
+      - key: LOG_LEVEL
+        value: INFO

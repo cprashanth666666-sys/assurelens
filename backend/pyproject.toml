@@ -1,0 +1,66 @@
+[project]
+name = "assurelens-backend"
+version = "0.1.0"
+description = "DPDP + AI controls assurance workbench — engine, suites and reporting"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
+    "httpx>=0.28",
+    "numpy>=2.1",
+    "pandas>=2.2",
+    "scipy>=1.14",
+    "scikit-learn>=1.5",
+    "python-docx>=1.1",
+    "python-multipart>=0.0.12",
+    "pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+# Declared explicitly. Auto-discovery fails on this layout because `alembic`,
+# `tests` and `.venv` sit beside `app` at the top level.
+[tool.setuptools]
+packages = ["app"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "types-PyYAML",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "BLE"]
+
+[tool.ruff.lint.flake8-bugbear]
+# `Depends()` in a parameter default is the FastAPI idiom, not the mutable
+# default argument B008 exists to catch.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = []
+# Third-party packages without stubs.
+[[tool.mypy.overrides]]
+module = ["scipy.*", "sklearn.*", "docx.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

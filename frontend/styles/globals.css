@@ -1,0 +1,100 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-prose);
+    -webkit-font-smoothing: antialiased;
+
+    /* Numbers in columns must align. Set once, globally, never overridden.
+     * [UX 2.2] */
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1, h2, h3, h4 {
+    color: var(--text-heading);
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    line-height: var(--lh-tight);
+    margin: 0;
+  }
+
+  h1 { font-size: var(--fs-xl); }
+  h2 { font-size: var(--fs-lg); }
+  h3 { font-size: var(--fs-md); }
+  h4 { font-size: var(--fs-base); }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+  }
+
+  /* 2px accent outline, 2px offset. Never `outline: none`. [UX 7] */
+  :focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+  }
+
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  /* The product has exactly one animation: a 1px indeterminate rule under a
+   * running control. This removes it. Nothing else moves. [UX 7] */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Tables, the heatmap and the scatter are the only elements permitted to
+   * exceed viewport width, each inside its own scroll container. The page
+   * body never scrolls horizontally. [UX 8] */
+  .scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* The single permitted animation. [UX 4.4] */
+  .indeterminate-rule {
+    position: relative;
+    overflow: hidden;
+    height: 1px;
+    background: var(--n-100);
+  }
+
+  .indeterminate-rule::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inline-size: 32%;
+    background: var(--accent-500);
+    animation: indeterminate 1.4s ease-in-out infinite;
+  }
+
+  @keyframes indeterminate {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(420%); }
+  }
+}
