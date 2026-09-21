@@ -1,0 +1,6 @@
+# Control library YAML lands here on Day 2.
+#
+# This file exists because docker-compose bind-mounts ./controls into the
+# backend, and git does not track empty directories. Without it, a fresh
+# clone has no ./controls; Docker silently creates an empty one and the
+# seeder finds no controls — an empty library rather than a clear error.

@@ -71,6 +71,12 @@ cd backend && ruff check . && mypy app && pytest -q
 cd frontend && npm run lint && npm run typecheck && npm run build
 ```
 
+`DATABASE_URL` is required with no default, and `NEXT_PUBLIC_API_BASE_URL` must
+be set at **build** time — Next.js inlines `NEXT_PUBLIC_*` into the bundle
+during `next build` and never reads it at runtime. Both refuse to start or
+build without their value, deliberately: a silent fallback to localhost turns a
+configuration mistake into what looks like a transient outage.
+
 ## Limitations
 
 Stated here because a tool that asserts compliance conclusions has to say what it is standing on.

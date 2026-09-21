@@ -30,11 +30,14 @@ services:
           property: connectionString
       - key: CORS_ALLOW_ORIGINS
         sync: false          # set to the Vercel origin — never "*"
+      # `host`, not `hostport`: hostport yields `name:443` with no scheme,
+      # which httpx rejects. The backend's settings validator prefixes the
+      # scheme, so either form is repaired — but host is the honest value.
       - key: TARGET_SERVICE_URL
         fromService:
           name: assurelens-target
           type: web
-          property: hostport
+          property: host
       - key: LOG_LEVEL
         value: INFO
 

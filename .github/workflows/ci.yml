@@ -86,5 +86,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # NEXT_PUBLIC_* is inlined at build time, so the production build
+      # refuses to run without it. Setting it here both satisfies that guard
+      # and documents that it is a build-time input, not a runtime one.
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
