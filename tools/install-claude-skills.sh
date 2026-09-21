@@ -24,6 +24,7 @@ FORCE=0
 DRY_RUN=0
 UNINSTALL=0
 NO_PLUGINS=0
+VERIFY=0
 
 # Duplicates of skills Claude Code already ships. Installing these shadows the
 # built-ins and makes skill selection ambiguous. Off by default.
@@ -44,6 +45,7 @@ Options:
   --no-plugins         skip the plugin install step entirely
   --force              overwrite skill directories that already exist
   --dry-run            print what would happen, change nothing
+  --verify             report which expected skills are present or missing, change nothing
   --uninstall          remove only what a previous run of this script installed
   -h, --help           this message
 USAGE
@@ -58,6 +60,7 @@ while [ $# -gt 0 ]; do
     --no-plugins)       NO_PLUGINS=1 ;;
     --force)            FORCE=1 ;;
     --dry-run)          DRY_RUN=1 ;;
+    --verify)           VERIFY=1 ;;
     --uninstall)        UNINSTALL=1 ;;
     -h|--help)          usage; exit 0 ;;
     *) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
@@ -82,6 +85,56 @@ if [ "$UNINSTALL" = 1 ]; then
   done < "$MANIFEST"
   run rm -f "$MANIFEST"
   say "removed $n skill(s). Plugins, if installed, are removed with: /plugin uninstall <name>"
+  exit 0
+fi
+
+if [ "$VERIFY" = 1 ]; then
+  say "skills dir: $SKILLS_DIR"
+  tmp="$WORK/verify"
+  git clone --depth 1 --quiet https://github.com/ComposioHQ/awesome-claude-skills.git "$tmp"
+  present=0; missing=0
+  say ""
+  say "== awesome-claude-skills"
+  while IFS= read -r f; do
+    d="$(dirname "$f")"; rel="${d#"$tmp"/}"
+    case "$rel" in composio-skills/*) continue ;; esac
+    gated=0
+    for s in "${SHADOWING[@]}"; do [ "$rel" = "$s" ] && gated=1 && break; done
+    name="$(basename "$rel")"
+    if [ -f "$SKILLS_DIR/$name/SKILL.md" ]; then
+      say "  present  $name"; present=$((present+1))
+    elif [ "$gated" = 1 ] && [ "$WITH_SHADOWING" != 1 ]; then
+      say "  gated    $name (duplicates a built-in; --with-shadowing to install)"
+    else
+      say "  MISSING  $name"; missing=$((missing+1))
+    fi
+  done < <(find "$tmp" -name SKILL.md -not -path '*/.git/*' | sort)
+
+  ncomposio=$(find "$SKILLS_DIR" -maxdepth 1 -name '*-automation' 2>/dev/null | wc -l | tr -d ' ')
+  say ""
+  say "== composio connector skills"
+  say "  $ncomposio installed (832 available; --with-composio to install, not recommended)"
+
+  say ""
+  say "== plugins"
+  for pl in superpowers andrej-karpathy-skills; do
+    if find "$HOME/.claude/plugins" -maxdepth 4 -type d -name "$pl" 2>/dev/null | grep -q .; then
+      say "  present  $pl"
+    elif [ -f "$SKILLS_DIR/karpathy-guidelines/SKILL.md" ] && [ "$pl" = andrej-karpathy-skills ]; then
+      say "  copied   $pl (as loose skill, not plugin)"
+    elif [ -f "$SKILLS_DIR/using-superpowers/SKILL.md" ] && [ "$pl" = superpowers ]; then
+      say "  copied   $pl (as loose skills — cross-references and SessionStart hook will not work)"
+    else
+      say "  MISSING  $pl"; missing=$((missing+1))
+    fi
+  done
+
+  say ""
+  if [ "$missing" -eq 0 ]; then
+    say "OK: $present curated skill(s) present, nothing expected is missing."
+  else
+    say "$present present, $missing MISSING. Run without --verify to install."
+  fi
   exit 0
 fi
 
