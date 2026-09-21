@@ -40,6 +40,26 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     engine_version: str = "0.1.0"
 
+    @field_validator("database_url")
+    @classmethod
+    def _normalise_driver(cls, value: str) -> str:
+        """Accept the bare URL every managed host hands out.
+
+        Neon, Supabase and Render all give a "postgresql://" connection
+        string, but SQLAlchemy needs the driver named or it reaches for
+        psycopg2, which is not installed. Pasting the string verbatim would
+        fail at startup with an obscure ModuleNotFoundError — a paste-time
+        trap, so it is repaired here rather than documented as a gotcha.
+        """
+        value = value.strip()
+        for bare, driven in (
+            ("postgresql://", "postgresql+psycopg://"),
+            ("postgres://", "postgresql+psycopg://"),
+        ):
+            if value.startswith(bare):
+                return driven + value[len(bare):]
+        return value
+
     @field_validator("target_service_url")
     @classmethod
     def _ensure_scheme(cls, value: str) -> str:

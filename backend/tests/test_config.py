@@ -61,3 +61,40 @@ def test_cors_origins_never_defaults_to_wildcard(
     settings = Settings(_env_file=None)  # type: ignore[call-arg]
 
     assert "*" not in settings.cors_origins
+
+
+@pytest.mark.parametrize(
+    ("given", "expected"),
+    [
+        # What Neon, Supabase and Render actually hand you.
+        (
+            "postgresql://u:p@ep-cool-name-123.ap-southeast-1.aws.neon.tech/assurelens?sslmode=require",
+            "postgresql+psycopg://u:p@ep-cool-name-123.ap-southeast-1.aws.neon.tech/assurelens?sslmode=require",
+        ),
+        # Heroku-style legacy prefix.
+        ("postgres://u:p@h:5432/d", "postgresql+psycopg://u:p@h:5432/d"),
+        # Already correct — left alone.
+        ("postgresql+psycopg://u:p@h:5432/d", "postgresql+psycopg://u:p@h:5432/d"),
+    ],
+)
+def test_database_url_driver_is_normalised(given: str, expected: str) -> None:
+    """Pasting a host's connection string verbatim must not fail at startup.
+
+    Without the driver named, SQLAlchemy reaches for psycopg2, which is not
+    installed, and the app dies with a ModuleNotFoundError that says nothing
+    about the real cause.
+    """
+    settings = Settings(_env_file=None, database_url=given)  # type: ignore[call-arg]
+
+    assert settings.database_url == expected
+
+
+def test_sslmode_is_preserved() -> None:
+    """Neon requires TLS; dropping the query string would break the connection."""
+    settings = Settings(  # type: ignore[call-arg]
+        _env_file=None,
+        database_url="postgresql://u:p@ep-x.aws.neon.tech/db?sslmode=require&channel_binding=require",
+    )
+
+    assert "sslmode=require" in settings.database_url
+    assert "channel_binding=require" in settings.database_url

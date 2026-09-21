@@ -5,11 +5,11 @@
 # first deployment on the last day is the most common way a project ends up
 # local-only. [PLAN §1]
 
-databases:
-  - name: assurelens-db
-    databaseName: assurelens
-    user: assurelens
-    plan: free
+# No database block. Render's Free PostgreSQL expires 30 days after creation,
+# then after a 14-day grace period Render DELETES it and all its data (their
+# docs, "Free Postgres / 30-day limit"). This link has to survive an
+# application cycle measured in months, so Postgres lives on Neon's free plan
+# instead, which has no expiry. See DEPLOY.md step 1.
 
 services:
   - type: web
@@ -30,10 +30,10 @@ services:
              python -m app.seed &&
              uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
+      # Paste the Neon connection string. The backend normalises a bare
+      # "postgresql://" prefix to the psycopg driver, so either form works.
       - key: DATABASE_URL
-        fromDatabase:
-          name: assurelens-db
-          property: connectionString
+        sync: false
       - key: CORS_ALLOW_ORIGINS
         sync: false          # set to the Vercel origin — never "*"
       # `host`, not `hostport`: hostport yields `name:443` with no scheme,
