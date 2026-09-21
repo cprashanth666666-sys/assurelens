@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # `workd` is the working branch: the build lands there daily and merges to
+    # main at milestones. CI has to cover it, or nine days of commits go
+    # unchecked until the merge.
+    branches: [main, workd]
   pull_request:
 
 jobs:
