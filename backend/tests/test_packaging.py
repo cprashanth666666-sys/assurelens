@@ -216,3 +216,25 @@ def test_declared_dependencies_are_actually_imported() -> None:
         assert unused not in dependencies, (
             f"{unused} is declared; import it or drop it"
         )
+
+
+def test_render_blueprint_pins_no_region() -> None:
+    """Render's blueprint spec on `region`: "You can't modify this value after
+    creation."
+
+    Adding it to services that already existed made every blueprint sync fail
+    -- and because the sync failed, the image fix that actually mattered could
+    never deploy. A one-line optimisation blocked the repair of the thing it
+    was optimising.
+    """
+    import yaml
+
+    blueprint = yaml.safe_load(
+        (REPO_ROOT / "render.yaml").read_text(encoding="utf-8")
+    )
+
+    for service in blueprint["services"]:
+        assert "region" not in service, (
+            f"{service['name']} pins a region; that field is immutable after "
+            f"creation and will fail the sync on an existing service"
+        )

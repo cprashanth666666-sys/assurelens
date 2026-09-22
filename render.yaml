@@ -16,10 +16,15 @@ services:
     name: assurelens-api
     runtime: docker
     plan: free
-    # Match the Neon project's region (us-east-2, Ohio). Every boot upserts
-    # the control library, which is ~150 round trips; across a continent that
-    # is a minute, alongside the database. Co-located it is seconds.
-    region: ohio
+    # NO region field, deliberately. Render's blueprint spec says of region:
+    # "You can't modify this value after creation." Adding it to services that
+    # already existed made every subsequent blueprint sync fail -- which also
+    # blocked the image fix that actually mattered from ever deploying.
+    #
+    # Co-locating with the Neon project (us-east-2) would cut round-trip time
+    # on the boot-time control-library upsert, but it requires deleting and
+    # recreating the services. Not worth it for a demo that is idle most of
+    # the time.
     dockerfilePath: ./backend/Dockerfile
     # Repo root: the image needs controls/ as well as backend/.
     dockerContext: .
@@ -62,7 +67,6 @@ services:
     name: assurelens-target
     runtime: docker
     plan: free
-    region: ohio
     dockerfilePath: ./target_service/Dockerfile
     dockerContext: ./target_service
     healthCheckPath: /health
