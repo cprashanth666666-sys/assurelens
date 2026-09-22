@@ -8,7 +8,7 @@ export default async function RunsPage() {
 
   if (engagement === null) {
     return (
-      <section className="border border-n-200 bg-n-0 p-6">
+      <section className="panel p-6">
         <h2>Test run console</h2>
         <p className="mt-3 max-w-prose text-n-600">
           The API is unreachable, so a run cannot be started. The page renders

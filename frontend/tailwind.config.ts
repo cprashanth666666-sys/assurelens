@@ -33,12 +33,26 @@ const config: Config = {
         800: "var(--n-800)",
         900: "var(--n-900)",
       },
+      white: "var(--pure-white)",
+      // Translucent panel for sticky chrome. Literal rgba behind the var, so
+      // backdrop-blur has something to blur through. [tokens.css]
+      veil: "var(--surface-veil)",
+      scrim: "var(--surface-scrim)",
       accent: {
         50: "var(--accent-50)",
         100: "var(--accent-100)",
+        400: "var(--accent-400)",
         500: "var(--accent-500)",
         600: "var(--accent-600)",
         700: "var(--accent-700)",
+      },
+      // The second voice. Rules, hover marks, active filters — never status.
+      warm: {
+        50: "var(--warm-50)",
+        100: "var(--warm-100)",
+        400: "var(--warm-400)",
+        500: "var(--warm-500)",
+        600: "var(--warm-600)",
       },
       sev: {
         critical: "var(--sev-critical)",
@@ -56,6 +70,10 @@ const config: Config = {
         // Neutral ink by design. Never red, amber or yellow. [UX 6.1]
         insufficient: "var(--verdict-insufficient)",
         na: "var(--verdict-na)",
+        "pass-bg": "var(--verdict-pass-bg)",
+        "fail-bg": "var(--verdict-fail-bg)",
+        "insufficient-bg": "var(--verdict-insufficient-bg)",
+        "na-bg": "var(--verdict-na-bg)",
       },
     },
 
@@ -75,8 +93,11 @@ const config: Config = {
       md: "var(--fs-md)",
       lg: "var(--fs-lg)",
       xl: "var(--fs-xl)",
-      // Deliberately the largest. No hero numerals. [UX 2.2]
       "2xl": "var(--fs-2xl)",
+      // v2.0: one display size, for the single statement line on the
+      // overview. It carries a sentence, never a percentage — the KPI
+      // numeral is still a fail condition. [UX 1.1, 1.3]
+      "3xl": "var(--fs-3xl)",
     },
 
     spacing: {
@@ -89,19 +110,27 @@ const config: Config = {
       6: "var(--sp-6)",
       7: "var(--sp-7)",
       8: "var(--sp-8)",
+      9: "var(--sp-9)",
       px: "1px",
     },
 
-    // Nothing above 4px. Removes rounded-lg / -xl / -2xl / -full entirely.
+    // Controls stay at 2-3px. `lg` (10px) is reachable but exists only for
+    // image plates — a hard corner on a photograph reads as an unstyled
+    // <img>. rounded-xl / -2xl / -full remain unreachable. [UX 2.3]
     borderRadius: {
       none: "0",
       sm: "var(--radius-sm)",
       md: "var(--radius-md)",
+      lg: "var(--radius-lg)",
+      full: "999px",
     },
 
-    // One shadow, for overlays. Removes shadow-sm/md/lg/xl. [UX 2.3]
+    // Two shadows. `raise` is the hover state of an interactive surface and
+    // is tinted warm; `overlay` is for genuine overlays. shadow-sm/md/lg/xl
+    // stay unreachable. [UX 2.3]
     boxShadow: {
       none: "none",
+      raise: "var(--shadow-raise)",
       overlay: "var(--shadow-overlay)",
     },
 
@@ -129,6 +158,42 @@ const config: Config = {
       gridTemplateColumns: {
         detail: "2fr 1fr",
         heatmap: "auto repeat(5, minmax(0, 1fr))",
+      },
+
+      /**
+       * Column widths, restored.
+       *
+       * Replacing `theme.spacing` (above) also removes every numeric width,
+       * because Tailwind derives `width` from the spacing scale. The result
+       * is that `w-32` on a table header emits NOTHING — the class is simply
+       * absent from the stylesheet, the browser reports no error, and the
+       * column silently falls back to auto-layout. Every `w-*` in this
+       * project had been dead since Day 1 and the tables had been laying
+       * themselves out by content width the whole time.
+       *
+       * These are the Tailwind defaults for the steps actually used, named
+       * so the call sites did not have to change.
+       */
+      width: {
+        24: "6rem",
+        28: "7rem",
+        32: "8rem",
+        40: "10rem",
+        44: "11rem",
+      },
+
+      // One motion rhythm, shared by utilities and by the component classes
+      // in globals.css. A transition written against anything else is
+      // out of step with the rest of the product. [UX 7.1]
+      transitionDuration: {
+        fast: "var(--dur-fast)",
+        base: "var(--dur-base)",
+        slow: "var(--dur-slow)",
+      },
+      transitionTimingFunction: {
+        out: "var(--ease-out)",
+        in: "var(--ease-in)",
+        inout: "var(--ease-inout)",
       },
     },
   },

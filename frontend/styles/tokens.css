@@ -1,57 +1,83 @@
 /* AssureLens design tokens.
  *
- * Implements docs/UX_BRIEF.md §2. Nothing in this project hardcodes a hex.
+ * Implements docs/UX_BRIEF.md section 2, as revised at v2.0 ("Warm
+ * instrument"). Nothing in this project hardcodes a hex.
  *
- * Aesthetic: audit-grade restraint. The reference points are the printed
- * workpaper, the statistical table and the regulatory filing — not the SaaS
- * dashboard. See UX_BRIEF §1.1 for the binding list of what this must not be.
+ * Aesthetic: an instrument on warm paper. The reference points are still the
+ * printed workpaper, the statistical table and the regulatory filing — but
+ * set with the care of a journal rather than photocopied. UX_BRIEF 1.1 lists
+ * what is still rejected; 1.3 lists what v2.0 deliberately lifted.
  */
 
 :root {
   /* --- Neutral -----------------------------------------------------------
-   * Deliberately WARM. A cool grey ramp is the default-SaaS tell; warmth
-   * reads as paper. [UX 2.1]
+   * WARM, and never pure white as a surface. The page ground is a low-chroma
+   * oat; panels sit a few steps lighter but keep the warmth. A cool grey ramp
+   * on #ffffff is the default-SaaS tell. [UX 2.1]
    */
-  --n-0:   #ffffff;
-  --n-25:  #fcfcfb;   /* page ground */
-  --n-50:  #f7f6f4;   /* table zebra, inset panels */
-  --n-100: #eeece8;   /* hairlines, dividers */
-  --n-200: #dedbd5;   /* borders */
-  --n-300: #c2beb6;   /* disabled */
-  --n-400: #9b968c;   /* placeholder */
-  --n-500: #6f6a61;   /* secondary text */
-  --n-600: #55504a;   /* body on light */
-  --n-700: #3b3733;   /* headings */
-  --n-800: #262320;   /* primary text */
-  --n-900: #14120f;   /* max contrast */
+  --n-0:   #fdfbf6;   /* panel — off-white, never #ffffff */
+  --n-25:  #f6f2e8;   /* page ground — warm oat */
+  --n-50:  #efe9db;   /* table zebra, inset panels */
+  --n-100: #e4ddcb;   /* hairlines, dividers */
+  --n-200: #d3cab4;   /* borders */
+  --n-300: #b5ab93;   /* disabled */
+  --n-400: #8e8571;   /* placeholder */
+  --n-500: #6a6353;   /* secondary text — 5.4:1 on ground */
+  --n-600: #524b3e;   /* body on light  — 7.6:1 on ground */
+  --n-700: #393328;   /* headings */
+  --n-800: #241f17;   /* primary text */
+  --n-900: #14100a;   /* max contrast */
+
+  /* True white, for the rare case that needs it (image plates, print). */
+  --pure-white: #ffffff;
 
   /* --- Accent ------------------------------------------------------------
-   * Deep ink blue. Interactive and structural only, never decorative.
+   * Deep teal ink. Interactive and structural. Warmer and more alive than the
+   * v1 navy, which read as institutional default.
    */
-  --accent-700: #1b3a5c;
-  --accent-600: #24506f;
-  --accent-500: #2f6690;
-  --accent-100: #dce7ef;
-  --accent-50:  #eef4f8;
+  --accent-700: #0f3f52;
+  --accent-600: #15566c;
+  --accent-500: #1c6b84;
+  --accent-400: #2f8a9e;
+  --accent-100: #cde2e6;
+  --accent-50:  #e7f1f2;
+
+  /* --- Warm secondary ----------------------------------------------------
+   * Terracotta: the second voice in a pairing — a rule under a heading, a
+   * hover mark, the active filter. NEVER status. Teal and terracotta is an
+   * editorial pairing, not a SaaS gradient.
+   */
+  --warm-600: #9c4e2f;
+  --warm-500: #bb6640;
+  --warm-400: #d08a63;
+  --warm-100: #f2ddce;
+  --warm-50:  #f9eee5;
 
   /* --- Severity — four steps, muted. Never neon. ------------------------- */
-  --sev-critical: #8c2f2a;
-  --sev-high:     #b4612c;
-  --sev-medium:   #8a7124;
-  --sev-low:      #4a6b52;
-  --sev-critical-bg: #f7e9e8;
-  --sev-high-bg:     #faefe4;
-  --sev-medium-bg:   #f7f2e0;
-  --sev-low-bg:      #eaf1ec;
+  --sev-critical: #8f322a;
+  --sev-high:     #ad6027;
+  --sev-medium:   #836c1f;
+  --sev-low:      #476b51;
+  --sev-critical-bg: #f6e2dd;
+  --sev-high-bg:     #f7e7d6;
+  --sev-medium-bg:   #f4eed6;
+  --sev-low-bg:      #e5eee6;
 
   /* --- Verdicts ----------------------------------------------------------
    * INSUFFICIENT is NEUTRAL INK by design. It is a peer verdict, not a soft
-   * fail, and must never be styled as a warning. [PRD 6.5, UX 6.1]
+   * fail, and must never be styled as a warning. This survives every visual
+   * revision — it is the argument the product exists to make.
+   * [PRD 6.5, UX 6.1]
    */
-  --verdict-pass:         #3f6b4a;
-  --verdict-fail:         #8c2f2a;
-  --verdict-insufficient: #55504a;
-  --verdict-na:           #9b968c;
+  --verdict-pass:         #3e6b4c;
+  --verdict-fail:         #8f322a;
+  --verdict-insufficient: #524b3e;
+  --verdict-na:           #8e8571;
+
+  --verdict-pass-bg:         #e5eee6;
+  --verdict-fail-bg:         #f6e2dd;
+  --verdict-insufficient-bg: #ebe5d7;
+  --verdict-na-bg:           #efe9db;
 
   /* --- Semantic surfaces ------------------------------------------------- */
   --surface-page:    var(--n-25);
@@ -61,12 +87,40 @@
   --text-secondary:  var(--n-500);
   --text-heading:    var(--n-700);
 
-  /* --- Type -------------------------------------------------------------- */
-  --font-sans:  "Inter Tight", "Inter", -apple-system, BlinkMacSystemFont,
-                "Segoe UI", Roboto, sans-serif;
-  --font-mono:  "JetBrains Mono", "SF Mono", "Cascadia Mono", Consolas,
-                "Liberation Mono", monospace;
-  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  /* Translucent panel, for the sticky masthead and tab rail. Declared as
+   * literal rgb() rather than an alpha modifier on --n-0: Tailwind cannot
+   * inject an alpha channel into a var() colour, so `bg-n-0/85` silently
+   * emits nothing. Getting a transparent header wrong gives you an opaque
+   * one, which looks fine and is not what was designed. */
+  --surface-veil:  rgb(253 251 246 / 0.72);
+  --surface-scrim: rgb(253 251 246 / 0.88);
+
+  /* --- Page ground wash --------------------------------------------------
+   * Three very low-chroma radial tints over the oat base. This is what keeps
+   * a flat fill from reading as dull, without putting a gradient on a card.
+   * Chroma ceiling is about 7%: once it is noticeable as colour it has gone
+   * too far.
+   */
+  --wash-teal:  rgb(28 107 132 / 0.07);
+  --wash-warm:  rgb(187 102 64 / 0.06);
+  --wash-green: rgb(62 107 76 / 0.05);
+
+  --grain-opacity: 0.5;
+
+  /* --- Type --------------------------------------------------------------
+   * --font-inter-tight / -jetbrains-mono / -source-serif are injected by
+   * next/font in app/layout.tsx, with the stacks below as fallback.
+   *
+   * Before v2.0 these faces were NAMED here but never loaded — no next/font,
+   * no stylesheet link — so the product shipped in Segoe UI. That single
+   * omission is a large part of why it read as unstyled.
+   */
+  --font-sans:  var(--font-inter-tight), "Inter Tight", "Inter",
+                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono:  var(--font-jetbrains-mono), "JetBrains Mono", "SF Mono",
+                "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia,
+                "Times New Roman", serif;
 
   --fs-2xs:  0.6875rem;  /* 11px — table meta, captions */
   --fs-xs:   0.75rem;    /* 12px — dense table body */
@@ -75,7 +129,11 @@
   --fs-md:   1rem;
   --fs-lg:   1.25rem;
   --fs-xl:   1.5rem;
-  --fs-2xl:  1.875rem;   /* largest on screen — no 48px hero numbers */
+  --fs-2xl:  1.875rem;   /* 30px */
+  /* The one display size, fluid. At a fixed 38px the cover-sheet sentence
+   * ran to four lines on a 375px phone and read as a shouted headline; the
+   * clamp keeps it a sentence at every width. */
+  --fs-3xl:  clamp(1.625rem, 4.4vw + 0.75rem, 2.375rem);
 
   --lh-tight: 1.35;
   --lh-table: 1.5;
@@ -84,22 +142,37 @@
   /* --- Spacing ----------------------------------------------------------- */
   --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
   --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  --sp-9: 96px;
 
   /* --- Borders and radius ------------------------------------------------
-   * No radius above 4px anywhere. rounded-2xl is the templated look.
+   * Controls stay at 2-3px: a sharp control reads as an instrument.
+   * `lg` (10px) exists ONLY for image figures, where a hard corner on a
+   * photograph looks like an unstyled <img>. [UX 2.3]
    */
   --radius-sm: 2px;
   --radius-md: 3px;
+  --radius-lg: 10px;
 
   --border-hair:   1px solid var(--n-100);
   --border-strong: 1px solid var(--n-200);
 
-  /* The ONLY shadow token. Overlays only — modals, popovers, dropdowns.
-   * Panels are defined by a 1px border and a background shift, never by a
-   * drop shadow. This single rule does most of the work of not looking
-   * templated. [UX 2.3]
+  /* Elevation. `overlay` is for genuine overlays. `raise` is the hover state
+   * of an interactive surface, tinted WARM — a neutral-grey drop shadow on
+   * warm paper is the tell that a palette was bolted on afterwards.
    */
-  --shadow-overlay: 0 4px 16px rgb(20 18 15 / 0.10);
+  --shadow-raise:   0 1px 2px rgb(57 51 40 / 0.05), 0 6px 18px rgb(57 51 40 / 0.07);
+  --shadow-overlay: 0 4px 24px rgb(36 31 23 / 0.16);
+
+  /* --- Motion ------------------------------------------------------------
+   * One rhythm for the whole product. Every transition reads from these, so
+   * nothing drifts out of step. [UX 7]
+   */
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:    cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;   /* press, tint */
+  --dur-base: 200ms;   /* hover, focus, state */
+  --dur-slow: 340ms;   /* entrance, reveal */
 
   --content-max: 1440px;
 
@@ -107,88 +180,128 @@
 }
 
 /* --- Dark theme -----------------------------------------------------------
- * Inverts the neutral ramp and desaturates severity further. Dark mode must
- * not become the security-ops-console look that UX 1.1 rejects. Light is the
- * primary design.
+ * Inverts the neutral ramp, KEEPS the warmth, and desaturates severity
+ * further. Dark mode must not become the security-ops-console look that
+ * UX 1.1 still rejects. Light remains the primary design.
  *
  * Declared twice so an explicit user choice wins in both directions.
  */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --n-0:   #14120f;
-    --n-25:  #191714;
-    --n-50:  #201e1a;
-    --n-100: #2b2823;
-    --n-200: #3a3630;
-    --n-300: #524d45;
-    --n-400: #6f6a61;
-    --n-500: #948f85;
-    --n-600: #b3aea3;
-    --n-700: #d0cbc2;
-    --n-800: #e8e4dc;
-    --n-900: #f7f6f4;
+    --n-0:   #1a1712;
+    --n-25:  #14110d;
+    --n-50:  #221e18;
+    --n-100: #2e2921;
+    --n-200: #3e382d;
+    --n-300: #564f41;
+    --n-400: #746c5b;
+    --n-500: #988f7c;
+    --n-600: #b8af9c;
+    --n-700: #d4cbb8;
+    --n-800: #ebe4d4;
+    --n-900: #f8f4ea;
 
-    --accent-700: #9dc2dd;
-    --accent-600: #8ab4d2;
-    --accent-500: #74a4c6;
-    --accent-100: #22333f;
-    --accent-50:  #1b2831;
+    --accent-700: #8fc4d4;
+    --accent-600: #7ab5c7;
+    --accent-500: #64a3b7;
+    --accent-400: #4f8fa4;
+    --accent-100: #1d333c;
+    --accent-50:  #16262d;
+
+    --warm-600: #dba184;
+    --warm-500: #c98d6d;
+    --warm-400: #b0755a;
+    --warm-100: #3a2519;
+    --warm-50:  #2b1c13;
 
     --sev-critical: #d99b96;
     --sev-high:     #d9a877;
     --sev-medium:   #cfbc7e;
     --sev-low:      #9cbda6;
-    --sev-critical-bg: #2e1d1c;
-    --sev-high-bg:     #2e241a;
-    --sev-medium-bg:   #2b271a;
-    --sev-low-bg:      #1d2a21;
+    --sev-critical-bg: #30201d;
+    --sev-high-bg:     #30271b;
+    --sev-medium-bg:   #2d291b;
+    --sev-low-bg:      #1f2c23;
 
     --verdict-pass:         #8fb89a;
     --verdict-fail:         #d99b96;
-    --verdict-insufficient: #b3aea3;
-    --verdict-na:           #6f6a61;
+    --verdict-insufficient: #b8af9c;
+    --verdict-na:           #746c5b;
 
-    --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.45);
+    --verdict-pass-bg:         #1f2c23;
+    --verdict-fail-bg:         #30201d;
+    --verdict-insufficient-bg: #2b2620;
+    --verdict-na-bg:           #221e18;
+
+    --surface-veil:  rgb(26 23 18 / 0.72);
+    --surface-scrim: rgb(26 23 18 / 0.90);
+    --wash-teal:  rgb(100 163 183 / 0.07);
+    --wash-warm:  rgb(201 141 109 / 0.05);
+    --wash-green: rgb(143 184 154 / 0.04);
+    --grain-opacity: 0.3;
+
+    --shadow-raise:   0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.35);
+    --shadow-overlay: 0 4px 24px rgb(0 0 0 / 0.55);
 
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --n-0:   #14120f;
-  --n-25:  #191714;
-  --n-50:  #201e1a;
-  --n-100: #2b2823;
-  --n-200: #3a3630;
-  --n-300: #524d45;
-  --n-400: #6f6a61;
-  --n-500: #948f85;
-  --n-600: #b3aea3;
-  --n-700: #d0cbc2;
-  --n-800: #e8e4dc;
-  --n-900: #f7f6f4;
+  --n-0:   #1a1712;
+  --n-25:  #14110d;
+  --n-50:  #221e18;
+  --n-100: #2e2921;
+  --n-200: #3e382d;
+  --n-300: #564f41;
+  --n-400: #746c5b;
+  --n-500: #988f7c;
+  --n-600: #b8af9c;
+  --n-700: #d4cbb8;
+  --n-800: #ebe4d4;
+  --n-900: #f8f4ea;
 
-  --accent-700: #9dc2dd;
-  --accent-600: #8ab4d2;
-  --accent-500: #74a4c6;
-  --accent-100: #22333f;
-  --accent-50:  #1b2831;
+  --accent-700: #8fc4d4;
+  --accent-600: #7ab5c7;
+  --accent-500: #64a3b7;
+  --accent-400: #4f8fa4;
+  --accent-100: #1d333c;
+  --accent-50:  #16262d;
+
+  --warm-600: #dba184;
+  --warm-500: #c98d6d;
+  --warm-400: #b0755a;
+  --warm-100: #3a2519;
+  --warm-50:  #2b1c13;
 
   --sev-critical: #d99b96;
   --sev-high:     #d9a877;
   --sev-medium:   #cfbc7e;
   --sev-low:      #9cbda6;
-  --sev-critical-bg: #2e1d1c;
-  --sev-high-bg:     #2e241a;
-  --sev-medium-bg:   #2b271a;
-  --sev-low-bg:      #1d2a21;
+  --sev-critical-bg: #30201d;
+  --sev-high-bg:     #30271b;
+  --sev-medium-bg:   #2d291b;
+  --sev-low-bg:      #1f2c23;
 
   --verdict-pass:         #8fb89a;
   --verdict-fail:         #d99b96;
-  --verdict-insufficient: #b3aea3;
-  --verdict-na:           #6f6a61;
+  --verdict-insufficient: #b8af9c;
+  --verdict-na:           #746c5b;
 
-  --shadow-overlay: 0 4px 16px rgb(0 0 0 / 0.45);
+  --verdict-pass-bg:         #1f2c23;
+  --verdict-fail-bg:         #30201d;
+  --verdict-insufficient-bg: #2b2620;
+  --verdict-na-bg:           #221e18;
+
+  --surface-veil:  rgb(26 23 18 / 0.72);
+  --surface-scrim: rgb(26 23 18 / 0.90);
+  --wash-teal:  rgb(100 163 183 / 0.07);
+  --wash-warm:  rgb(201 141 109 / 0.05);
+  --wash-green: rgb(143 184 154 / 0.04);
+  --grain-opacity: 0.3;
+
+  --shadow-raise:   0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.35);
+  --shadow-overlay: 0 4px 24px rgb(0 0 0 / 0.55);
 
   color-scheme: dark;
 }

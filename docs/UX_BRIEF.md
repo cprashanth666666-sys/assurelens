@@ -2,10 +2,12 @@
 
 | | |
 |---|---|
-| Version | 1.0 |
-| Date | 21 September 2026 |
+| Version | 2.0 — *Warm instrument* |
+| Date | 22 September 2026 (v1.0: 21 September 2026) |
 | Status | Approved for build |
 | Related | [PRD.md](PRD.md) · [TRD.md](TRD.md) · [SCHEMA.md](SCHEMA.md) |
+
+> **v2.0 revision.** The v1.0 aesthetic was judged, on the built product, to have overshot restraint into plainness. §1.3 records exactly which constraints were lifted and which were re-affirmed; §11 records the full change and the reasoning. Everything not named in §1.3 still stands as written.
 
 > At build time, run the `design-taste-frontend` / `ui-ux-pro-max` skill against this brief before writing components, and again as a review pass before Day 10. This document is the input to that review and the standard it is judged against.
 
@@ -47,6 +49,37 @@ These are rejections, not preferences. A design review that finds any of them fa
 | **Left-aligned page structure, max 1440px** | A workpaper has a margin. Content does not stretch to a 27" monitor. |
 | **Typographic hierarchy over colour hierarchy** | Weight and size carry structure; colour carries meaning. |
 | **Monospace for identifiers and evidence** | Control refs, run IDs, hashes, probe payloads. |
+
+### 1.3 v2.0 — what was lifted, and what was not
+
+v1.0 was written against one failure mode: the templated AI dashboard. It succeeded, and then kept going. Built out, the product read as *unfinished* rather than *restrained* — and an assurance tool that looks unfinished is not read as disciplined, it is read as a prototype.
+
+The diagnosis matters, because "make it less plain" and "make it a SaaS dashboard" are one careless step apart. Three findings:
+
+1. **Nothing was actually wrong with the rules.** The three faces named in §2.2 were never loaded — no `next/font`, no stylesheet link — so every screen had been rendering in Segoe UI since Day 1. The brief specified Inter Tight, JetBrains Mono and Source Serif 4; the build shipped the system font. A large share of "it looks plain" was a missing `<link>`.
+2. **Restraint was being confused with absence.** "One accent colour, earned" is a good rule. One accent colour on a neutral ground *with no second voice anywhere* is a monochrome, and a monochrome has no way to signal that anyone made a decision.
+3. **Motion was banned outright** (§7, v1.0: "the product has exactly one animation"). But a page with no state transitions does not read as calm — it reads as static, and on a phone it gives the reader no feedback that anything responded to them.
+
+**Lifted:**
+
+| v1.0 constraint | v2.0 position | Why |
+|---|---|---|
+| Page ground is near-white `#fcfcfb` | **Warm oat `#f6f2e8`**, under a three-tint radial wash at ≤7% chroma | The ground is the largest surface on every screen. A near-white ground is the one that reads as "unstyled default". Oat reads as paper, which is the reference this brief named in the first line. |
+| One accent colour only | **Two inks: teal `#1c6b84` + terracotta `#bb6640`** | Terracotta is a second *voice*, not a second status colour: rules under headings, hover marks, the active filter. It is never permitted to carry severity or verdict — those stay on their own scale. |
+| "The product has exactly one animation" | **A motion system with one rhythm** (`--dur-fast/base/slow`, `--ease-out/in/inout`) | The test is unchanged and is now written down: *motion must report state*. Hover, focus, entrance and run progress all report something. §11.3 lists what is still banned. |
+| No imagery at all | **Four duotone plates, credited** | See §11.4. The programme is deliberately short and every image is mapped into the two inks, so no photograph sits in the layout at full saturation. |
+| No radius above 4px | **Controls stay at 2–3px; `--radius-lg: 10px` exists for image plates only** | A hard corner on a photograph looks like an unstyled `<img>`. Nothing else may use it. |
+| One shadow token, overlays only | **Two: `--shadow-overlay` and `--shadow-raise`** | `raise` is the hover state of an interactive surface and is tinted *warm*. A neutral-grey shadow on warm paper is the tell that a palette was applied afterwards. |
+
+**Re-affirmed, and not negotiable:**
+
+- **No headline compliance percentage.** Still the product's whole position. [PRD §7.3]
+- **`INSUFFICIENT_EVIDENCE` renders in neutral ink, as a peer verdict.** Every visual revision must leave this alone. If `PASS` ever gets a flourish that a gated verdict does not, the interface is quietly telling the reader which answer it prefers.
+- **No animated counters, no progress celebration, no confetti.** Compliance progress is not a game, and a number that ticks upward is a number the reader is being encouraged to feel rather than check.
+- **No emoji status icons.** The verdict marks added in v2.0 are geometric *shapes* — full disc, half disc, empty ring, dash — carrying the verdict without colour. That is an accessibility gain, not an icon set.
+- **No dark security-ops console.** Dark mode keeps the warmth and stays a document.
+- **No full-width marketing hero.** The overview gained a **cover sheet**, which is a different object: no call to action, no pitch, no metric tile. A workpaper file has a cover; a product has a hero. The distinction is the whole discipline here, because "the page looks plain" leads to a hero section faster than to anything else.
+- **Tabular figures everywhere.** Unchanged.
 
 ---
 
@@ -347,3 +380,125 @@ Run before declaring the build done. Any ✗ blocks.
 - [ ] Dark mode does not read as a security-ops console
 - [ ] Synthetic-data disclosure visible on every screen
 - [ ] `design-taste-frontend` / `ui-ux-pro-max` review passed against this brief
+- [ ] No `w-*` or spacing utility resolves to nothing (see §11.6 — the replaced Tailwind scale silently deletes classes)
+- [ ] Reduced motion: every reveal is visible, no tint chases the cursor, the indeterminate rule is static
+- [ ] Every photograph is credited to a named photographer, and was looked at before selection
+
+---
+
+## 11. Revision 2.0 — *Warm instrument*
+
+### 11.1 Palette
+
+The neutral ramp stays warm and moves further from white. **No surface in the product is `#ffffff`.**
+
+```css
+--n-0:  #fdfbf6;   /* panel  — off-white, never pure white */
+--n-25: #f6f2e8;   /* page ground — warm oat */
+--n-50: #efe9db;   /* zebra, inset */
+--n-500:#6a6353;   /* secondary text — 5.4:1 on ground */
+--n-600:#524b3e;   /* body           — 7.6:1 on ground */
+
+--accent-500: #1c6b84;   /* teal ink   — interactive, structural */
+--warm-500:   #bb6640;   /* terracotta — second voice, NEVER status */
+```
+
+The ground carries three radial tints (teal, terracotta, green) at 5–7% alpha with `background-attachment: fixed`, plus an SVG `feTurbulence` grain laid **over the ground and under the content**. Grain on body text is noise; grain in the margins is paper.
+
+**Chroma ceiling on the wash is about 7%.** At the point the tint becomes noticeable *as colour* it has become a gradient background, which is on the §1.1 reject list.
+
+### 11.2 Type
+
+`next/font/google` now actually loads Inter Tight, JetBrains Mono and Source Serif 4, with `display: swap` and Next's generated fallback metrics so the swap does not shift the line.
+
+One size was added — `--fs-3xl`, fluid at `clamp(1.625rem, 4.4vw + 0.75rem, 2.375rem)` — used **once**, for the cover-sheet statement line. It carries a sentence. A 38px numeral in that slot would be the KPI tile §1.1 rejects. Fixed at 38px it ran to four lines on a 375px phone and read as a shouted headline; the clamp was the fix.
+
+### 11.3 Motion
+
+One rhythm, defined once in tokens and read by both the utility classes and the component CSS:
+
+```css
+--dur-fast: 120ms;  /* press, tint */
+--dur-base: 200ms;  /* hover, focus, state */
+--dur-slow: 340ms;  /* entrance, reveal */
+--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+```
+
+| Motion | What state it reports | Where |
+|---|---|---|
+| Masthead condense + backdrop blur | You have scrolled away from the top | `Masthead` |
+| Scroll-progress rule (2px) | How much of a long table remains | `ScrollProgress` |
+| Scroll reveal, 40ms stagger | This content just entered view | `Reveal` |
+| Cursor spotlight | The pointer is over this panel | `Spotlight` |
+| Row rule wipe + tint | This row is under the cursor **or the keyboard** | `.row-interactive` |
+| Panel lift (2px, warm shadow) | This surface is interactive | `.panel-raise` |
+| Result rows, 30ms stagger, capped at 12 | Findings arriving in sequence | `RunConsole` |
+| Plate desaturation easing back | The photograph is resolving under attention | `.plate-zoom` |
+| Indeterminate rule | A run is in flight | `RunConsole` |
+| Aperture mark rotating 45° | The masthead condensed | `Masthead` |
+
+Still banned: decorative loops, animated counters, pulsing skeletons, celebration on `PASS`, and any transform on a `<tr>` — table layout handles it inconsistently, so the result-row entrance is **opacity only** and the stagger carries the sequence.
+
+**Performance rules, which are the reason the above is affordable:**
+
+- `Spotlight` and `ScrollProgress` never read layout inside an event handler. Pointer position is stashed and flushed once per `requestAnimationFrame`; the rect is measured on enter and on resize only. A `getBoundingClientRect()` inside `pointermove` is the standard way to lose 60fps.
+- Every transition is `transform`, `opacity` or colour. Nothing animates a box dimension, so none of this can contribute to CLS.
+- `Reveal` disconnects its observer after firing. A permanent observer per panel is a scroll-time cost for an effect that already happened.
+- `Spotlight` bails out entirely under `pointer: coarse`.
+
+**Reduced motion** is handled in a block placed deliberately *outside every `@layer`*, at the end of `globals.css`. `.reveal` starts at `opacity: 0` and is defined in `@layer components`; an override in `@layer base` only beats it because `!important` reverses cascade-layer order. That is true, and far too subtle a mechanism for the rule deciding whether a reader who asked for less motion sees the page at all. Unlayered declarations beat every layer outright.
+
+Under `reduce`: reveals are visible, the spotlight is off, nothing lifts or scales, and the indeterminate rule becomes a **static filled rule** — still "something is running", without the loop.
+
+### 11.4 The image programme
+
+Four photographs, declared in `lib/imagery.ts`, each doing one job:
+
+| Plate | Subject | Job |
+|---|---|---|
+| `statute` | Vidhana Soudha, Bengaluru | Cover sheet. The seat of the Karnataka legislature — the building where the law this product executes is made. Chosen over a glass tower because the subject here is a statute. |
+| `estate` | Bengaluru under monsoon cloud | The estate under test is a real city; every record in it is synthetic. |
+| `evidence` | Tied bundles of archive paper | Evidence before it was queryable. The gate asks the same question of both. |
+| `structure` | Glass curtain wall on a steel grid | The control library: twenty-five controls on one frame. |
+
+**Sourcing rules — the same rules this product applies to statutory text in `SOURCES.md`:**
+
+1. **Every image is credited** to a named photographer with a link, though the Unsplash licence does not require it. A tool whose entire argument is *cite what you are standing on* cannot run uncredited images.
+2. **Every URL was fetched and checked for 200, and every photograph was looked at.** This was not ceremony. The top-ranked "Bengaluru office building" result had a three-storey Christmas tree and toy houses filling the foreground; the top "server room" result was a neon-lit rack — the dark-ops-console cliché §1.1 rejects. Both carried clean, plausible alt text. **Alt text is not a substitute for looking.**
+3. **No people.** Stock photographs of smiling colleagues are the fastest way to make a compliance tool look like a brochure.
+
+**Treatment — a real duotone, not a tint.** The first attempt desaturated to 0.72 and laid a soft wash over the top, which left a bright green lawn and a blue sky sitting in the middle of a warm oat page looking pasted in. Desaturating a photograph *towards* a palette is not the same as mapping it *into* one. The plate now drives the image to greyscale, multiplies a teal-to-terracotta ramp over it, and screens a paper tone back into the shadows. Every photograph resolves to the same two inks, which is what makes four unrelated stock images read as one commissioned set. `isolation: isolate` contains the blend, so the result does not change depending on what the plate happens to sit on.
+
+**Delivery:** plain `<img>` with a hand-built `srcSet` and `sizes`, not `next/image`. `images.unsplash.com` is already an image CDN doing format negotiation and width variants; proxying it would add a hop, a `sharp` dependency in the Docker path, and image-optimisation billing, in exchange for nothing. Each plate reserves its box with `aspect-ratio` so there is no CLS, and carries its own gradient, so a blocked CDN leaves a composed rectangle with a caption rather than a broken-image glyph in the middle of an audit report.
+
+### 11.5 Responsive
+
+- The masthead and tab rail are **sticky**, and their heights are **measured** (`ResizeObserver` publishing `--masthead-h` and `--tabnav-h`) rather than hardcoded. A guessed `top: 57px` fails quietly — as a gap of scrolling content showing between two sticky bars — the moment the type scale or the wrap point changes.
+- At rest on a phone the identity block takes the whole row so the client name wraps at a sensible measure; once condensed it clamps to one line and shares the row with the role switch. The statutory date is reference, not navigation, so it is what goes first. Chrome on a 375×812 phone went from **about 450px to about 150px**.
+- The tab rail scrolls the active tab into view on navigation, so "Report" is reachable on a 375px screen instead of sitting silently off-screen.
+- Edge fades are scoped to **below 768px**. A mask is unconditional and the overflow is not: at desktop width the filter rail wraps and the tab rail fits, and the fade was eating the first six pixels of the word "Domain" to signal scrolling that could not happen. A cue for a state the element is not in is just damage.
+- Suite checkboxes became **chips**: the whole 36px chip is the target, not a 13px native box.
+
+### 11.6 Two latent bugs this revision exposed
+
+Both predate v2.0 and had been shipping silently since Day 1.
+
+**The fonts were never loaded.** §2.2 named three faces; `tokens.css` listed them in `--font-sans`, `--font-mono` and `--font-serif`; nothing ever fetched them. The product had been rendering in Segoe UI on Windows and system-ui elsewhere. It failed invisibly because the fallback stack is legitimate — the page looked *fine*, just anonymous.
+
+**Every `w-*` utility was dead.** `tailwind.config.ts` replaces `theme.spacing`, which is correct: extending it would leave `rounded-2xl` and `shadow-lg` reachable, an explicit fail condition. But Tailwind derives `width` from `spacing`, so replacing it also deleted every numeric width. `w-32` on a table header emitted **nothing** — no rule in the stylesheet, no console warning, no error. Every table in the product had been laying itself out by content width, and the column widths written in the source had never once applied. Fixed by restoring the used steps under `theme.extend.width`.
+
+> Both share a failure signature worth naming: **a declaration that is simply absent produces no error anywhere.** It is the same class of fault as the scheme-less `render.yaml` host and the `NEXT_PUBLIC_API_BASE_URL00` typo — the system does not break, it quietly does something else instead. The check that catches it is looking at the rendered result, not reading the source and agreeing with yourself.
+
+### 11.7 Three faults the review pass caught in v2.0 itself
+
+§11.6 lists bugs v2.0 *exposed*. These three it *introduced*, and all were found by looking at the rendered result rather than re-reading the source.
+
+**Zebra rows had no hover state.** `.row-interactive:hover` sets `--accent-50`; the striping is applied in markup as Tailwind's `bg-n-25`. Hovering an odd row, the element reported `:hover` correctly and its computed background stayed `--n-25`. Half the rows in every table had no hover feedback, and the CSS read as correct in both files.
+
+The interesting part is that the first diagnosis was wrong. Tailwind 3's `@tailwind` directives are a build-time bucketing, **not** native CSS cascade layers — a check in the browser showed both rules sitting unlayered, so the layer-order explanation could not be the cause. What resolved it was moving the rule so it wins on ordinary cascade terms, and then *verifying the computed colour changed* (`rgb(246,242,232)` → `rgb(231,241,242)`). Reasoning about the cascade from the source produced a confident wrong answer twice; the computed style produced the right one immediately.
+
+**The focus ring was drawn on a 1px element.** The suite chips hide a real checkbox with `sr-only` so the whole 36px chip is the hit target — but `sr-only` collapses that input to a 1×1px clipped box, and the global `:focus-visible` ring went with it. Measured: input 1×1, chip 141×36. A keyboard user could tab through the five suites with no visible indication of where they were. Fixed with `.chip:focus-within`, so the ring is drawn on the thing the reader can see.
+
+**The spotlight forced a layout on every scroll event.** `Spotlight` was written specifically to keep pointer tracking off the layout path — and then subscribed to `window.scroll` with a handler calling `getBoundingClientRect()` directly, unthrottled, firing whether or not the pointer was near the panel. Its own docstring claimed the opposite. The rect is now read inside the existing `requestAnimationFrame` flush, which bounds it to once per frame *and* only while the pointer is moving over the element; the scroll and resize listeners are gone entirely.
+
+> The common thread with §11.6: **a comment asserting a property is not the property.** Two of these three shipped with documentation stating they did the right thing.

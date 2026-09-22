@@ -13,26 +13,56 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+
+    /* The ground. A warm oat base under three very low-chroma radial tints.
+     * Fixed attachment so the wash belongs to the page, not to the scroll —
+     * the content moves across it like paper across a desk. [UX 2.1] */
+    background-color: var(--surface-page);
+    background-image:
+      radial-gradient(900px 520px at 10% -8%, var(--wash-teal), transparent 62%),
+      radial-gradient(760px 460px at 95% 2%, var(--wash-warm), transparent 64%),
+      radial-gradient(1100px 680px at 50% 108%, var(--wash-green), transparent 66%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 
   body {
     margin: 0;
-    background: var(--surface-page);
+    background: transparent;
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: var(--fs-sm);
     line-height: var(--lh-prose);
     -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
 
     /* Numbers in columns must align. Set once, globally, never overridden.
      * [UX 2.2] */
     font-variant-numeric: tabular-nums;
   }
 
+  /* Paper grain, over the ground and UNDER the content. Grain on a
+   * photograph or on body text is noise; grain in the margins is paper. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.24'/%3E%3C/svg%3E");
+  }
+
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+
   h1, h2, h3, h4 {
     color: var(--text-heading);
     font-weight: 600;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.014em;
     line-height: var(--lh-tight);
     margin: 0;
   }
@@ -51,20 +81,31 @@
   :focus-visible {
     outline: 2px solid var(--accent-500);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
   img { max-width: 100%; }
   [hidden] { display: none !important; }
 
-  /* The product has exactly one animation: a 1px indeterminate rule under a
-   * running control. This removes it. Nothing else moves. [UX 7] */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+  /* A visible, on-palette selection. The browser default blue is the last
+   * unstyled surface in most projects. */
+  ::selection {
+    background: var(--accent-100);
+    color: var(--n-900);
   }
+
+  /* Scrollbars inside the product's own scroll regions. */
+  .scroll-x {
+    scrollbar-width: thin;
+    scrollbar-color: var(--n-300) transparent;
+  }
+  .scroll-x::-webkit-scrollbar { height: 8px; }
+  .scroll-x::-webkit-scrollbar-thumb {
+    background: var(--n-300);
+    border-radius: 999px;
+  }
+  .scroll-x::-webkit-scrollbar-track { background: transparent; }
+
 }
 
 @layer components {
@@ -76,11 +117,327 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* The single permitted animation. [UX 4.4] */
+  /* A horizontal scroller that says so: the content fades at both edges, so
+   * a tab rail running off a phone screen reads as scrollable rather than
+   * truncated.
+   *
+   * Scoped to below 768px, because a mask is unconditional and the overflow
+   * is not: at desktop width both rails fit (the filter rail wraps at `md`
+   * and the tab rail has room), and the fade was quietly eating the first
+   * six pixels of the word "Domain" to indicate scrolling that could not
+   * happen. A cue for a state the element is not in is just damage. */
+  @media (max-width: 767px) {
+    .edge-fade {
+      -webkit-mask-image: linear-gradient(
+        to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+      mask-image: linear-gradient(
+        to right, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+    }
+  }
+
+  /* --- Surfaces --------------------------------------------------------- */
+
+  .panel {
+    background: var(--surface-panel);
+    border: 1px solid var(--n-200);
+    border-radius: var(--radius-md);
+  }
+
+  /* An interactive surface. Lifts 2px on hover with a WARM shadow. The lift
+   * is transform-only, so it costs no layout. [UX 7] */
+  .panel-raise {
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+    will-change: transform;
+  }
+
+  .panel-raise:hover,
+  .panel-raise:focus-within {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-raise);
+    border-color: var(--n-300);
+  }
+
+  /* --- Cursor spotlight --------------------------------------------------
+   * A soft tint that follows the pointer across a panel. Coordinates arrive
+   * as --mx/--my from Spotlight.tsx on a rAF, so pointermove never touches
+   * layout. Fine pointers only: on a touchscreen it would just be a smear
+   * where the finger last was. [UX 7.2]
+   */
+  .spotlight { position: relative; isolation: isolate; }
+
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity var(--dur-slow) var(--ease-out);
+    background: radial-gradient(
+      460px circle at var(--mx, 50%) var(--my, 0%),
+      var(--accent-100),
+      transparent 68%);
+  }
+
+  .spotlight > * { position: relative; z-index: 1; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .spotlight:hover::before { opacity: 1; }
+  }
+
+  /* --- Scroll reveal -----------------------------------------------------
+   * Entrance only, once, on first intersection. Opacity and transform only,
+   * so it cannot shift layout or cost CLS. The delay is set per item by the
+   * caller for a 40ms stagger. [UX 7.3]
+   */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .reveal[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* If scripting is off the observer never fires, so neutralise the start
+   * state rather than leaving the page blank. A <noscript> rule in
+   * app/layout.tsx covers browsers without `scripting`. */
+  @media (scripting: none) {
+    .reveal { opacity: 1; transform: none; }
+  }
+
+  /* --- Links and tabs ---------------------------------------------------- */
+
+  /* An underline that grows from the left instead of blinking on. */
+  .link-grow {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size var(--dur-base) var(--ease-out);
+  }
+
+  .link-grow:hover,
+  .link-grow:focus-visible { background-size: 100% 1px; }
+
+  .tab { position: relative; }
+
+  .tab::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--warm-500);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .tab:hover::after { transform: scaleX(1); }
+
+  .tab[aria-current="page"]::after {
+    background: var(--accent-500);
+    transform: scaleX(1);
+  }
+
+  /* --- Controls ---------------------------------------------------------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    /* 44px minimum target, even though the visual box is shorter. */
+    min-height: 40px;
+    padding: 0 var(--sp-4);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+  }
+
+  .btn-primary {
+    border: 1px solid var(--accent-600);
+    background: var(--accent-600);
+    color: var(--n-0);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-700);
+    border-color: var(--accent-700);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-raise);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+    box-shadow: none;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    border-color: var(--n-200);
+    background: var(--n-100);
+    color: var(--n-400);
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* A selectable suite. A checkbox in a chip, so the target is the whole
+   * chip rather than a 13px box. [a11y touch-target-size] */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 36px;
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--n-200);
+    border-radius: var(--radius-md);
+    background: var(--n-0);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+
+  .chip:hover { border-color: var(--accent-500); background: var(--accent-50); }
+  .chip:active { transform: scale(0.98); }
+
+  .chip[data-selected="true"] {
+    border-color: var(--accent-500);
+    background: var(--accent-50);
+  }
+
+  .field {
+    min-height: 36px;
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--n-200);
+    border-radius: var(--radius-md);
+    background: var(--n-0);
+    color: var(--n-800);
+    transition:
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .field:hover { border-color: var(--n-300); }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--accent-500);
+    box-shadow: 0 0 0 3px var(--accent-100);
+  }
+
+  /* --- Image figures -----------------------------------------------------
+   * Every photograph sits on a tinted plate and under a warm multiply wash,
+   * so a stock image cannot sit in the layout looking like a stock image —
+   * and so a failed load leaves a composed rectangle, not a broken frame.
+   */
+  .plate {
+    position: relative;
+    overflow: hidden;
+    /* Contains the multiply/screen blends to this box. Without it they
+     * composite against whatever is behind the plate on the page, so the
+     * duotone changes depending on what it happens to be sitting on. */
+    isolation: isolate;
+    border-radius: var(--radius-lg);
+    background:
+      linear-gradient(135deg, var(--accent-100), var(--warm-100));
+    border: 1px solid var(--n-200);
+  }
+
+  /* A real duotone, not a tint over colour.
+   *
+   * The first attempt was `saturate(0.72)` plus a soft multiply wash, which
+   * left a bright green lawn and a blue sky sitting in the middle of a warm
+   * oat page looking pasted in. Desaturating a photograph *towards* the
+   * palette is not the same as mapping it *into* the palette.
+   *
+   * So: drive the image to greyscale first, then multiply a teal-to-
+   * terracotta ramp over it and screen a paper tone back into the shadows.
+   * Every photograph in the product then resolves to the same two inks,
+   * which is what makes four unrelated stock images read as one commissioned
+   * set. [UX 2.6]
+   */
+  .plate img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.24) brightness(1.03);
+    transition:
+      transform 620ms var(--ease-out),
+      filter var(--dur-slow) var(--ease-out);
+  }
+
+  /* The ink. Multiply over greyscale maps luminance onto the ramp. */
+  .plate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    background: linear-gradient(
+      200deg,
+      var(--accent-400) 0%,
+      var(--accent-600) 42%,
+      var(--warm-600) 100%);
+    opacity: 0.74;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+
+  /* The paper. Screen lifts the blacks off pure black so the plate sits on
+   * the page rather than punching a hole in it. */
+  .plate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    background: linear-gradient(
+      200deg,
+      rgb(246 242 232 / 0.26) 0%,
+      rgb(242 221 206 / 0.14) 100%);
+  }
+
+  /* Hover eases the colour back in — the photograph resolving under
+   * attention. A cause-and-effect the reader controls, not an idle loop.
+   * [UX 7.1] */
+  @media (hover: hover) and (pointer: fine) {
+    .plate-zoom:hover img {
+      transform: scale(1.035);
+      filter: grayscale(0.35) contrast(1.04) brightness(1.01);
+    }
+    .plate-zoom:hover::after { opacity: 0.5; }
+  }
+
+  /* --- The indeterminate rule -------------------------------------------
+   * Still the only motion that reports state rather than decorating it.
+   * [UX 4.4] */
   .indeterminate-rule {
     position: relative;
     overflow: hidden;
-    height: 1px;
+    height: 2px;
+    border-radius: 999px;
     background: var(--n-100);
   }
 
@@ -89,12 +446,140 @@
     position: absolute;
     inset-block: 0;
     inline-size: 32%;
-    background: var(--accent-500);
-    animation: indeterminate 1.4s ease-in-out infinite;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent-500), var(--warm-500));
+    animation: indeterminate 1.4s var(--ease-inout) infinite;
   }
 
   @keyframes indeterminate {
     0%   { transform: translateX(-100%); }
     100% { transform: translateX(420%); }
   }
+
+  /* Scroll position, as a 2px rule across the top of the window. On a long
+   * control table this is the only cue for how much is left. */
+  .scroll-progress {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 2px;
+    z-index: 60;
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--accent-500), var(--warm-500));
+    transform: scaleX(var(--progress, 0));
+  }
+}
+
+
+/* --- Reduced motion -------------------------------------------------------
+ * Deliberately OUTSIDE every @layer, at the end of the file.
+ *
+ * `.reveal` starts at opacity 0 and is defined in @layer components. An
+ * override in @layer base only beats it because !important reverses cascade
+ * layer order — true, but far too subtle a thing for the rule that decides
+ * whether a reader who asked for less motion sees the page at all. Unlayered
+ * declarations beat every layer outright, so this needs no cleverness.
+ *
+ * Everything the v2.0 revision added is decoration on top of a page that
+ * already works. Under `reduce` all of it resolves to its end state at once:
+ * nothing is left mid-transition, and nothing stays invisible.
+ * [a11y reduced-motion]
+ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The entrance never runs, so the start state must not exist. */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* A tint that chases the cursor is exactly what `reduce` is asking about. */
+  .spotlight::before { opacity: 0 !important; }
+
+  /* Hover states stay — they report affordance — but stop moving. */
+  .panel-raise:hover,
+  .panel-raise:focus-within { transform: none !important; }
+  .btn-primary:hover:not(:disabled) { transform: none !important; }
+  .btn-primary:active:not(:disabled) { transform: none !important; }
+  .chip:active { transform: none !important; }
+  .plate-zoom:hover img { transform: none !important; }
+
+  /* The indeterminate rule is a loop with nowhere to land, so it is replaced
+   * by a static filled rule: still "something is running", without the
+   * motion. */
+  .indeterminate-rule::after {
+    animation: none !important;
+    inline-size: 100% !important;
+    opacity: 0.55;
+  }
+}
+
+
+/* --- Interactive rows -----------------------------------------------------
+ * Unlayered, and it has to be.
+ *
+ * Zebra striping is applied in the markup with Tailwind's `bg-n-25`, which
+ * lives in @layer utilities. This hover rule lived in @layer components.
+ * Cascade layers are resolved BEFORE specificity, and utilities is the later
+ * layer — so `.bg-n-25` beat `.row-interactive:hover` even though the hover
+ * selector is more specific, and every odd row in every table took no hover
+ * tint at all. The row reported `:hover` correctly; the colour simply never
+ * changed. Half the rows in the product had no hover feedback and the CSS
+ * looked right.
+ *
+ * Unlayered declarations beat every layer, so this needs no specificity
+ * games and no !important. The non-hover zebra still applies normally,
+ * because when the row is not hovered this rule does not match.
+ */
+.row-interactive {
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.row-interactive > td:first-child { position: relative; }
+
+/* A terracotta rule wipes in at the left edge. No lift and no scale: a row
+ * that moves breaks the column alignment that makes a table readable. */
+.row-interactive > td:first-child::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 3px;
+  background: var(--warm-500);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.row-interactive:hover > td:first-child::before,
+.row-interactive:focus-within > td:first-child::before {
+  transform: scaleY(1);
+}
+
+/* :focus-within as well as :hover, so tabbing through 25 control links
+ * tracks the same way the mouse does. [a11y focus-states] */
+.row-interactive:hover,
+.row-interactive:focus-within {
+  background-color: var(--accent-50);
+}
+
+/* --- Chip focus -----------------------------------------------------------
+ * The suite chips hide a real checkbox with `sr-only` so the whole 36px chip
+ * is the target. But `sr-only` collapses the input to a 1px clipped box, so
+ * the global :focus-visible ring was being drawn on something invisible —
+ * a keyboard user tabbing through the suites could not see where they were.
+ * The ring belongs on the chip the reader can actually see.
+ * [a11y focus-states, touch-target-size]
+ */
+.chip:focus-within {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
 }

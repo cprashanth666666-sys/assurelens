@@ -162,7 +162,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-n-200 bg-n-0 p-4">
+    <section className="panel p-4">
       <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">
         {title}
       </h3>

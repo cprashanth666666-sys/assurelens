@@ -20,7 +20,7 @@ export function RoleSwitch() {
     <div>
       <label
         htmlFor="role-switch"
-        className="block text-2xs uppercase tracking-[0.14em] text-n-400"
+        className="sr-only text-2xs uppercase tracking-[0.18em] text-n-400 md:not-sr-only md:block"
       >
         Viewing as
       </label>
@@ -28,7 +28,7 @@ export function RoleSwitch() {
         id="role-switch"
         value={role}
         onChange={(e) => setRole(e.target.value as Role)}
-        className="mt-1 rounded-sm border border-n-200 bg-n-0 px-2 py-1 text-sm text-n-800"
+        className="field mt-1 cursor-pointer text-sm"
       >
         {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
           <option key={r} value={r}>

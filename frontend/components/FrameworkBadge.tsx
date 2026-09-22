@@ -22,9 +22,10 @@ export function FrameworkBadge({
       title={unverified ? "Citation not verified against the source standard" : undefined}
       className={[
         "inline-block rounded-sm border px-1 font-mono text-2xs leading-table",
+        "transition-colors duration-base ease-out",
         unverified
-          ? "border-dashed border-n-300 text-n-500"
-          : "border-n-200 text-n-600",
+          ? "cursor-help border-dashed border-n-300 text-n-500 hover:border-warm-500 hover:text-warm-600"
+          : "border-n-200 text-n-600 hover:border-accent-500 hover:text-accent-700",
       ].join(" ")}
     >
       {FRAMEWORK_LABEL[code] ?? code}

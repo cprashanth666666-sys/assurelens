@@ -15,10 +15,23 @@ export function Placeholder({
   buildsOn: string;
 }) {
   return (
-    <section className="border border-n-200 bg-n-0 p-6">
+    <section className="panel panel-raise relative overflow-hidden p-5 md:p-6">
+      {/* A hatched corner: this panel is scaffolding and says so at a glance,
+          without a banner taking up a line of the layout. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-6 -top-6 h-[72px] w-[72px] rotate-45"
+        style={{
+          background:
+            "repeating-linear-gradient(45deg, var(--warm-100) 0 6px, transparent 6px 12px)",
+        }}
+      />
       <h2>{title}</h2>
       <p className="mt-3 max-w-prose text-n-600">{summary}</p>
-      <p className="mt-4 font-mono text-xs text-n-400">Builds on {buildsOn}</p>
+      <p className="mt-4 inline-flex items-center gap-2 font-mono text-xs text-n-400">
+        <span aria-hidden="true" className="h-px w-5 bg-warm-500" />
+        Builds on {buildsOn}
+      </p>
     </section>
   );
 }

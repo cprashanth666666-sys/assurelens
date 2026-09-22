@@ -1,6 +1,9 @@
 import Link from "next/link";
 
 import { ControlTable } from "@/components/ControlTable";
+import { Figure } from "@/components/Plate";
+import { Reveal } from "@/components/Reveal";
+import { PLATES } from "@/lib/imagery";
 import { DOMAINS, DOMAIN_LABEL, fetchControls, type Domain } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +26,7 @@ export default async function ControlsPage({
 
   if (controls === null) {
     return (
-      <section className="border border-n-200 bg-n-0 p-6">
+      <section className="panel p-5 md:p-6">
         <h2>Control library</h2>
         <p className="mt-3 max-w-prose text-n-600">
           The API is unreachable, so the library cannot be listed. The page
@@ -38,7 +41,8 @@ export default async function ControlsPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <header>
+      <header className="grid items-start gap-5 lg:grid-cols-[1.6fr_1fr]">
+        <div>
         <h2>Control library</h2>
         <p className="mt-2 max-w-prose text-n-600">
           Controls derived from the Digital Personal Data Protection Act 2023
@@ -51,11 +55,20 @@ export default async function ControlsPage({
           {controls.length - executable} documented
           {outOfScope > 0 && ` · ${outOfScope} not applicable`}
         </p>
+        </div>
+
+        <Figure
+          plate={PLATES.structure}
+          sizes="(max-width: 1023px) 100vw, 32vw"
+          className="hidden lg:block"
+        />
       </header>
 
       <FilterRail active={params.domain} executable={params.executable} />
 
-      <ControlTable controls={controls} />
+      <Reveal>
+        <ControlTable controls={controls} />
+      </Reveal>
     </div>
   );
 }
@@ -80,7 +93,7 @@ function FilterRail({
   return (
     <nav
       aria-label="Filter controls"
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-n-100 py-2 text-xs"
+      className="scroll-x edge-fade flex flex-nowrap items-center gap-x-4 gap-y-2 border-y border-n-100 py-3 text-xs md:flex-wrap"
     >
       <span className="text-2xs uppercase tracking-[0.14em] text-n-400">
         Domain
@@ -133,10 +146,10 @@ function FilterLink({
       href={href}
       aria-current={active ? "true" : undefined}
       className={[
-        "no-underline",
+        "whitespace-nowrap no-underline transition-colors duration-base ease-out",
         active
-          ? "font-semibold text-n-800 underline decoration-accent-500 decoration-2 underline-offset-4"
-          : "text-n-500 hover:text-n-700",
+          ? "font-semibold text-n-800 underline decoration-warm-500 decoration-2 underline-offset-4"
+          : "link-grow text-n-500 hover:text-n-800",
       ].join(" ")}
     >
       {children}
