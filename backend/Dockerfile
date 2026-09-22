@@ -25,10 +25,13 @@ WORKDIR /app
 # COPY below replaces it. Without this the whole dependency layer would have
 # to be rebuilt on every source edit, which on Render's free tier is minutes
 # per deploy.
+#
+# Runtime dependencies only: no pytest, ruff or mypy. Test tooling has no
+# business in a deployed container.
 COPY backend/pyproject.toml ./
 RUN mkdir -p app && touch app/__init__.py \
     && pip install --upgrade pip \
-    && pip install ".[dev]"
+    && pip install "."
 
 COPY backend/ ./
 COPY controls/ /opt/assurelens/controls/

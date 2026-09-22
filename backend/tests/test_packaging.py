@@ -166,3 +166,53 @@ def test_render_boots_migrate_then_seed_then_serve() -> None:
     serve = render.index("uvicorn app.main:app")
 
     assert migrate < seed < serve
+
+
+def test_dockerignore_excludes_the_local_virtualenv() -> None:
+    """A 495 MB Windows virtualenv was being copied into a Linux image.
+
+    `COPY backend/ ./` takes everything the build context contains, and
+    without a .dockerignore the context was the whole repository -- venv and
+    node_modules included. Useless in the image, and large enough that the
+    upload alone could exhaust a free-tier build.
+    """
+    ignored = (REPO_ROOT / ".dockerignore").read_text(encoding="utf-8")
+
+    for pattern in (".venv/", "node_modules/", ".git/"):
+        assert pattern in ignored, f"{pattern} must not enter the build context"
+
+
+def test_dockerignore_excludes_env_files() -> None:
+    """A secret copied into a layer stays in that layer even if a later one
+    deletes it."""
+    ignored = (REPO_ROOT / ".dockerignore").read_text(encoding="utf-8")
+
+    assert ".env" in ignored
+    assert "!.env.example" in ignored, "the template is safe and useful"
+
+
+def test_production_image_omits_test_tooling() -> None:
+    """pytest, ruff and mypy have no business in a deployed container."""
+    dockerfile = DOCKERFILE.read_text(encoding="utf-8")
+
+    assert '.[dev]' not in dockerfile
+    assert 'pip install "."' in dockerfile
+
+
+def test_declared_dependencies_are_actually_imported() -> None:
+    """scipy, pandas and scikit-learn were declared and never imported: 227 MB
+    of nothing.
+
+    The gate's statistics are hand-implemented on purpose, so the maths is
+    visible and unit-tested against published values rather than delegated to
+    a library. Carrying the library anyway was pure weight.
+    """
+    pyproject = (REPO_ROOT / "backend" / "pyproject.toml").read_text(
+        encoding="utf-8"
+    )
+    dependencies = pyproject.split("dependencies = [")[1].split("]")[0]
+
+    for unused in ("scipy", "scikit-learn", "pandas"):
+        assert unused not in dependencies, (
+            f"{unused} is declared; import it or drop it"
+        )

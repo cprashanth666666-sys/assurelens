@@ -1,0 +1,54 @@
+# Everything here would otherwise be uploaded as build context and, worse,
+# copied into the image by `COPY backend/ ./`.
+#
+# Without this file the backend image carried a 495 MB Windows virtualenv
+# inside a Linux container: useless, and large enough that the build context
+# alone was close to a gigabyte. That is the difference between a free-tier
+# build succeeding and failing.
+
+# Virtual environments — host-specific, wrong platform, never wanted
+.venv/
+backend/.venv/
+venv/
+ENV/
+
+# Node — the frontend builds on Vercel, not in this image
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Python build and cache artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Version control and CI
+.git/
+.github/
+
+# Secrets must never enter an image layer, where they persist even if a later
+# layer deletes them.
+.env
+.env.*
+!.env.example
+
+# Documentation and planning — not needed at runtime
+docs/
+*.md
+!controls/*.md
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test output
+playwright-report/
+test-results/
