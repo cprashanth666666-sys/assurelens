@@ -238,3 +238,16 @@ def test_render_blueprint_pins_no_region() -> None:
             f"{service['name']} pins a region; that field is immutable after "
             f"creation and will fail the sync on an existing service"
         )
+
+
+def test_estate_completeness_is_not_judged_by_one_table() -> None:
+    """Using principals as a proxy for "the estate is seeded" held until a
+    migration added a table. The proxy then reported complete while the new
+    table stayed empty, and the control depending on it gated for no evidence
+    on a deployment that looked perfectly healthy."""
+    source = (REPO_ROOT / "backend" / "app" / "seed" / "meridian.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "_ESTATE_TABLES" in source
+    assert "AssetRecord," in source.split("_ESTATE_TABLES")[1][:400]

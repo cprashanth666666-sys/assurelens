@@ -52,11 +52,14 @@ services:
       # `host`, not `hostport`: hostport yields `name:443` with no scheme,
       # which httpx rejects. The backend's settings validator prefixes the
       # scheme, so either form is repaired — but host is the honest value.
+      # Set explicitly, not injected. `fromService` with property `host`
+      # yields the bare service NAME -- "assurelens-target" -- which does not
+      # resolve, so every probe failed and every access-control control gated
+      # on G8_TARGET_UNREACHABLE. The gate reported that correctly, which is
+      # how it was found, but a correct report of a broken deployment is
+      # still a broken deployment.
       - key: TARGET_SERVICE_URL
-        fromService:
-          name: assurelens-target
-          type: web
-          property: host
+        sync: false
       - key: LOG_LEVEL
         value: INFO
 

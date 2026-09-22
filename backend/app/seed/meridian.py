@@ -256,8 +256,34 @@ def persist_estate(db: Session, estate: GeneratedEstate, org_id: int) -> dict[st
     }
 
 
+# Every table the estate is responsible for filling. Checked as a set rather
+# than sampling one of them: using principals as a proxy for "the estate is
+# complete" was right until a migration added a table, after which the proxy
+# reported complete while the new table stayed empty -- and the control that
+# depended on it gated for no evidence on a deployment that looked seeded.
+_ESTATE_TABLES = (
+    DataAsset,
+    ProcessingActivity,
+    DataPrincipal,
+    ConsentRecord,
+    ThirdParty,
+    AccessLog,
+    ModelRegistry,
+    ModelPrediction,
+    AssetRecord,
+)
+
+
 def estate_is_populated(db: Session) -> bool:
-    return bool(db.scalar(select(func.count()).select_from(DataPrincipal)))
+    """True only when every table the estate fills has rows.
+
+    Deliberately strict. A partially seeded estate produces controls that
+    gate for missing evidence on an environment that appears healthy, and
+    the cause is invisible from the outside.
+    """
+    return all(
+        db.scalar(select(func.count()).select_from(model)) for model in _ESTATE_TABLES
+    )
 
 
 def load_estate(
@@ -278,7 +304,7 @@ def load_estate(
 
     if not force and estate_is_populated(db):
         existing = db.scalar(select(func.count()).select_from(DataPrincipal))
-        log.info("estate already populated (%d principals); skipping", existing)
+        log.info("estate complete (%d principals); skipping", existing)
         return {"skipped": True, "principals": existing or 0, "seed": seed}
 
     wipe_estate(db)
