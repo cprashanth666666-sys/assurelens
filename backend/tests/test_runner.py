@@ -114,21 +114,35 @@ def _attach(db: Session, control_ref: str, plugin_key: str, suite: str) -> None:
     """Point a real control at a stub procedure for the duration of a test."""
     control = db.scalar(select(Control).where(Control.ref == control_ref))
     assert control is not None
-    db.execute(
-        text("DELETE FROM test_procedures WHERE control_id = :cid"),
-        {"cid": control.id},
+    # Reuse the existing row rather than deleting it: test_results reference
+    # procedures, so a raw delete recreates the foreign-key violation the
+    # loader was just fixed to avoid.
+    contract = {
+        "required": [
+            {"name": "records", "kind": "DB_QUERY", "defines_population": True}
+        ]
+    }
+
+    existing = db.scalar(
+        select(ProcedureRow).where(ProcedureRow.control_id == control.id)
     )
+    if existing is not None:
+        existing.plugin_key = plugin_key
+        existing.suite = suite
+        # The contract too: the stub reads an evidence name the real YAML
+        # does not declare, and a stale contract would collect the wrong
+        # names and leave the stub reading an empty bundle.
+        existing.evidence_contract = contract
+        db.flush()
+        return
+
     db.add(
         ProcedureRow(
             control_id=control.id,
             plugin_key=plugin_key,
             suite=suite,
             config={},
-            evidence_contract={
-                "required": [
-                    {"name": "records", "kind": "DB_QUERY", "defines_population": True}
-                ]
-            },
+            evidence_contract=contract,
         )
     )
     db.flush()

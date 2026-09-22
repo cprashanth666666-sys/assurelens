@@ -8,7 +8,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import controls, health
+from app.api import controls, health, runs
 from app.config import get_settings
 
 settings = get_settings()
@@ -35,3 +35,4 @@ app.add_middleware(
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(controls.router, prefix="/api", tags=["controls"])
+app.include_router(runs.router, prefix="/api", tags=["runs"])

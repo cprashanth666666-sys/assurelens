@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -30,6 +30,7 @@ from app.models.control import (
     TestProcedure,
     User,
 )
+from app.models.results import TestResult
 
 # Repo-root-relative default, correct for a source checkout. Overridden by
 # CONTROLS_DIR in the container, where the source tree is not the repo tree.
@@ -173,30 +174,63 @@ def _sync_mappings(
 
 
 def _sync_procedure(db: Session, control: Control, spec: dict[str, Any]) -> None:
-    for existing in list(control.procedures):
-        db.delete(existing)
-    db.flush()
+    """Upsert the control's procedure rather than replacing it.
 
-    if not control.is_executable:
-        return
+    Deleting and recreating looks equivalent and is not: test_results
+    reference the procedure that produced them, so a delete violates that
+    foreign key the moment any run exists. Since the library is upserted on
+    every boot, that turned the first deploy after the first run into a crash.
 
+    Keeping the row also keeps the link meaningful -- a workpaper cites which
+    procedure produced a result, and a recreated row with a new id would
+    quietly orphan that citation.
+    """
     plugin_key = spec.get("plugin_key")
     suite = spec.get("suite")
+
+    if not control.is_executable:
+        # Genuinely no longer executable. Detach rather than delete, so
+        # historical results keep their statistics and lose only the link.
+        for existing in list(control.procedures):
+            db.execute(
+                update(TestResult)
+                .where(TestResult.procedure_id == existing.id)
+                .values(procedure_id=None)
+            )
+            db.delete(existing)
+        db.flush()
+        return
+
     if not plugin_key or not suite:
         raise ControlLibraryError(
             f"Control {control.ref} is executable but declares no "
             f"plugin_key/suite. An executable control must say what runs it."
         )
 
-    db.add(
-        TestProcedure(
-            control_id=control.id,
-            plugin_key=plugin_key,
-            suite=suite,
-            config=spec.get("config") or {},
-            evidence_contract=spec.get("evidence_contract") or {},
+    procedure = db.scalar(
+        select(TestProcedure).where(
+            TestProcedure.control_id == control.id,
+            TestProcedure.plugin_key == plugin_key,
         )
     )
+    if procedure is None:
+        procedure = TestProcedure(control_id=control.id, plugin_key=plugin_key)
+        db.add(procedure)
+
+    procedure.suite = suite
+    procedure.config = spec.get("config") or {}
+    procedure.evidence_contract = spec.get("evidence_contract") or {}
+
+    # Any other procedure for this control is stale: the YAML declares one.
+    for existing in list(control.procedures):
+        if existing.plugin_key != plugin_key:
+            db.execute(
+                update(TestResult)
+                .where(TestResult.procedure_id == existing.id)
+                .values(procedure_id=None)
+            )
+            db.delete(existing)
+
     db.flush()
 
 

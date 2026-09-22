@@ -50,10 +50,32 @@ def seeded_db(db_available: bool) -> Iterator[Session]:
     engine = create_engine(TEST_DATABASE_URL)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     with factory() as db:
+        _clear_run_history(db)
         load_control_library(db)
         load_engagement_scope(db)
         db.commit()
         yield db
+
+
+def _clear_run_history(db: Session) -> None:
+    """Start every session from a known state.
+
+    The run API commits, because that is what the real code path does. Those
+    rows then survive the pytest process and, on the next invocation, pin the
+    procedure rows the control-library loader is about to update -- so the
+    suite passes once and fails ever after, for reasons that have nothing to
+    do with the code under test.
+
+    Truncating here rather than asking tests not to commit: a test that
+    avoids the real commit is not testing the real path.
+    """
+    db.execute(
+        text(
+            "TRUNCATE test_results, evidence_items, test_runs, audit_log "
+            "RESTART IDENTITY CASCADE"
+        )
+    )
+    db.commit()
 
 
 @pytest.fixture(scope="session")
