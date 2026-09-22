@@ -47,6 +47,29 @@ class DataAsset(Base):
     hosted_region: Mapped[str | None] = mapped_column(Text)
 
 
+class AssetRecord(Base):
+    """What an asset actually contains.
+
+    The gap between this and `DataAsset.declared_identifier_classes` is the
+    finding: an inventory describes what an organisation believes it holds,
+    and a scan establishes what it does.
+    """
+
+    __tablename__ = "est_asset_records"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    asset_id: Mapped[int] = mapped_column(
+        ForeignKey("est_data_assets.id", ondelete="CASCADE")
+    )
+    principal_id: Mapped[int | None] = mapped_column(
+        ForeignKey("est_data_principals.id", ondelete="CASCADE")
+    )
+    content: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
 class ProcessingActivity(Base):
     __tablename__ = "est_processing_activities"
 

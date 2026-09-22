@@ -11,6 +11,7 @@ means registering a procedure, never editing this file.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 import time
 from collections.abc import Callable
@@ -154,11 +155,21 @@ def _persist(
 
 
 def _summarise(payload: Any) -> Any:
+    """A JSON-safe précis of what was collected.
+
+    Round-tripped through json with `default=str` because evidence rows carry
+    datetimes and Decimals, which JSONB will not take. The full payload is not
+    stored -- an estate query would bloat every result row, and the content
+    hash already pins exactly what was collected.
+    """
     if isinstance(payload, list):
-        return {"kind": "list", "length": len(payload), "first": payload[:2]}
-    if isinstance(payload, dict):
-        return {"kind": "mapping", "keys": sorted(payload)[:12]}
-    return payload
+        summary: Any = {"kind": "list", "length": len(payload), "first": payload[:2]}
+    elif isinstance(payload, dict):
+        summary = {"kind": "mapping", "keys": sorted(payload)[:12]}
+    else:
+        summary = payload
+
+    return json.loads(json.dumps(summary, default=str))
 
 
 def run_suites(

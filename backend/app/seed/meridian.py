@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from app.models.control import Organization
 from app.models.estate import (
     AccessLog,
+    AssetRecord,
     ConsentEvent,
     ConsentRecord,
     DataAsset,
@@ -52,6 +53,7 @@ def _table(model: type[Any]) -> Table:
 # intermediate step rather than relying on cascade ordering.
 _WIPE_ORDER = (
     ModelAssessment,
+    AssetRecord,
     ModelPrediction,
     ModelRegistry,
     ConsentEvent,
@@ -199,6 +201,23 @@ def persist_estate(db: Session, estate: GeneratedEstate, org_id: int) -> dict[st
         ],
     )
 
+    # --- Asset content -----------------------------------------------------
+    # What suite 1 scans. Stored separately from the principal row because
+    # that is where it actually lives: an identifier belongs to the asset
+    # holding it, not to an abstract record of the person.
+    db.execute(
+        insert(_table(AssetRecord)),
+        [
+            {
+                "asset_id": asset_ids[r["asset_name"]],
+                "principal_id": principal_ids.get(r["external_ref"]),
+                "content": r["content"],
+            }
+            for r in estate.asset_records
+            if r["asset_name"] in asset_ids
+        ],
+    )
+
     # --- Model and predictions ---------------------------------------------
     db.execute(
         insert(_table(ModelRegistry)),
@@ -232,6 +251,7 @@ def persist_estate(db: Session, estate: GeneratedEstate, org_id: int) -> dict[st
         "consent_events": len(estate.consent_events),
         "third_parties": len(estate.third_parties),
         "access_logs": len(estate.access_logs),
+        "asset_records": len(estate.asset_records),
         "predictions": len(estate.predictions),
     }
 

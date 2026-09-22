@@ -90,6 +90,8 @@ class GeneratedEstate:
     # asset rather than in its own table, because the finding is about the
     # asset's protection, not about the transcripts themselves.
     transcripts: list[dict[str, Any]] = field(default_factory=list)
+    # Rows of actual asset content, which is what suite 1 scans.
+    asset_records: list[dict[str, Any]] = field(default_factory=list)
 
 
 def _days(n: float) -> dt.timedelta:
@@ -600,6 +602,73 @@ def generate_access_logs(
     return rows
 
 
+# How many records are stored per sampled asset. Deliberately far below the
+# asset's declared record_count: scanning 800 of 24,000 cannot establish that
+# the other 23,200 are clean, and the gate should say so. Full coverage is
+# kept only for call_transcripts, which is small enough to scan entirely --
+# so the finding there is definitive rather than merely suggestive.
+SAMPLED_RECORDS_PER_ASSET = 800
+
+
+def generate_asset_records(
+    rng: np.random.Generator,
+    principals: list[dict[str, Any]],
+    transcripts: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Rows of asset content for the assets suite 1 scans.
+
+    Only a sample of the large assets is stored, on purpose. A scan that
+    covers 3% of an estate and reports it clean has established very little,
+    and making that visible is more useful than a convenient full copy.
+    """
+    rows: list[dict[str, Any]] = []
+    sample = rng.choice(
+        len(principals), size=SAMPLED_RECORDS_PER_ASSET, replace=False
+    ).tolist()
+
+    for idx in sample:
+        p = principals[idx]
+        rows.append(
+            {
+                "asset_name": "crm_customers",
+                "external_ref": p["external_ref"],
+                "content": {
+                    "name": f"Customer {p['external_ref']}",
+                    "email": p["email"],
+                    "mobile": p["mobile"],
+                    "account_number": p["account_number"],
+                },
+            }
+        )
+        # Declares aadhaar and pan, and holds them. The honest case, kept so
+        # a finding elsewhere reads as a finding rather than as the norm.
+        rows.append(
+            {
+                "asset_name": "kyc_documents",
+                "external_ref": p["external_ref"],
+                "content": {
+                    "name": f"Customer {p['external_ref']}",
+                    "aadhaar": p["aadhaar"],
+                    "pan": p["pan"],
+                },
+            }
+        )
+
+    # Every transcript, because the asset is small enough to scan entirely.
+    # Defect S9 lives in the ten per cent whose body carries a PAN the asset
+    # never declared, in a store with no encryption at rest.
+    for transcript in transcripts:
+        rows.append(
+            {
+                "asset_name": "call_transcripts",
+                "external_ref": transcript["external_ref"],
+                "content": {"body": transcript["body"]},
+            }
+        )
+
+    return rows
+
+
 def generate_estate(seed: int) -> GeneratedEstate:
     """Build the whole estate from one seed. No I/O, no clock reads."""
     rng = np.random.default_rng(seed)
@@ -618,4 +687,7 @@ def generate_estate(seed: int) -> GeneratedEstate:
 
     estate.access_logs = generate_access_logs(rng, estate.third_parties)
     estate.transcripts = generate_transcripts(rng, estate.principals)
+    estate.asset_records = generate_asset_records(
+        rng, estate.principals, estate.transcripts
+    )
     return estate

@@ -117,3 +117,101 @@ export const fetchControl = (ref: string) =>
   get<ControlDetail>(`/api/controls/${encodeURIComponent(ref)}`);
 
 export const fetchEngagement = () => get<Engagement>("/api/engagement");
+
+
+// --- Runs ------------------------------------------------------------------
+
+export type ResultSummary = {
+  id: number;
+  control_ref: string;
+  control_title: string;
+  verdict: Verdict;
+  raw_outcome: Verdict | null;
+  gate_fired: boolean;
+  gate_reasons: string[];
+  gate_explanations: string[];
+  gate_remedies: string[];
+  sample_size: number | null;
+  population_size: number | null;
+  successes: number | null;
+  coverage_pct: number | null;
+  point_estimate: number | null;
+  ci_lower: number | null;
+  ci_upper: number | null;
+  ci_method: string | null;
+  thresholds_applied: Record<string, unknown>;
+  threshold_overrides: Record<string, unknown>;
+  duration_ms: number | null;
+};
+
+export type Verdict =
+  | "PASS"
+  | "FAIL"
+  | "INSUFFICIENT_EVIDENCE"
+  | "NOT_APPLICABLE";
+
+export type RunSummary = {
+  id: number;
+  engagement_id: number;
+  seed: number;
+  suites: string[];
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  engine_version: string;
+  error: string | null;
+  result_count: number;
+};
+
+export type RunDetail = RunSummary & { results: ResultSummary[] };
+
+export type SuiteCatalogue = {
+  suites: string[];
+  registered_procedures: string[];
+};
+
+export const VERDICT_LABEL: Record<Verdict, string> = {
+  PASS: "Pass",
+  FAIL: "Fail",
+  // Never "Unknown", "Error" or "Incomplete". It is a peer verdict, and the
+  // wording is what makes that legible. [UX 6.1]
+  INSUFFICIENT_EVIDENCE: "Insufficient evidence",
+  NOT_APPLICABLE: "Not applicable",
+};
+
+export const VERDICT_CLASS: Record<Verdict, string> = {
+  PASS: "text-verdict-pass",
+  FAIL: "text-verdict-fail",
+  // Neutral ink, deliberately. Never red, amber or yellow -- it is not a
+  // warning and must not be dressed as one.
+  INSUFFICIENT_EVIDENCE: "text-verdict-insufficient",
+  NOT_APPLICABLE: "text-verdict-na",
+};
+
+export const fetchSuites = () => get<SuiteCatalogue>("/api/suites");
+
+export const fetchRun = (id: number) => get<RunDetail>(`/api/runs/${id}`);
+
+export const fetchRuns = (engagementId: number) =>
+  get<RunSummary[]>(`/api/engagements/${engagementId}/runs`);
+
+export async function startRun(
+  engagementId: number,
+  suiteIds: string[],
+  seed: number,
+): Promise<RunSummary | null> {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/engagements/${engagementId}/runs`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suite_ids: suiteIds, seed }),
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as RunSummary;
+  } catch {
+    return null;
+  }
+}
