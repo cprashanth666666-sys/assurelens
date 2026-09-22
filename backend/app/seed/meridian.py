@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 from typing import Any, cast
 
-from sqlalchemy import Table, delete, insert, select
+from sqlalchemy import Table, delete, func, insert, select
 from sqlalchemy.orm import Session
 
 from app.models.control import Organization
@@ -236,12 +236,34 @@ def persist_estate(db: Session, estate: GeneratedEstate, org_id: int) -> dict[st
     }
 
 
-def load_estate(db: Session, seed: int) -> dict[str, Any]:
-    """Generate and persist Meridian's estate from a seed. Idempotent."""
-    org = _org(db)
-    wipe_estate(db)
+def estate_is_populated(db: Session) -> bool:
+    return bool(db.scalar(select(func.count()).select_from(DataPrincipal)))
 
+
+def load_estate(
+    db: Session, seed: int, *, force: bool = False
+) -> dict[str, Any]:
+    """Generate and persist Meridian's estate from a seed.
+
+    Skips when the estate already exists, because this runs on every boot and
+    the estate is bulk data derived from a seed -- rebuilding it changes
+    nothing. That matters more than it sounds: seeding 24,000 principals takes
+    seconds against a local database and minutes across a network, which is
+    long enough to fail a platform health check and leave the service flapping
+    on restart.
+
+    `force=True` re-seeds anyway, which is what the demo reset endpoint wants.
+    """
+    org = _org(db)
+
+    if not force and estate_is_populated(db):
+        existing = db.scalar(select(func.count()).select_from(DataPrincipal))
+        log.info("estate already populated (%d principals); skipping", existing)
+        return {"skipped": True, "principals": existing or 0, "seed": seed}
+
+    wipe_estate(db)
     estate = generate_estate(seed)
     counts = persist_estate(db, estate, org.id)
     counts["seed"] = seed
+    counts["skipped"] = False
     return counts

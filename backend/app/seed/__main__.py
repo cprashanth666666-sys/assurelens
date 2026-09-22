@@ -31,6 +31,11 @@ def main() -> None:
         help="Seed for the synthetic estate. Defaults to DEFAULT_SEED.",
     )
     parser.add_argument(
+        "--force-estate",
+        action="store_true",
+        help="Re-seed the estate even if it already exists.",
+    )
+    parser.add_argument(
         "--no-estate",
         action="store_true",
         help="Skip the synthetic estate (control library and engagement only).",
@@ -55,14 +60,20 @@ def main() -> None:
 
             if not args.no_estate:
                 seed = args.seed if args.seed is not None else get_settings().default_seed
-                counts = load_estate(db, seed)
-                log.info(
-                    "estate seed=%d: %d principals, %d consents, %d events, "
-                    "%d processors, %d access logs, %d predictions",
-                    counts["seed"], counts["principals"], counts["consents"],
-                    counts["consent_events"], counts["third_parties"],
-                    counts["access_logs"], counts["predictions"],
-                )
+                counts = load_estate(db, seed, force=args.force_estate)
+                if counts["skipped"]:
+                    log.info(
+                        "estate already present (%d principals); left alone",
+                        counts["principals"],
+                    )
+                else:
+                    log.info(
+                        "estate seed=%d: %d principals, %d consents, %d events, "
+                        "%d processors, %d access logs, %d predictions",
+                        counts["seed"], counts["principals"], counts["consents"],
+                        counts["consent_events"], counts["third_parties"],
+                        counts["access_logs"], counts["predictions"],
+                    )
 
         db.commit()
     log.info("done")

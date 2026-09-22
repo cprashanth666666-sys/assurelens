@@ -139,3 +139,30 @@ def test_estate_wipe_does_not_synchronise_the_session() -> None:
     )
 
     assert "synchronize_session=False" in source
+
+
+def test_seed_skips_an_existing_estate() -> None:
+    """The boot command runs the seed on every restart.
+
+    The control library is upserted each time, so edits ship with the deploy.
+    The estate is not: it is bulk data derived from a seed, so rebuilding
+    24,000 rows on every restart changes nothing and takes long enough to
+    fail a platform health check, leaving the service flapping.
+    """
+    source = (REPO_ROOT / "backend" / "app" / "seed" / "meridian.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "def estate_is_populated" in source
+    assert "force" in source, "a forced re-seed must still be possible"
+
+
+def test_render_boots_migrate_then_seed_then_serve() -> None:
+    """Order matters: a schema without content is a 404 on every endpoint."""
+    render = (REPO_ROOT / "render.yaml").read_text(encoding="utf-8")
+
+    migrate = render.index("alembic upgrade head")
+    seed = render.index("python -m app.seed")
+    serve = render.index("uvicorn app.main:app")
+
+    assert migrate < seed < serve

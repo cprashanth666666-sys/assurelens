@@ -15,7 +15,10 @@
 ## Step 1 — Neon (PostgreSQL)
 
 1. Sign up at [neon.tech](https://neon.tech) and create a project named `assurelens`.
-2. Pick the region closest to you (`ap-southeast-1` Singapore for India).
+2. Pick a region and **note which one** — the Render services must match it.
+   Co-locating matters: the control library is upserted on every boot, which
+   is ~150 round trips. Across a continent that is a minute; alongside the
+   database it is seconds.
 3. Copy the connection string from **Connection Details**. It looks like:
 
    ```
@@ -48,9 +51,10 @@ Target: existing Render project **`assurelens`**, environment **`EY`**.
    | `DATABASE_URL` | the Neon string from Step 1 |
    | `CORS_ALLOW_ORIGINS` | `http://localhost:3000` — placeholder, replaced in Step 4 |
 
-5. Wait for the deploy. The start command runs `alembic upgrade head`, then `python -m app.seed`, then uvicorn — so the control library is loaded on first boot. Seeding is idempotent, so redeploys are safe.
-6. Copy the API URL, roughly `https://assurelens-api.onrender.com`. Render appends a suffix if the name is taken, so **copy the real one**.
-7. Confirm:
+5. **Set `region:` in [render.yaml](render.yaml) to match your Neon region** before applying, if it is not already. It ships pinned to `ohio` for a Neon project in `us-east-2`.
+6. Wait for the deploy. The start command runs `alembic upgrade head`, then `python -m app.seed`, then uvicorn. The control library is upserted every boot so edits ship with the deploy; the synthetic estate is skipped once present, because rebuilding 24,000 rows on every restart changes nothing and takes long enough to fail the health check.
+7. Copy the API URL, roughly `https://assurelens-api.onrender.com`. Render appends a suffix if the name is taken, so **copy the real one**.
+8. Confirm:
 
    ```bash
    curl https://assurelens-api.onrender.com/api/health

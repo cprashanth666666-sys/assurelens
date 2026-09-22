@@ -16,15 +16,23 @@ services:
     name: assurelens-api
     runtime: docker
     plan: free
+    # Match the Neon project's region (us-east-2, Ohio). Every boot upserts
+    # the control library, which is ~150 round trips; across a continent that
+    # is a minute, alongside the database. Co-located it is seconds.
+    region: ohio
     dockerfilePath: ./backend/Dockerfile
     # Repo root: the image needs controls/ as well as backend/.
     dockerContext: .
     healthCheckPath: /api/health
     # Migrations apply on every deploy, so the schema can never lag the code.
     # Seeding runs too: the control library is the product's content, not test
-    # fixtures, and it is idempotent. Without this a deployed backend comes up
-    # with an empty library and /api/engagement 404s — the schema would be
-    # right and the application useless.
+    # fixtures. Without it a deployed backend comes up with an empty library
+    # and /api/engagement 404s — schema right, application useless.
+    #
+    # The control library is upserted every boot, so an edit ships with the
+    # deploy. The synthetic estate is skipped when already present: it is bulk
+    # data derived from a seed, so rebuilding 24,000 rows on every restart
+    # changes nothing and takes long enough to fail this health check.
     dockerCommand: >-
       sh -c "alembic upgrade head &&
              python -m app.seed &&
@@ -54,6 +62,7 @@ services:
     name: assurelens-target
     runtime: docker
     plan: free
+    region: ohio
     dockerfilePath: ./target_service/Dockerfile
     dockerContext: ./target_service
     healthCheckPath: /health
