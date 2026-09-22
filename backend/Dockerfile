@@ -26,7 +26,9 @@ WORKDIR /app
 # to be rebuilt on every source edit, which on Render's free tier is minutes
 # per deploy.
 COPY backend/pyproject.toml ./
-RUN mkdir -p app && touch app/__init__.py     && pip install --upgrade pip     && pip install ".[dev]"
+RUN mkdir -p app && touch app/__init__.py \
+    && pip install --upgrade pip \
+    && pip install ".[dev]"
 
 COPY backend/ ./
 COPY controls/ /opt/assurelens/controls/

@@ -7,6 +7,7 @@ image was built and run for the first time.
 
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -92,3 +93,49 @@ def test_settings_default_leaves_controls_dir_unset() -> None:
         _env_file=None, database_url="postgresql+psycopg://u:p@h:5432/d"
     )
     assert settings.controls_dir == ""
+
+
+def test_estate_seed_uses_core_executemany_not_orm_bulk_insert() -> None:
+    """A performance guard with a correctness-shaped failure mode.
+
+    `insert(Model)` is an ORM bulk insert that fetches generated primary keys
+    back, which degrades to one `INSERT ... RETURNING` per row. Swapping the
+    Core form for it took the estate seed from 4 seconds to 9 minutes, and
+    nothing failed -- the data was identical, so only the clock showed it.
+
+    The regression was introduced while silencing a type error, which is
+    exactly how it would come back.
+    """
+    tree = ast.parse(
+        (REPO_ROOT / "backend" / "app" / "seed" / "meridian.py").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    # Parsed rather than grepped: the module docstring explains this very
+    # distinction, and a regex over the text matched the explanation.
+    orm_bulk = [
+        node.args[0].id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "insert"
+        and node.args
+        and isinstance(node.args[0], ast.Name)
+    ]
+
+    assert not orm_bulk, (
+        f"ORM bulk insert used for {orm_bulk}; use insert(_table(Model)) so "
+        f"psycopg can executemany"
+    )
+
+
+def test_estate_wipe_does_not_synchronise_the_session() -> None:
+    """Deleting 110,000 rows through the ORM's default strategy loads every
+    one into the identity map to reconcile in-memory objects. Nothing reads
+    them afterwards, so there is nothing to reconcile."""
+    source = (REPO_ROOT / "backend" / "app" / "seed" / "meridian.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "synchronize_session=False" in source

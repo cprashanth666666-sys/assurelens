@@ -16,6 +16,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.seed.controls import load_control_library, load_engagement_scope
+from app.seed.meridian import load_estate
 
 # Default matches docker-compose, which publishes on host port 5433 to avoid
 # a locally installed PostgreSQL service that usually owns 5432.
@@ -53,3 +54,15 @@ def seeded_db(db_available: bool) -> Iterator[Session]:
         load_engagement_scope(db)
         db.commit()
         yield db
+
+
+@pytest.fixture(scope="session")
+def seeded_estate(seeded_db: Session) -> Session:
+    """The control library plus Meridian's generated estate.
+
+    Seeded once per session: 24,000 principals is a few seconds to build and
+    there is no reason to pay it per test. Every test here reads, none write.
+    """
+    load_estate(seeded_db, seed=42)
+    seeded_db.commit()
+    return seeded_db

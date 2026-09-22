@@ -9,8 +9,10 @@ without touching schema. [SCHEMA 6]
 import argparse
 import logging
 
+from app.config import get_settings
 from app.db import get_session_factory
 from app.seed.controls import load_control_library, load_engagement_scope
+from app.seed.meridian import load_estate
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +23,17 @@ def main() -> None:
         "--library-only",
         action="store_true",
         help="Load the control library without creating the demo engagement.",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Seed for the synthetic estate. Defaults to DEFAULT_SEED.",
+    )
+    parser.add_argument(
+        "--no-estate",
+        action="store_true",
+        help="Skip the synthetic estate (control library and engagement only).",
     )
     args = parser.parse_args()
 
@@ -39,6 +52,17 @@ def main() -> None:
                 "engagement %d seeded; %d control(s) scoped out with a written reason",
                 scope["engagement_id"], scope["excluded"],
             )
+
+            if not args.no_estate:
+                seed = args.seed if args.seed is not None else get_settings().default_seed
+                counts = load_estate(db, seed)
+                log.info(
+                    "estate seed=%d: %d principals, %d consents, %d events, "
+                    "%d processors, %d access logs, %d predictions",
+                    counts["seed"], counts["principals"], counts["consents"],
+                    counts["consent_events"], counts["third_parties"],
+                    counts["access_logs"], counts["predictions"],
+                )
 
         db.commit()
     log.info("done")
