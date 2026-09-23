@@ -546,7 +546,7 @@ controls:
       For principals erased in the period, confirm an erasure instruction was
       issued to each processor that received their data, and that confirmation
       of erasure was received. Erasure at the fiduciary alone is an exception.
-    inference_mode: POPULATION
+    inference_mode: CENSUS
     is_executable: true
     suite: third_party
     plugin_key: retention.processor_erasure_cascade
@@ -554,6 +554,14 @@ controls:
       required:
         - {name: erased_principals, kind: DB_QUERY}
         - {name: third_parties, kind: DB_QUERY}
+        # The record that makes this control testable at all: which erasure
+        # instructions went to which processor, and whether each confirmed.
+        # Meridian's estate holds no such record, so nothing is registered to
+        # collect it and the control gates on G4. That is the finding: the
+        # fiduciary cannot evidence the cascade either way. Inferring it from
+        # the processor list alone would report a conclusion with no evidence
+        # behind it.
+        - {name: processor_erasure_instructions, kind: DB_QUERY}
       population_source: erased_principals
     clauses:
       - {ref: "Act s.8(7)(b)", primary: true, rationale: "Section 8(7)(b) extends the erasure duty to data made available to a processor."}
@@ -706,7 +714,7 @@ controls:
       compare granted against exercised scopes; test credential age against
       the rotation period and last use against the staleness period; and
       confirm access is revoked where the relationship has ended.
-    inference_mode: POPULATION
+    inference_mode: CENSUS
     is_executable: true
     suite: third_party
     plugin_key: third_party.access_posture

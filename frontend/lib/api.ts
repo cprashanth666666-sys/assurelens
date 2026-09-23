@@ -215,3 +215,50 @@ export async function startRun(
     return null;
   }
 }
+
+// --- Latest result per control (evidence viewer) ---------------------------
+
+export type EvidenceOut = {
+  label: string;
+  kind: string;
+  source_ref: string | null;
+  content_hash: string;
+  collected_at: string;
+  summary: unknown;
+};
+
+export type ControlResult = ResultSummary & {
+  run_id: number;
+  seed: number;
+  completed_at: string | null;
+  detail: Record<string, unknown>;
+  evidence: EvidenceOut[];
+};
+
+/**
+ * Three states, kept distinct on purpose.
+ *
+ * The endpoint returns JSON `null` for a control that has never run, and the
+ * shared `get()` also returns null when the API is unreachable. Folding both
+ * into null would render "not tested yet" when the truth is "could not ask",
+ * which is the same category of error the gate exists to prevent: reporting
+ * an absence of evidence as if it were a finding.
+ */
+export type LatestResult =
+  | { kind: "result"; result: ControlResult }
+  | { kind: "never-run" }
+  | { kind: "unreachable" };
+
+export async function fetchLatestResult(ref: string): Promise<LatestResult> {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/controls/${encodeURIComponent(ref)}/latest-result`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return { kind: "unreachable" };
+    const body = (await response.json()) as ControlResult | null;
+    return body === null ? { kind: "never-run" } : { kind: "result", result: body };
+  } catch {
+    return { kind: "unreachable" };
+  }
+}

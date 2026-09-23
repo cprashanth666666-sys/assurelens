@@ -242,3 +242,21 @@ def test_authorised_access_is_logged(target: TestClient) -> None:
 
     entries = target.get("/_probe/access-log").json()["entries"]
     assert [e for e in entries if e["was_authorised"] is True]
+
+
+# --- Test infrastructure ---------------------------------------------------
+
+
+def test_reset_restores_principals_changed_through_the_profile_endpoint(
+    target: TestClient,
+) -> None:
+    """The profile endpoint writes to the principal record in place. Before
+    reset restored principals, a role changed in one run stayed changed for
+    the next, and two runs with the same seed stopped agreeing."""
+    changed = target.post("/profile", json={"role": "operations"}, headers=VENDOR)
+    assert changed.json()["role"] == "operations"
+
+    target.post("/_probe/reset")
+
+    after = target.post("/profile", json={}, headers=VENDOR)
+    assert after.json()["role"] == "processor"

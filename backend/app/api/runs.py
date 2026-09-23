@@ -79,6 +79,34 @@ class RunDetail(RunSummary):
     results: list[ResultSummary]
 
 
+class EvidenceOut(BaseModel):
+    """What was collected, as persisted: a label, a content hash that pins
+    the exact bytes, and a summary. The full payload is never stored."""
+
+    label: str
+    kind: str
+    source_ref: str | None
+    content_hash: str
+    collected_at: dt.datetime
+    summary: object | None
+
+
+class ControlResult(ResultSummary):
+    """The latest result for one control, with what the procedure found.
+
+    `detail` is where a procedure records its exceptions -- the ranked
+    processor list, the unencrypted assets -- and it is what the evidence
+    viewer shows. Evidence rows carry the hash and a summary; the detail
+    carries the finding.
+    """
+
+    run_id: int
+    seed: int
+    completed_at: dt.datetime | None
+    detail: dict[str, object]
+    evidence: list[EvidenceOut]
+
+
 def _summarise(run: TestRun, results: list[TestResult]) -> RunSummary:
     return RunSummary(
         id=run.id,
@@ -199,6 +227,50 @@ def get_run(run_id: int, db: Session = Depends(get_db)) -> RunDetail:
     return RunDetail(
         **_summarise(run, results).model_dump(),
         results=[_to_summary(r, controls) for r in results],
+    )
+
+
+@router.get("/controls/{ref}/latest-result", response_model=ControlResult | None)
+def latest_result(ref: str, db: Session = Depends(get_db)) -> ControlResult | None:
+    """The most recent result for a control, or null if it has never run.
+
+    Null rather than 404: "this control has not been tested yet" is a normal
+    state the page should render, not an error the client has to catch.
+    """
+    control = db.scalar(select(Control).where(Control.ref == ref))
+    if control is None:
+        raise HTTPException(status_code=404, detail=f"No control with ref {ref}")
+
+    result = db.scalar(
+        select(TestResult)
+        .where(TestResult.control_id == control.id)
+        .order_by(TestResult.id.desc())
+        .limit(1)
+        .options(selectinload(TestResult.evidence))
+    )
+    if result is None:
+        return None
+
+    run = db.get(TestRun, result.run_id)
+    assert run is not None  # FK guarantees it
+
+    return ControlResult(
+        **_to_summary(result, {control.id: control}).model_dump(),
+        run_id=run.id,
+        seed=run.seed,
+        completed_at=run.completed_at,
+        detail=dict(result.detail or {}),
+        evidence=[
+            EvidenceOut(
+                label=e.label,
+                kind=e.kind,
+                source_ref=e.source_ref,
+                content_hash=e.content_hash,
+                collected_at=e.collected_at,
+                summary=(e.payload or {}).get("summary"),
+            )
+            for e in sorted(result.evidence, key=lambda e: e.label)
+        ],
     )
 
 

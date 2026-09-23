@@ -22,6 +22,7 @@ from app.models.estate import (
     DataAsset,
     DataPrincipal,
     ProcessingActivity,
+    ThirdParty,
 )
 from app.suites.consent import probe_downstream, probe_journey
 
@@ -135,6 +136,55 @@ def collect_consent_records(context: dict[str, Any]) -> list[dict[str, Any]]:
         }
         for c in _db(context).scalars(select(ConsentRecord)).all()
     ]
+
+
+@register_query("third_parties")
+def collect_third_parties(context: dict[str, Any]) -> list[dict[str, Any]]:
+    """The processor inventory.
+
+    `credential_token` is deliberately not selected. The first rows of every
+    evidence payload are persisted as its summary, so a token read here would
+    be written into the results table -- an assurance tool leaking the very
+    credential it is assessing.
+    """
+    return [
+        {
+            "id": t.id,
+            "name": t.name,
+            "category": t.category,
+            "dpa_reference": t.dpa_reference,
+            "granted_scopes": list(t.granted_scopes or []),
+            "exercised_scopes": list(t.exercised_scopes or []),
+            "credential_issued_at": t.credential_issued_at,
+            "last_used_at": t.last_used_at,
+            "is_active": t.is_active,
+            "relationship_ended_at": t.relationship_ended_at,
+            "country": t.country,
+        }
+        for t in _db(context).scalars(select(ThirdParty).order_by(ThirdParty.id)).all()
+    ]
+
+
+@register_query("erased_principals")
+def collect_erased_principals(context: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {"id": p.id, "external_ref": p.external_ref, "erased_at": p.erased_at}
+        for p in _db(context)
+        .scalars(
+            select(DataPrincipal)
+            .where(DataPrincipal.erased_at.is_not(None))
+            .order_by(DataPrincipal.id)
+        )
+        .all()
+    ]
+
+
+# Deliberately NOT registered: processor_erasure_instructions. Meridian keeps
+# no record of erasure instructions sent to processors, so there is nothing
+# to read, and DPDP-08-02 gates on G4. Registering a query that returned []
+# would turn "no evidence" into "evidence of nothing", and the control would
+# report every principal as a gap on the strength of a table that does not
+# exist.
 
 
 # --- Probes ----------------------------------------------------------------

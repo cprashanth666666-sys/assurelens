@@ -6,6 +6,6 @@ suite that is never imported is a control that silently never runs -- which
 is why the import lives here rather than being left to a caller to remember.
 """
 
-from app.suites import consent, evidence_sources, pii_retention
+from app.suites import consent, evidence_sources, pii_retention, third_party
 
-__all__ = ["consent", "evidence_sources", "pii_retention"]
+__all__ = ["consent", "evidence_sources", "pii_retention", "third_party"]

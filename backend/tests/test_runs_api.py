@@ -154,3 +154,53 @@ def test_runs_are_listed_newest_first(engagement_id: int) -> None:
     runs = response.json()
     assert len(runs) >= 2
     assert runs[0]["id"] > runs[1]["id"]
+
+
+# --- Latest result per control (the evidence viewer's source) --------------
+
+
+@pytest.mark.usefixtures("seeded_estate")
+def test_latest_result_carries_the_finding_and_the_evidence_hash(
+    engagement_id: int,
+) -> None:
+    started = client.post(
+        f"/api/engagements/{engagement_id}/runs",
+        json={"suite_ids": ["third_party"], "seed": 42},
+    )
+    assert started.status_code == 201
+
+    body = client.get("/api/controls/DPDP-TP-01/latest-result").json()
+    assert body["run_id"] == started.json()["id"]
+    assert body["verdict"] == "FAIL"
+    assert body["detail"]["ranked"][0]["processor"] == "EchoScribe Transcription"
+
+    [evidence] = body["evidence"]
+    assert evidence["label"] == "third_parties"
+    assert len(evidence["content_hash"]) == 64
+    # The persisted summary must never carry a credential.
+    assert "credential_token" not in str(evidence["summary"])
+
+
+@pytest.mark.usefixtures("seeded_estate")
+def test_the_erasure_cascade_reports_insufficient_evidence(engagement_id: int) -> None:
+    client.post(
+        f"/api/engagements/{engagement_id}/runs",
+        json={"suite_ids": ["third_party"], "seed": 42},
+    )
+    body = client.get("/api/controls/DPDP-08-02/latest-result").json()
+
+    assert body["verdict"] == "INSUFFICIENT_EVIDENCE"
+    assert "G4_MISSING_ARTIFACT" in body["gate_reasons"]
+    assert any("processor_erasure_instructions" in e for e in body["gate_explanations"])
+
+
+def test_a_control_that_has_never_run_returns_null() -> None:
+    """Not tested yet is a normal state, not an error. DPDP-03-01 is a
+    documented control, so no run ever produces a result for it."""
+    response = client.get("/api/controls/DPDP-03-01/latest-result")
+    assert response.status_code == 200
+    assert response.json() is None
+
+
+def test_an_unknown_control_is_404() -> None:
+    assert client.get("/api/controls/NOPE-00-00/latest-result").status_code == 404

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ClauseQuote } from "@/components/ClauseQuote";
+import { EvidenceViewer } from "@/components/EvidenceViewer";
 import { FrameworkBadge } from "@/components/FrameworkBadge";
-import { DOMAIN_LABEL, fetchControl } from "@/lib/api";
+import { DOMAIN_LABEL, fetchControl, fetchLatestResult } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,12 @@ export default async function ControlDetailPage({
   params: Promise<{ ref: string }>;
 }) {
   const { ref } = await params;
-  const control = await fetchControl(ref);
+  // In parallel: the result does not depend on the control body, and a cold
+  // backend should cost one round trip, not two.
+  const [control, latest] = await Promise.all([
+    fetchControl(ref),
+    fetchLatestResult(ref),
+  ]);
 
   if (control === null) notFound();
 
@@ -69,6 +75,12 @@ export default async function ControlDetailPage({
               {control.procedure_text}
             </p>
           </Panel>
+
+          {control.is_executable && (
+            <Panel title="Latest result">
+              <EvidenceViewer latest={latest} />
+            </Panel>
+          )}
 
           {primary && (
             <Panel title="Legal basis">

@@ -17,6 +17,7 @@ real, and the root endpoint says so.
 
 from __future__ import annotations
 
+import copy
 import logging
 import math
 import os
@@ -94,6 +95,12 @@ PRINCIPALS: dict[str, dict[str, Any]] = {
         "role": "processor",
     },
 }
+
+# Snapshot for /_probe/reset. POST /profile mutates these records in place --
+# that is the mass-assignment defect -- so without restoring them a probe run
+# that escalates a role would leave the escalated role in place for the next
+# run, and two runs with the same seed would stop agreeing.
+_PRINCIPALS_AT_START = copy.deepcopy(PRINCIPALS)
 
 CUSTOMERS: dict[int, dict[str, Any]] = {
     cid: {
@@ -337,6 +344,8 @@ def read_access_log() -> dict[str, Any]:
 def reset_state() -> dict[str, str]:
     """Restore the in-memory state so probe runs are independent."""
     ACCESS_LOG.clear()
+    for token, record in _PRINCIPALS_AT_START.items():
+        PRINCIPALS[token] = copy.deepcopy(record)
     MARKETING_SEGMENT.clear()
     MARKETING_SEGMENT.update(c["external_ref"] for c in CUSTOMERS.values())
     for ref in CONSENT:
