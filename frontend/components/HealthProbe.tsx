@@ -55,6 +55,7 @@ export function HealthProbe() {
   return (
     <section
       aria-live="polite"
+      data-tilt
       className="panel p-4 md:p-5"
     >
       <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">

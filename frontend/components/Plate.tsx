@@ -82,9 +82,12 @@ export function Figure({
   className?: string;
 }) {
   return (
-    <figure className={`m-0 ${className}`}>
+    // v3.0: the figure is a tile. Its caption used to sit on the page
+    // ground, which is now a moving gradient; small grey text on coral fails
+    // contrast, so the caption comes onto the tile with the photograph.
+    <figure data-tilt className={`panel m-0 p-2 md:p-3 ${className}`}>
       <Plate plate={plate} sizes={sizes} priority={priority} />
-      <figcaption className="mt-2 flex flex-wrap items-baseline justify-between gap-2 text-2xs text-n-500">
+      <figcaption className="mt-2 flex flex-wrap items-baseline justify-between gap-2 px-1 pb-1 text-2xs text-n-500">
         <span className="max-w-prose">{plate.caption}</span>
         <a
           href={plate.credit.href}

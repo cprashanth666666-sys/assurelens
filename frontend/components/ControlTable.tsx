@@ -23,8 +23,8 @@ import { FrameworkBadge } from "./FrameworkBadge";
  */
 export function ControlTable({ controls }: { controls: ControlSummary[] }) {
   return (
-    <div>
-      <div className="scroll-x panel">
+    <div className="panel overflow-hidden">
+      <div className="scroll-x">
         <table className="w-full border-collapse text-xs leading-table">
           <thead>
             <tr className="border-b border-n-200 bg-n-50 text-left">
@@ -115,7 +115,7 @@ export function ControlTable({ controls }: { controls: ControlSummary[] }) {
           with no affordance reads as broken rather than scrollable. Shown
           only below the breakpoint where it is unconditionally true, so it
           is never a lie. [a11y swipe-clarity] */}
-      <p className="m-0 mt-2 flex items-center gap-2 text-2xs text-n-400 md:hidden">
+      <p className="m-0 flex items-center gap-2 border-t border-n-100 px-3 py-2 text-2xs text-n-500 md:hidden">
         <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" fill="none">
           <path
             d="M1 5h14M11 1.5 14.5 5 11 8.5"

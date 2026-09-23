@@ -15,7 +15,7 @@ export function Placeholder({
   buildsOn: string;
 }) {
   return (
-    <section className="panel panel-raise relative overflow-hidden p-5 md:p-6">
+    <section data-tilt className="panel relative overflow-hidden p-5 md:p-6">
       {/* A hatched corner: this panel is scaffolding and says so at a glance,
           without a banner taking up a line of the layout. */}
       <div

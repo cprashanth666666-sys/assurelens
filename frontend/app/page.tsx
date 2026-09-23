@@ -73,8 +73,10 @@ function CoverSheet() {
 
             {/* The display line carries a SENTENCE. A 38px numeral here
                 would be the KPI tile UX 1.1 rejects, and this product's
-                argument is precisely that the number is the wrong object. */}
-            <p className="m-0 mt-4 max-w-[22ch] font-serif text-3xl leading-tight text-n-800">
+                argument is precisely that the number is the wrong object.
+                v3.0: set in Geist, heavy and tight, not serif -- serif is
+                kept for quoted statute only. [UX 12.2] */}
+            <p className="m-0 mt-4 max-w-[20ch] text-3xl font-semibold leading-tight tracking-[-0.03em] text-n-800">
               It refuses to state a result its evidence cannot support.
             </p>
 
@@ -176,7 +178,7 @@ function Principles() {
     >
       {items.map((item, i) => (
         <Reveal key={item.title} as="article" delay={i * 40}>
-          <div className="panel panel-raise h-full p-5">
+          <div data-tilt className="panel h-full p-5">
             <div className="text-accent-600">{item.mark}</div>
             <h3 className="mt-4">{item.title}</h3>
             <p className="m-0 mt-2 text-n-600">{item.body}</p>

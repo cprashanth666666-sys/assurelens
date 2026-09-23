@@ -42,7 +42,7 @@ export default async function ControlsPage({
   return (
     <div className="flex flex-col gap-5">
       <header className="grid items-start gap-5 lg:grid-cols-[1.6fr_1fr]">
-        <div>
+        <div className="panel p-4 md:p-5">
         <h2>Control library</h2>
         <p className="mt-2 max-w-prose text-n-600">
           Controls derived from the Digital Personal Data Protection Act 2023
@@ -93,7 +93,7 @@ function FilterRail({
   return (
     <nav
       aria-label="Filter controls"
-      className="scroll-x edge-fade flex flex-nowrap items-center gap-x-4 gap-y-2 border-y border-n-100 py-3 text-xs md:flex-wrap"
+      className="panel scroll-x edge-fade flex flex-nowrap items-center gap-x-4 gap-y-2 px-4 py-3 text-xs md:flex-wrap"
     >
       <span className="text-2xs uppercase tracking-[0.14em] text-n-400">
         Domain

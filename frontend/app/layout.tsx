@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 
+import { AmbientBackground } from "@/components/AmbientBackground";
 import { DisclosureFooter } from "@/components/DisclosureFooter";
 import { Masthead } from "@/components/Masthead";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { SurfaceMotion } from "@/components/SurfaceMotion";
 import { TabNav } from "@/components/TabNav";
 import "@/styles/globals.css";
 
@@ -17,10 +19,10 @@ import "@/styles/globals.css";
  * invisible, and the fallback metrics Next generates keep the swap from
  * shifting the line. [a11y font-loading]
  */
-const sans = Inter_Tight({
+const sans = Geist({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter-tight",
+  variable: "--font-geist",
 });
 
 const mono = JetBrains_Mono({
@@ -48,8 +50,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Never `maximum-scale: 1` / `user-scalable: no`. [a11y viewport-meta]
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f2e8" },
-    { media: "(prefers-color-scheme: dark)", color: "#14110d" },
+    // The browser chrome matches the top-left of the ground gradient.
+    { media: "(prefers-color-scheme: light)", color: "#ffc27a" },
+    { media: "(prefers-color-scheme: dark)", color: "#3a2019" },
   ],
 };
 
@@ -74,6 +77,10 @@ export default function RootLayout({
         </noscript>
       </head>
       <body>
+        {/* First child: it is fixed at z-0, and every later sibling paints
+            above it. See AmbientBackground and the grain note in globals.css. */}
+        <AmbientBackground />
+        <SurfaceMotion />
         <ScrollProgress />
 
         {/* Keyboard users should not have to tab through the masthead, the

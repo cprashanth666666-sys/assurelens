@@ -122,6 +122,7 @@ const config: Config = {
       sm: "var(--radius-sm)",
       md: "var(--radius-md)",
       lg: "var(--radius-lg)",
+      tile: "var(--radius-tile)",
       full: "999px",
     },
 

@@ -29,7 +29,7 @@ export default async function RunsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header>
+      <header className="panel p-4 md:p-5">
         <h2>Test run console</h2>
         <p className="mt-2 max-w-prose text-n-600">
           Select suites and run. Each control resolves to a verdict, and where

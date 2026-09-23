@@ -28,6 +28,7 @@ export default async function ControlDetailPage({
 
   return (
     <article className="flex flex-col gap-5">
+      <div className="panel p-4 md:p-5">
       <nav className="text-xs">
         <Link href="/controls" className="text-accent-600 no-underline hover:underline">
           Control library
@@ -45,6 +46,7 @@ export default async function ControlDetailPage({
             : "Population — inference from a sample"}
         </p>
       </header>
+      </div>
 
       {!control.in_scope && (
         <section className="border border-n-200 bg-n-50 p-4">
@@ -77,7 +79,7 @@ export default async function ControlDetailPage({
           </Panel>
 
           {control.is_executable && (
-            <Panel title="Latest result">
+            <Panel title="Latest result" tilt={false}>
               <EvidenceViewer latest={latest} />
             </Panel>
           )}
@@ -166,15 +168,20 @@ function evidenceNames(contract: Record<string, unknown> | null): string[] {
     .filter((n): n is string => n !== null);
 }
 
+/** A section tile. Tilts toward the pointer unless it holds scrollable or
+ *  expandable content, where a surface moving under the finger fights the
+ *  reader. [UX 12.4] */
 function Panel({
   title,
   children,
+  tilt = true,
 }: {
   title: string;
   children: React.ReactNode;
+  tilt?: boolean;
 }) {
   return (
-    <section className="panel p-4">
+    <section data-tilt={tilt ? "" : undefined} className="panel p-4">
       <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">
         {title}
       </h3>

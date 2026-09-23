@@ -2,10 +2,12 @@
 
 | | |
 |---|---|
-| Version | 2.0 — *Warm instrument* |
-| Date | 22 September 2026 (v1.0: 21 September 2026) |
+| Version | 3.0 — *Tidal* |
+| Date | 23 September 2026 (v2.0: 22 September; v1.0: 21 September 2026) |
 | Status | Approved for build |
 | Related | [PRD.md](PRD.md) · [TRD.md](TRD.md) · [SCHEMA.md](SCHEMA.md) |
+
+> **v3.0 revision.** A vivid, continuously moving gradient ground with wave motion, and raised tiles that tilt toward the cursor and the finger. §12 records the change, the positions it reverses, and the one rule that keeps it readable: text never sits on the moving ground. Everything in §12.7 is unchanged.
 
 > **v2.0 revision.** The v1.0 aesthetic was judged, on the built product, to have overshot restraint into plainness. §1.3 records exactly which constraints were lifted and which were re-affirmed; §11 records the full change and the reasoning. Everything not named in §1.3 still stands as written.
 
@@ -502,3 +504,111 @@ The interesting part is that the first diagnosis was wrong. Tailwind 3's `@tailw
 **The spotlight forced a layout on every scroll event.** `Spotlight` was written specifically to keep pointer tracking off the layout path — and then subscribed to `window.scroll` with a handler calling `getBoundingClientRect()` directly, unthrottled, firing whether or not the pointer was near the panel. Its own docstring claimed the opposite. The rect is now read inside the existing `requestAnimationFrame` flush, which bounds it to once per frame *and* only while the pointer is moving over the element; the scroll and resize listeners are gone entirely.
 
 > The common thread with §11.6: **a comment asserting a property is not the property.** Two of these three shipped with documentation stating they did the right thing.
+
+---
+
+## 12. Revision 3.0 — *Tidal*
+
+v2.0 made the product warm and considered. It was still read as too quiet. v3.0 answers a direct brief: **a bright, vibrant, colourful background with a gradient and continuous wave motion; depth and contrast; tiles that rise and respond to the cursor and to touch, equally on desktop and mobile.**
+
+This reverses several v2.0 positions outright, and they are recorded here rather than quietly edited out of §1.3.
+
+| v2.0 position | v3.0 position |
+|---|---|
+| Warm oat ground, tints capped at ~7% chroma | **A saturated sunset-to-sea gradient** that moves continuously |
+| Motion must report state; no idle loops | **Continuous motion in the ground only** (waves, drifting colour). Everything the reader interacts with still moves only in response to them |
+| Rules not shadows; one warm `raise` shadow | **Raised tiles** with layered shadows tinted toward the sea hue |
+| Radius 2–3px, 10px for photographs only | **14px for tiles.** Controls inside them keep 2–3px |
+| Photographs fully duotoned | **Photographs in colour** under a light wash, full colour on hover |
+
+### 12.0 The rule that makes the rest possible
+
+> **Text never sits on the moving ground.**
+
+A gradient that runs from saffron to deep teal and moves under the page cannot guarantee contrast anywhere: grey caption text that passes 4.5:1 over saffron fails over coral. So every line of copy lives on a tile — including things that used to sit directly on the page in v2.0: page headers, the filter rail, figure captions and the table's scroll hint. The tile is 93% opaque (fully scrim-opaque on phones), so contrast is set by the tile and is the same wherever the ground happens to be under it that second.
+
+This is what lets the ground be as vivid as the brief asks without the product becoming harder to read.
+
+### 12.1 The ground
+
+| Token | Hex | Role |
+|---|---|---|
+| `--ground-1` Saffron | `#ffc27a` | Warm corner, top left |
+| `--ground-2` Coral | `#ff8f7a` | Warm mid |
+| `--ground-3` Turquoise | `#52d1be` | Cool mid |
+| `--ground-4` Deep sea | `#2a9db8` | Cool corner, bottom right |
+
+A 125° linear gradient through all four, with three soft colour blooms (sun, coral, lagoon) drifting over it on 26s, 33s and 39s cycles. Chosen as a **warm/cool pair** so no single hue dominates. One colour reads as a brand splash; two temperatures read as a horizon. There's no purple and no electric blue, which are the recognisable AI-gradient cliché.
+
+**Dark mode** keeps the same structure in deep tones (ember `#3a2019`, oxblood `#552723`, deep lagoon `#0f4a4a`, midnight sea `#0a2f43`) with dimmer waves. It doesn't read as a security-ops console.
+
+### 12.2 Type
+
+**Geist** replaces Inter Tight for all UI text. Inter is the default face of generated interfaces; Geist has the same neutrality with its own character. **JetBrains Mono** is unchanged for identifiers and evidence.
+
+The cover-sheet statement line moved from serif to Geist, semibold, tracked tight (−0.03em). **Source Serif 4 is kept for one purpose only: verbatim statutory quotation** (`ClauseQuote`), where it marks quoted matter as quoted. That exception is deliberate and is the only serif in the product.
+
+### 12.3 Motion — the waves
+
+`AmbientBackground.tsx` is a **server component with no JavaScript**. Everything in it is a CSS animation of `transform`, so it runs on the compositor thread and can't block input, a test run, or scrolling.
+
+- **Three wave layers** along the bottom of the viewport: deep (34s), mid (21s, reversed), foam (13s). Different speeds and depths of colour give **parallax**, so the slow dark back wave reads as further away than the fast pale front one. That's where the depth comes from: timing, not blur.
+- **Seamless looping.** Each layer is one wave period drawn twice across a 200%-wide strip that slides left by exactly half its width. The path starts and ends at the same height with the same slope, so there's no seam and no visible jump. This is the one place linear easing is used: a wave that eased in and out would visibly stall once per cycle.
+- **A static twin** of the gradient is painted on `html`, so the first frame, and any iOS overscroll bounce past the fixed layer, shows the same colours rather than a flash of white.
+
+Verified in the browser: over 1.5s the three layers moved −16px, +27px and −43px respectively.
+
+### 12.4 Tiles — rise and tilt
+
+`SurfaceMotion.tsx` is mounted once in the layout and uses **event delegation**, so tiles stay server-rendered. Any element with `data-tilt` takes part.
+
+| Input | Behaviour |
+|---|---|
+| **Mouse** | The tile rises 6px, scales to 1.012, rotates toward the cursor and catches light at the pointer. It settles on leave. |
+| **Touch** | A press lifts the tile and tilts it toward the contact point, and release settles it. A press that turns into a scroll arrives as `pointercancel` and also settles, so dragging a list never leaves a card stuck mid-tilt. **Nothing calls `preventDefault`**: scroll, taps and links behave exactly as without it. |
+| **Keyboard** | `:focus-within` raises the tile without tilting it. There's no pointer to tilt toward. |
+| **Reduced motion** | Nothing is attached, and the stylesheet pins every tile flat. |
+
+- **Tilt scales with tile width**: `6° × min(1, 360 / width)`. Rotation moves an edge by width × sin(angle), so 6° would swing a 700px panel's edges nearly 40px and make its text swim. Verified: a 454px tile peaks at 4.8°, a 343px tile at the full 6°.
+- **Spring settle.** Rising uses a short ease-out; settling uses `cubic-bezier(0.34, 1.4, 0.64, 1)`, a small overshoot, so a released tile lands rather than stops.
+- **Performance.** The pointer position is stashed and applied once per animation frame, with the rect read inside that frame. Only custom properties are written, and CSS turns them into a `transform`.
+- **Not everything tilts.** Tables, the run console and the evidence viewer rise on hover but don't rotate. A surface moving under the reader while they select a checkbox or scroll a code block works against them.
+
+Scroll reveal is also stronger: tiles now travel 24px and scale from 0.98 with a spring settle, so on a phone each one surfaces as it scrolls in.
+
+### 12.5 Photographs
+
+The duotone is lighter: `grayscale(0.45)` under a turquoise-to-coral multiply wash at 42%, and on hover `grayscale(0)` with the wash at 14%. The photographs are now in colour and belong to the palette.
+
+The wash has **its own tokens** (`--plate-wash-a/b`), deliberately not the ground colours and not overridden in dark mode. The first build reused the ground tokens, and in dark mode the wash became `rgb(15,74,74)` → `rgb(85,39,35)`. A multiply wash darkens by definition, so the cover photograph rendered as a flat grey block. It was caught in the browser, not in review.
+
+### 12.6 Performance and responsiveness
+
+- **Frosting only above 768px.** `backdrop-filter` re-samples everything behind an element on every frame the ground moves, and on a phone with a dozen tiles that is the difference between smooth and not. Below 768px the tile is simply more opaque.
+- **No horizontal overflow** at 375, 768 or 1280px (measured).
+- **Grain above the ground, below content**: z-index 1, because at equal z-index the later-in-tree ambient layer would paint over it.
+
+### 12.7 Still not negotiable
+
+Unchanged from every earlier version:
+
+- **No headline compliance percentage.** [PRD §7.3]
+- **`INSUFFICIENT_EVIDENCE` renders in neutral ink, as a peer verdict.** The tiles and ground are decoration. They carry no status, and no verdict gets a colour, glow or motion the others don't.
+- **No animated counters or celebration on `PASS`.**
+- **No emoji.** Verdict marks remain geometric shapes.
+- **No neon outer glows, and no custom cursors.**
+- **Reduced motion:** the ground freezes (keeping its colour), tiles never rotate, reveals are immediate.
+
+### 12.8 Where v3.0 departs from the `stitch-design-taste` rules
+
+The skill was applied except where it contradicts the brief:
+
+| Skill rule | v3.0 | Reason |
+|---|---|---|
+| Neutral base; gradient backgrounds discouraged | Vivid moving gradient | Explicitly requested |
+| Maximum one accent | Teal and terracotta, plus the ground's four hues | Explicitly requested colour; the inks still never carry status |
+| Serif banned in software UIs | One serif, for quoted statute only | Marks quoted legal text as quoted: a meaning, not a style |
+| No three-equal-card rows | Three principle tiles kept on the overview | Each tile states a distinct engine behaviour (one clause, the gate, the seed), not decorative feature copy. The row collapses to one column below 768px |
+| Use picsum, not Unsplash | Unsplash kept | Every URL was fetched and checked for 200, each photo was looked at, and all are credited (§11.4) |
+
+Everything else in the skill is followed: Geist, no Inter, no pure black, no neon glows, no custom cursor, no emoji, transform/opacity-only animation, 44px touch targets, `dvh` rather than `vh`, and single-column collapse below 768px.
