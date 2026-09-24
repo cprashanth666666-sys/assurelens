@@ -1,32 +1,48 @@
+import { ArrowDownIcon, ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
+
 import { DeadlineCount } from "@/components/DeadlineCount";
+import { GateExplorer } from "@/components/GateExplorer";
 import { HealthProbe } from "@/components/HealthProbe";
-import { Figure, Plate } from "@/components/Plate";
+import { MediaClip } from "@/components/MediaClip";
+import { Plate } from "@/components/Plate";
 import { Placeholder } from "@/components/Placeholder";
 import { Reveal } from "@/components/Reveal";
 import { ENGAGEMENT } from "@/lib/engagement";
+import { CLIPS, type Clip } from "@/lib/media";
 import { PLATES } from "@/lib/imagery";
 
 /**
- * The overview is the engagement's COVER SHEET: whose engagement, against what
- * law, standing on what evidence. There is no headline compliance percentage
- * anywhere, by product decision. [PRD 7.3]
+ * The overview: the engagement's cover sheet, then the product's argument
+ * made interactive. No headline compliance percentage anywhere, by product
+ * decision. [PRD 7.3]
  *
- * v5 builds it as one ruled grid of colour blocks rather than a stack of
- * floating tiles: a display-size statement on white, a cobalt fact block, the
- * photograph at full colour, and the three commitments as a numbered list.
- * [DESIGN.md 5]
+ * v6 layout (Figma: "AssureLens v6 Revamp" / Overview / Desktop 1440):
+ *   1. Split hero: statement + actions on white, the estate on live video
+ *      with the statutory clock in a cobalt block over it.
+ *   2. The evidence gate, as something the reader can move.
+ *   3. How the instrument works: an asymmetric media bento.
  */
 export default function OverviewPage() {
   return (
-    <div className="flex flex-col gap-8">
-      <CoverSheet />
+    <div className="flex flex-col gap-9">
+      <Hero />
 
-      <Reveal as="section" className="flex flex-col gap-5" >
-        <h2 className="section-rule">The estate under test</h2>
-        <div className="ruled md:grid-cols-2">
-          <Figure plate={PLATES.estate} sizes="(max-width: 768px) 100vw, 46vw" />
-          <Figure plate={PLATES.evidence} sizes="(max-width: 768px) 100vw, 46vw" />
+      <Reveal as="section" className="flex flex-col gap-5">
+        <div id="gate" className="flex max-w-prose scroll-mt-[140px] flex-col gap-3">
+          <h2 className="text-2xl font-medium tracking-title">Try the evidence gate</h2>
+          <p className="m-0 text-base text-ink-2 md:text-lg md:leading-prose">
+            Move the sliders. A verdict is only published when the sample, the
+            coverage and the interval all clear the gate. Otherwise the result
+            says insufficient evidence, and says why.
+          </p>
         </div>
+        <GateExplorer />
+      </Reveal>
+
+      <Reveal as="section" className="flex flex-col gap-5">
+        <h2 className="text-2xl font-medium tracking-title">How the instrument works</h2>
+        <HowItWorks />
       </Reveal>
 
       <Reveal delay={40}>
@@ -50,121 +66,150 @@ export default function OverviewPage() {
   );
 }
 
-function CoverSheet() {
+function Hero() {
   return (
-    <section aria-label="Engagement cover" className="ruled lg:grid-cols-12">
-      {/* The statement. It carries a sentence, never a number: this product's
-          argument is that the single number is the wrong object. */}
-      <div className="flex flex-col justify-between gap-7 p-5 md:p-7 lg:col-span-8 lg:p-8">
+    <section aria-label="Engagement cover" className="ruled lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      <div className="flex flex-col justify-between gap-7 p-5 md:p-7 lg:p-8">
         <p className="m-0 text-sm font-medium text-ink-3">
           Engagement cover <span aria-hidden="true">/</span> synthetic data
         </p>
         <div>
-          <p className="m-0 max-w-[15ch] text-display font-medium tracking-display text-ink">
+          <h2 className="m-0 max-w-[17ch] text-[clamp(2.5rem,3.4vw+1rem,4.5rem)] font-medium leading-[1.02] tracking-display text-ink">
             It refuses to state a result its evidence cannot support.
+          </h2>
+          <p className="m-0 mt-6 max-w-[54ch] text-base text-ink-2 md:text-lg md:leading-prose">
+            AssureLens turns the DPDP Act 2023 and the Rules of 13 November 2025
+            into controls that execute against a real service, on a recorded
+            seed. Where the evidence cannot carry a conclusion, the result says{" "}
+            <mark className="font-semibold">insufficient evidence</mark> and names
+            what would resolve it.
           </p>
-          <p className="m-0 mt-6 max-w-[58ch] text-base text-ink-2 md:text-lg md:leading-prose">
-            AssureLens turns the Digital Personal Data Protection Act 2023 and
-            the Rules of 13 November 2025 into controls that actually execute,
-            against a real target service, over HTTP, on a recorded seed. Where
-            the evidence cannot carry a conclusion, the result says{" "}
-            <mark className="font-semibold">insufficient evidence</mark> and
-            names what would resolve it.
-          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <a href="#gate" className="btn btn-primary no-underline">
+            Try the evidence gate
+            <ArrowDownIcon size={18} weight="bold" aria-hidden className="btn-arrow" />
+          </a>
+          <Link href="/controls" className="btn btn-secondary no-underline">
+            Open the control library
+            <ArrowRightIcon size={18} weight="bold" aria-hidden className="btn-arrow" />
+          </Link>
         </div>
       </div>
 
-      {/* The facts, as a flat cobalt block. The day count is the one large
-          figure on the page, and it is a date, not a score. */}
-      <div className="flex flex-col justify-between gap-7 bg-cobalt p-5 text-on-cobalt md:p-7 lg:col-span-4">
-        <div>
-          <p className="m-0 text-sm font-medium text-on-cobalt-2">Obligations commence in</p>
-          <p className="m-0 mt-2 font-mono text-num font-medium tracking-head">
-            <DeadlineCount />
-            <span className="ml-3 font-sans text-xl font-medium">days</span>
-          </p>
-          <p className="m-0 mt-2 font-mono text-sm text-on-cobalt-2">
-            {ENGAGEMENT.complianceDeadline}, per Rule 1(4)
-          </p>
+      {/* The estate on live video. Text never sits on the footage: the facts
+          are in a solid cobalt block, the credit is on the white strip below. */}
+      <figure className="m-0 flex min-h-[360px] flex-col lg:min-h-[620px]">
+        <div className="relative flex-1">
+          <div className="absolute inset-0">
+            <MediaClip clip={CLIPS.estate} priority className="h-full" />
+          </div>
+          <div className="absolute bottom-0 left-0 z-[1] bg-cobalt px-5 py-4 text-on-cobalt md:px-6 md:py-5">
+            <p className="m-0 text-sm font-medium text-on-cobalt-2">Obligations commence in</p>
+            <p className="m-0 mt-1 font-mono text-num font-medium tracking-head">
+              <DeadlineCount />
+              <span className="ml-3 font-sans text-xl font-medium">days</span>
+            </p>
+            <p className="m-0 mt-1 font-mono text-sm text-on-cobalt-2">
+              {ENGAGEMENT.complianceDeadline}, per Rule 1(4)
+            </p>
+          </div>
         </div>
-
-        <dl className="m-0 grid gap-4 border-t border-on-cobalt-2 pt-5 text-base">
-          <Fact label="Client" value={ENGAGEMENT.organisation} />
-          <Fact label="Location" value={ENGAGEMENT.city} />
-          <Fact label="Frameworks" value="DPDP, ISO 27001, NIST AI RMF" />
-        </dl>
-      </div>
-
-      <figure className="m-0 flex flex-col lg:col-span-5">
-        <Plate
-          plate={PLATES.statute}
-          sizes="(max-width: 1023px) 100vw, 40vw"
-          priority
-          className="aspect-[4/3] lg:aspect-auto lg:min-h-[360px] lg:flex-1"
-          fill
-        />
-        <figcaption className="px-4 py-3 text-meta text-ink-2">
-          {PLATES.statute.caption} Photograph{" "}
-          <a
-            href={PLATES.statute.credit.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link font-mono text-xs"
-          >
-            {PLATES.statute.credit.name}
-          </a>{" "}
-          on Unsplash.
-        </figcaption>
+        <Credit as="figcaption" clip={CLIPS.estate} caption={`${ENGAGEMENT.city}: the estate under test is real; every record in it is synthetic.`} />
       </figure>
-
-      <Principles />
     </section>
   );
 }
 
-function Fact({ label, value }: { label: string; value: string }) {
+/**
+ * Three commitments, as an asymmetric bento: one large clip and two stacked
+ * cells. Each cell carries real media and plays on hover or focus (or when
+ * in view on a touch screen). Not three equal cards.
+ */
+function HowItWorks() {
   return (
-    <div>
-      <dt className="text-sm font-medium text-on-cobalt-2">{label}</dt>
-      <dd className="m-0 mt-1 font-semibold">{value}</dd>
+    <div className="ruled lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+      <article data-clip-card className="flex flex-col">
+        <MediaClip clip={CLIPS.network} mode="hover" className="aspect-[16/10] lg:aspect-auto lg:flex-1" />
+        <CellText
+          n="01"
+          title="Tests run against a live service"
+          body="Every executable control probes a real target over HTTP, on a recorded seed, and keeps what came back as evidence."
+          href="/runs"
+          cta="Open the run console"
+        />
+        <Credit clip={CLIPS.network} />
+      </article>
+
+      <div className="grid gap-px bg-rule-strong">
+        <article data-clip-card className="flex flex-col bg-surface">
+          <MediaClip clip={CLIPS.evidence} mode="hover" className="aspect-[16/8]" />
+          <CellText
+            n="02"
+            title="Every item of evidence is hashed"
+            body="A SHA-256 pins exactly the bytes a verdict stood on, so the finding can be re-checked later."
+          />
+          <Credit clip={CLIPS.evidence} />
+        </article>
+        <article data-clip-card className="flex flex-col bg-surface">
+          <Plate plate={PLATES.statute} sizes="(max-width: 1023px) 100vw, 40vw" className="aspect-[16/8]" fill />
+          <CellText
+            n="03"
+            title="One clause, quoted verbatim"
+            body="Each control names a single statutory basis and shows its text. A paraphrase is where a conclusion becomes an opinion."
+            href="/controls"
+            cta="Browse the controls"
+          />
+          <p className="m-0 px-5 pb-4 text-xs text-ink-3">
+            Vidhana Soudha, Bengaluru. Photograph{" "}
+            <a href={PLATES.statute.credit.href} target="_blank" rel="noopener noreferrer" className="link">
+              {PLATES.statute.credit.name}
+            </a>{" "}
+            on Unsplash.
+          </p>
+        </article>
+      </div>
     </div>
   );
 }
 
-/**
- * Three commitments the engine actually keeps, as one numbered list rather
- * than three equal cards. The numbers are list order, set in mono cobalt.
- */
-function Principles() {
-  const items = [
-    {
-      title: "One clause, quoted",
-      body: "Every control names a single statutory basis and shows its verbatim text. A paraphrase is where an assurance conclusion quietly becomes an opinion.",
-    },
-    {
-      title: "A gate before a verdict",
-      body: "Eight rules stand between a measurement and a published result: structural failures first, then sample size, coverage and interval width.",
-    },
-    {
-      title: "A seed on every run",
-      body: "Each run records the seed it was generated from. A result nobody can regenerate is an assertion, not a finding.",
-    },
-  ];
-
+function CellText({
+  n, title, body, href, cta,
+}: {
+  n: string; title: string; body: string; href?: string; cta?: string;
+}) {
   return (
-    <div className="p-5 md:p-7 lg:col-span-7">
-      <h2>How the instrument works</h2>
-      <ol className="m-0 mt-5 list-none divide-y divide-rule p-0">
-        {items.map((item, i) => (
-          <li key={item.title} className="grid grid-cols-[3rem_1fr] gap-4 py-5 first:pt-0 last:pb-0">
-            <span className="font-mono text-xl font-medium text-link">0{i + 1}</span>
-            <div>
-              <h3>{item.title}</h3>
-              <p className="m-0 mt-2 max-w-prose text-base text-ink-2">{item.body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+    <div className="flex flex-col gap-2 px-5 pb-3 pt-5 md:px-6">
+      <h3 className="flex items-baseline gap-3">
+        <span className="font-mono text-lg font-medium text-link">{n}</span>
+        {title}
+      </h3>
+      <p className="m-0 max-w-prose text-base text-ink-2">{body}</p>
+      {href && cta && (
+        <Link href={href} className="link mt-1 inline-flex w-fit items-center gap-1 text-sm font-semibold">
+          {cta}
+          <ArrowRightIcon size={14} weight="bold" aria-hidden />
+        </Link>
+      )}
     </div>
+  );
+}
+
+function Credit({
+  clip, caption, as: Tag = "p",
+}: {
+  clip: Clip; caption?: string; as?: "p" | "figcaption";
+}) {
+  return (
+    <Tag className="m-0 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-surface px-5 py-3 text-xs text-ink-3 md:px-6">
+      {caption && <span className="text-meta text-ink-2">{caption}</span>}
+      <span>
+        Video{" "}
+        <a href={clip.credit.href} target="_blank" rel="noopener noreferrer" className="link">
+          {clip.credit.name}
+        </a>{" "}
+        on {clip.credit.source}
+      </span>
+    </Tag>
   );
 }

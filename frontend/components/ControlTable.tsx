@@ -1,3 +1,7 @@
+"use client";
+
+import { ArrowRightIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 
 import { DOMAIN_LABEL, type ControlSummary } from "@/lib/api";
@@ -10,6 +14,9 @@ import { FrameworkBadge } from "./FrameworkBadge";
  * under an inset header band, hairlines between rows and no zebra (zebra plus
  * hairlines was two devices doing one job). Rows answer hover AND keyboard
  * focus with a cobalt bar and tint (`.row-interactive`); they never move.
+ *
+ * v6: rows fade in and out as the search and filters change. Opacity only:
+ * a transform on a <tr> breaks column alignment in some engines.
  *
  * No sticky header: `overflow-x: auto` makes the wrapper a scroll container
  * in both axes, so a sticky thead would stick to the wrapper, not the
@@ -31,9 +38,14 @@ export function ControlTable({ controls }: { controls: ControlSummary[] }) {
             </tr>
           </thead>
           <tbody>
+            <AnimatePresence initial={false}>
             {controls.map((control) => (
-              <tr
+              <motion.tr
                 key={control.ref}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.16 }}
                 className={`row-interactive ${control.in_scope ? "" : "text-ink-3"}`}
               >
                 <td>
@@ -99,8 +111,9 @@ export function ControlTable({ controls }: { controls: ControlSummary[] }) {
                     <span className="text-meta text-ink-3">Documented</span>
                   )}
                 </td>
-              </tr>
+              </motion.tr>
             ))}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>
@@ -108,9 +121,7 @@ export function ControlTable({ controls }: { controls: ControlSummary[] }) {
       {/* Six columns cannot fit a 375px screen; say so, only where it is
           unconditionally true. [a11y swipe-clarity] */}
       <p className="m-0 flex items-center gap-2 border-t border-rule px-4 py-3 text-meta text-ink-2 md:hidden">
-        <svg viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" fill="none">
-          <path d="M1 5h14M11 1.5 14.5 5 11 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
-        </svg>
+        <ArrowRightIcon size={16} weight="bold" aria-hidden />
         Scroll the table sideways for basis and framework mappings.
       </p>
     </div>

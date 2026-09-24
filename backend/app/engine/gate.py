@@ -93,6 +93,11 @@ class RawResult:
     target_unreachable: bool = False
     source_status: str = "VERIFIED"
 
+    # Size of each subgroup a procedure compared, e.g. applicant groups in a
+    # fairness test. Reported, not judged: the gate decides which are too
+    # small to conclude from, against the (possibly overridden) threshold.
+    subgroup_sizes: dict[str, int] = field(default_factory=dict)
+
     detail: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -258,6 +263,32 @@ def apply(
             f"result does not extend to the population.",
             "Re-sample at random, or restate the control's scope to match the "
             "population actually tested.",
+        )
+
+    # --- Undersized subgroups ----------------------------------------------
+    # A comparison across groups can only speak for the groups large enough
+    # to support it. Applied only when the procedure found no exception:
+    #
+    # * a PASS would otherwise vouch for a group nobody could assess, so it
+    #   gates, and says which group and why;
+    # * a FAIL established among adequately sized groups stands. Gating it
+    #   because some *other* group was small would hide a proven disparity
+    #   behind a group that played no part in finding it.
+    #
+    # Either way the small group is never reported AS a disparity: the
+    # procedure excludes it from the comparison and lists it as unassessed.
+    undersized = sorted(
+        (name, size) for name, size in raw.subgroup_sizes.items()
+        if size < effective.min_group_n
+    )
+    if undersized and raw.outcome is Verdict.PASS:
+        listed = ", ".join(f"{name} (n={size})" for name, size in undersized)
+        note(
+            GateReason.G1_MIN_SAMPLE,
+            f"No conclusion can be drawn for {listed}: below the minimum group "
+            f"size of {effective.min_group_n}. The other groups were compared.",
+            f"Obtain at least {effective.min_group_n} decisions for each listed "
+            f"group, or record why the group is out of scope.",
         )
 
     # --- Statistical -------------------------------------------------------

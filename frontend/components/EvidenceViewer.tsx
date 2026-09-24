@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { ControlResult, EvidenceOut, LatestResult } from "@/lib/api";
+import { DriftView, FairnessView, driftOf, fairnessOf } from "./ModelAssessment";
 import { VerdictBadge } from "./VerdictBadge";
 
 /**
@@ -44,6 +45,8 @@ export function EvidenceViewer({ latest }: { latest: LatestResult }) {
 
   const r = latest.result;
   const ranked = rankedProcessors(r.detail);
+  const fairness = fairnessOf(r.detail);
+  const drift = driftOf(r.detail);
   // The runner stamps population_source on every result, including one that
   // never executed. On its own it is bookkeeping, not a finding, and showing
   // "Full finding record" over a single null would imply there was one.
@@ -72,6 +75,8 @@ export function EvidenceViewer({ latest }: { latest: LatestResult }) {
       )}
 
       {ranked && <RankedProcessors rows={ranked} />}
+      {fairness && <FairnessView f={fairness} />}
+      {drift && <DriftView {...drift} />}
 
       {substantive && (
         <details className="group">

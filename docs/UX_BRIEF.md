@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 5.0, *Signal* |
+| Version | 6.0, *Signal + Motion* (5.0 *Signal* earlier the same day) |
 | Date | 24 September 2026 (v4.0 and v3.0: 23-24 September; v2.0: 22 September; v1.0: 21 September 2026) |
 | Status | Shipped on branch `workd` |
 | Related | [DESIGN.md](DESIGN.md) (the specification) · [PRD.md](PRD.md) · [TRD.md](TRD.md) · [SCHEMA.md](SCHEMA.md) |
@@ -771,3 +771,32 @@ The owner lifted the rule that `INSUFFICIENT_EVIDENCE` must be neutral grey. The
 - Screenshots before and after at 1440×900 and 390×844 for Overview, Controls, Control detail and Test runs, plus dark mode at 1440.
 - No horizontal page overflow at 375, 390, 768 and 1440px in either theme (measured `scrollWidth`).
 - `npm run typecheck`, `npm run lint` and `npm run build` (with `NEXT_PUBLIC_API_BASE_URL` set, as `next.config.mjs` requires) pass.
+
+---
+
+## 15. Revision 6.0: *Signal + Motion*
+
+v5 fixed the colour, type and structure. v6 answers the next brief: **real photos and video, and a more interactive product**, designed in Figma first.
+
+### 15.1 Figma
+
+The file *AssureLens v6 Revamp* (drafts of the owner's Figma account) holds three boards: **Overview / Desktop 1440** (split hero with the video slot, the evidence gate, the media bento, with the real poster frames uploaded), **Controls / Desktop 1440** (search, instant filters, table), and **Motion & interaction spec**. The code implements those boards; DESIGN.md §6 is the spec. Figma's Weave AI media models were not available (the account is not linked to Weave), so no media was generated.
+
+### 15.2 Media
+
+Stock footage rather than generated: for a compliance product, real footage of the real city and real paper is more credible than synthetic imagery. Three Pexels clips, each chosen for a job: **Bengaluru's IT district at sunrise** (the estate under test), **network cables in a server room** (tests run against a live service; its cobalt light matches the brand), and **hands searching archive files** (evidence). Re-encoded to about 2 MB in total, self-hosted, credited on screen. Behaviour rules are in DESIGN.md §6.
+
+### 15.3 Interactivity, and why each piece exists
+
+- **The evidence gate explorer** (`GateExplorer`, `lib/wilson.ts`) turns the product's thesis into something the reader can move. It mirrors the engine's G1 (n >= 30), G2 (width <= 0.20) and G3 (coverage >= 10%) exactly (`backend/app/engine/thresholds.py`) and uses the 5% tolerable exception rate decided in §13.9. The Wilson function reproduces the brief's check value: 12 of 12 gives a lower bound of 0.7575. All three outcomes are reachable from the presets (verified: Too few items gives Insufficient, Clean gives Pass, Borderline gives Insufficient via threshold straddle, Clearly failing gives Fail).
+- **Instant control search and filters** replace a server round trip per filter click (the production API answers in about 3.5s). The URL still reflects the filter.
+- **Sliding tab indicator, page transition, staggered run results**: continuity and sequence, not decoration.
+
+### 15.4 What did not change
+
+The v5 palette, contrast ratios (§14.3), type scale, ruled structure and all product rules: no headline compliance percentage, verdict and severity always carry a word and a shape, every verdict gets identical motion, and reduced motion is honoured everywhere.
+
+### 15.5 Dependencies added (approved by the owner)
+
+`motion` 13.4.2 and `@phosphor-icons/react` 2.1.10.
+

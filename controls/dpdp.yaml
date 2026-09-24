@@ -800,7 +800,9 @@ controls:
       where ground truth exists. Report per-group confidence intervals. A
       group below the minimum size is reported as insufficient evidence, not
       as a disparity.
-    inference_mode: POPULATION
+    # Every decision the model made is examined, so a census of its
+    # decisions: sampling gates do not apply. Group size still does. [Day 7]
+    inference_mode: CENSUS
     is_executable: true
     suite: ai_assurance
     plugin_key: ai.fairness_selection_rate
@@ -828,7 +830,9 @@ controls:
       snapshot over quantile bins. Report features above the moderate and
       significant thresholds. Absence of any drift monitoring is itself an
       exception.
-    inference_mode: POPULATION
+    # Every decision the model made is examined, so a census of its
+    # decisions: sampling gates do not apply. Group size still does. [Day 7]
+    inference_mode: CENSUS
     is_executable: true
     suite: ai_assurance
     plugin_key: ai.input_drift_psi

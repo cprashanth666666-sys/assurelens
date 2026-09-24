@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 
 import { DisclosureFooter } from "@/components/DisclosureFooter";
 import { Masthead } from "@/components/Masthead";
+import { MotionProvider } from "@/components/MotionProvider";
 import { TabNav } from "@/components/TabNav";
 import "@/styles/globals.css";
 
@@ -82,9 +83,11 @@ export default function RootLayout({
         <Masthead />
         <TabNav />
 
-        <main id="main" className="mx-auto max-w-content px-4 pb-9 pt-7 md:px-6 md:pt-8">
-          {children}
-        </main>
+        <MotionProvider>
+          <main id="main" className="mx-auto max-w-content px-4 pb-9 pt-7 md:px-6 md:pt-8">
+            {children}
+          </main>
+        </MotionProvider>
 
         <DisclosureFooter />
       </body>

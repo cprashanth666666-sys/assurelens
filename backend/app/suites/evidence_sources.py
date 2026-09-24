@@ -21,6 +21,8 @@ from app.models.estate import (
     ConsentRecord,
     DataAsset,
     DataPrincipal,
+    ModelPrediction,
+    ModelRegistry,
     ProcessingActivity,
     ThirdParty,
 )
@@ -176,6 +178,61 @@ def collect_erased_principals(context: dict[str, Any]) -> list[dict[str, Any]]:
             .order_by(DataPrincipal.id)
         )
         .all()
+    ]
+
+
+@register_query("model_registry")
+def collect_model_registry(context: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every registered model, with the training baseline drift is measured
+    against. A model with no snapshot is returned too: its absence is a
+    finding, not a reason to leave the model out."""
+    return [
+        {
+            "id": m.id,
+            "name": m.name,
+            "purpose": m.purpose,
+            "deployed_at": m.deployed_at,
+            "training_snapshot": m.training_snapshot,
+            "has_drift_monitoring": m.has_drift_monitoring,
+            "is_consequential": m.is_consequential,
+        }
+        for m in _db(context).scalars(select(ModelRegistry).order_by(ModelRegistry.id)).all()
+    ]
+
+
+@register_query("model_predictions")
+def collect_model_predictions(context: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every scored application, with the applicant's group.
+
+    The group comes from the principal record, not from the model's inputs:
+    the model never sees it, which is exactly why its outcomes have to be
+    checked against it. Principal identity is reduced to the internal id,
+    enough to detect duplicates without carrying names into evidence.
+    """
+    rows = _db(context).execute(
+        select(
+            ModelPrediction.id,
+            ModelPrediction.model_id,
+            ModelPrediction.principal_id,
+            ModelPrediction.features,
+            ModelPrediction.decision,
+            ModelPrediction.ground_truth,
+            DataPrincipal.group_attribute,
+        )
+        .join(DataPrincipal, DataPrincipal.id == ModelPrediction.principal_id, isouter=True)
+        .order_by(ModelPrediction.id)
+    ).all()
+    return [
+        {
+            "id": r.id,
+            "model_id": r.model_id,
+            "principal_id": r.principal_id,
+            "features": r.features,
+            "decision": r.decision,
+            "ground_truth": r.ground_truth,
+            "group": r.group_attribute,
+        }
+        for r in rows
     ]
 
 

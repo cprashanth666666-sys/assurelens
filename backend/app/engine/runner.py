@@ -31,6 +31,7 @@ from app.engine.evidence import (
 from app.engine.gate import RawResult, Verdict
 from app.engine.thresholds import DEFAULT_THRESHOLDS, Thresholds
 from app.models.control import Control, EngagementControl, TestProcedure
+from app.models.estate import ModelAssessment
 from app.models.results import AuditEntry, EvidenceRecord, TestResult, TestRun
 
 log = logging.getLogger(__name__)
@@ -318,7 +319,38 @@ def _run_one(
     outcome = gate_module.apply(raw, thresholds, control.threshold_overrides)
     duration_ms = int((time.perf_counter() - started) * 1000)
 
-    _persist(
+    result = _persist(
         db, run, control, procedure_row, outcome, bundle, duration_ms,
         {**raw.detail, "population_source": primary_source},
     )
+    _persist_model_assessments(db, result, raw.detail)
+
+
+def _persist_model_assessments(
+    db: Session, result: TestResult, detail: dict[str, Any]
+) -> None:
+    """One `est_model_assessments` row per metric, feature and group.
+
+    Model procedures report these in their detail; the runner writes them,
+    because procedures never touch the database. Keeping them as rows as well
+    as in the result's JSON means a metric can be queried across runs, and
+    `group_n` travels with every group figure so a small group can never be
+    read back as a disparity without its size beside it. [SCHEMA est_model_assessments]
+    """
+    rows = detail.get("model_assessments") or []
+    model_id = detail.get("model_id")
+    if not rows or model_id is None:
+        return
+    for row in rows:
+        db.add(
+            ModelAssessment(
+                model_id=model_id,
+                result_id=result.id,
+                metric=row["metric"],
+                feature=row.get("feature"),
+                group_label=row.get("group_label"),
+                value=row.get("value"),
+                group_n=row.get("group_n"),
+            )
+        )
+    db.flush()

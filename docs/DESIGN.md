@@ -1,4 +1,4 @@
-# Design System: AssureLens, *Signal* (v5.0)
+# Design System: AssureLens, *Signal* (v6.0: Signal + Motion)
 
 > Semantic design system for AssureLens, a DPDP + AI controls assurance workbench. This is the specification new screens are built from. The reasoning, the award research it rests on and the measured contrast for every pair are in [UX_BRIEF.md §14](UX_BRIEF.md). Tokens live in `frontend/styles/tokens.css`; component classes in `frontend/styles/globals.css`.
 
@@ -10,7 +10,7 @@ The verdicts are the loudest thing on any screen: solid chips at full strength.
 
 - **Density:** Daily App (5): dense tables with 12/16px cell padding and 14px text inside a generous page rhythm (48-64px between sections)
 - **Variance:** Offset (6): 8/4 and 5/7 splits on the cover, 2:1 on control detail
-- **Motion:** Restrained (3): state feedback only; no ambient motion
+- **Motion:** Fluid (6): spring feedback, shared-layout tab indicator, in-view video, an interactive evidence gate. Everything collapses under reduced motion
 
 ## 2. Color Palette & Roles
 
@@ -92,16 +92,32 @@ Page `#0B0D12`, surface `#151821`, inset `#1E222D`, ink `#F2F4F8` (16.1:1), ink 
 
 ## 6. Motion & Interaction
 
-- **No ambient motion.** No moving background, no loops except the indeterminate rule while a run is in flight
-- **Feedback:** 120ms colour changes on hover and press; 1px press on buttons; row bar wipes in over 120ms
-- **Entrance:** sections reveal once on scroll, 12px rise with opacity, 40ms stagger; fail visible without JavaScript and always print visible
-- **Scroll progress:** 3px lime rule on top of the masthead, driven by CSS `animation-timeline: scroll()`; no listener, hidden where unsupported
-- **Reduced motion:** everything resolves to its end state immediately, the scroll rule is hidden, the indeterminate rule is static
-- **Timing:** 120ms fast, 180ms base, 320ms slow; `cubic-bezier(0.22, 1, 0.36, 1)` out
+Library: **Motion** (`motion/react`), wrapped once in `MotionConfig reducedMotion="user"` (`components/MotionProvider.tsx`). Icons: **Phosphor** (`@phosphor-icons/react`; `/dist/ssr` in server components). The Figma file *AssureLens v6 Revamp* holds the Overview and Controls boards and the motion spec this section implements.
+
+| Interaction | Behaviour | What it reports |
+|---|---|---|
+| Tab indicator | One lime block (`layoutId="tab-active"`) slides between tabs, spring 520/42 | Where you are |
+| Page change | `app/template.tsx`: 8px rise + fade, 280ms | Continuity |
+| Hero video | Muted 10s loop, plays only while 40% in view, visible Pause/Play (WCAG 2.2.2), poster only under reduced motion or Save-Data | Context: the estate under test |
+| Media bento | Clip plays on hover or focus (in view on touch), pauses on leave; 2.5% zoom | Attention |
+| Evidence gate | Sliders and scenario presets move the 95% Wilson interval with a spring (transform only); verdict cross-fades identically for every verdict; gate reasons enter and leave | Cause and effect |
+| Control search | Filters as you type, rows fade (opacity only, never a transform on `<tr>`), live count, `/` focuses search, empty state, URL kept in sync | Feedback |
+| Run results | Rows arrive 40ms apart (capped at 12); tally chips spring in, same spring for every verdict | Sequence |
+| Buttons | 1px press; arrow nudges 3px on hover | Affordance |
+| Scroll progress | 3px lime rule, CSS `animation-timeline: scroll()` | Position |
+
+- **Reduced motion:** reveals immediate, videos show their poster, springs become instant, scroll rule hidden, hover zooms off
+- **Timing:** 120ms fast, 180ms base, 320ms slow; springs as listed
+
+## 6a. Media
+
+- Three self-hosted clips in `frontend/public/media`, each 1280px H.264, 10s, no audio, `+faststart` (estate 1.08 MB, evidence 0.72 MB, network 0.18 MB), with a JPEG poster. Registry and credits in `frontend/lib/media.ts`
+- Every clip and photograph is credited on screen (Pexels / Unsplash photographer, linked)
+- Text never sits on footage: overlays are solid blocks (cobalt fact block, white Pause chip at 19:1)
 
 ## 7. Anti-Patterns (Banned)
 
-- No moving, gradient or animated backgrounds; no translucent or blurred surfaces
+- No moving, gradient or animated backgrounds; no translucent or blurred surfaces (video is content in a frame, never a page background)
 - No rounded cards, no drop shadows on the page (overlays only), no 3D tilt
 - No text below 12px; no 11px uppercase tracked labels
 - No muted or desaturated status colour; no colour-only encoding

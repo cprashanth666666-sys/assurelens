@@ -1,5 +1,6 @@
 "use client";
 
+import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -25,6 +26,7 @@ const TABS = [
 
 export function TabNav() {
   const pathname = usePathname();
+  const reduce = useReducedMotion();
   const railRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
@@ -78,24 +80,36 @@ export function TabNav() {
       className="sticky z-30 border-b-2 border-rule-strong bg-surface"
     >
       <div ref={railRef} className="scroll-x edge-fade mx-auto max-w-content md:px-6">
-        <ul className="m-0 flex list-none divide-x divide-rule p-0 md:border-x md:border-rule">
-          {TABS.map((tab) => {
-            const active =
-              tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+        <LayoutGroup id="tabs">
+          <ul className="m-0 flex list-none divide-x divide-rule p-0 md:border-x md:border-rule">
+            {TABS.map((tab) => {
+              const active =
+                tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
 
-            return (
-              <li key={tab.href}>
-                <Link
-                  href={tab.href}
-                  aria-current={active ? "page" : undefined}
-                  className="tab"
-                >
-                  {tab.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+              return (
+                <li key={tab.href} className="relative">
+                  {/* One lime block, shared between tabs: it slides to the
+                      new tab on navigation instead of blinking on. */}
+                  {active && (
+                    <motion.span
+                      layoutId="tab-active"
+                      aria-hidden="true"
+                      className="tab-indicator"
+                      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 42 }}
+                    />
+                  )}
+                  <Link
+                    href={tab.href}
+                    aria-current={active ? "page" : undefined}
+                    className="tab"
+                  >
+                    {tab.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </LayoutGroup>
       </div>
     </nav>
   );

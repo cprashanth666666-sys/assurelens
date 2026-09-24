@@ -153,11 +153,20 @@
   }
   .tab:hover { background: var(--inset); color: var(--ink); }
   .tab[aria-current="page"] {
-    background: var(--lime);
     color: var(--on-lime);
     font-weight: 600;
+    background: transparent;
+  }
+  /* The active block, a shared-layout element (TabNav) that slides between
+   * tabs. The label sits above it. */
+  .tab-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: var(--lime);
     box-shadow: inset 0 -3px 0 var(--on-lime);
   }
+  .tab { z-index: 1; }
 
   /* --- Controls ---------------------------------------------------------- */
   .btn {
@@ -177,6 +186,14 @@
   .btn-primary { background: var(--cobalt); color: var(--on-cobalt); border-color: var(--cobalt); }
   .btn-primary:hover:not(:disabled) { background: var(--cobalt-deep); border-color: var(--cobalt-deep); }
   .btn:active:not(:disabled) { transform: translateY(1px); }
+  /* Secondary action: an ink outline that fills on hover. */
+  .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--ink); }
+  .btn-secondary:hover:not(:disabled) { background: var(--ink); color: var(--surface); }
+
+  /* The arrow inside a button nudges toward where it goes. */
+  .btn .btn-arrow { transition: transform var(--dur-base) var(--ease-out); }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+
   .btn:disabled {
     cursor: not-allowed;
     background: var(--inset);
@@ -273,6 +290,65 @@
   @media (hover: hover) and (pointer: fine) {
     .plate-zoom:hover img { transform: scale(1.025); }
   }
+
+  /* --- Video clips ---------------------------------------------------------
+   * The control sits on a solid surface chip, never directly on footage, so
+   * its contrast does not depend on the frame behind it (ink on white 19:1).
+   */
+  .clip video { display: block; }
+  .clip-control {
+    position: absolute;
+    right: var(--sp-3);
+    bottom: var(--sp-3);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 var(--sp-3);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+  .clip-control:hover { background: var(--lime); color: var(--on-lime); }
+  [data-clip-card] .clip video { transition: transform 700ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    [data-clip-card]:hover .clip video { transform: scale(1.025); }
+  }
+
+  /* --- Range sliders --------------------------------------------------------
+   * Cobalt fill to the thumb (via --pct), inset track after it, square ink
+   * thumb. 44px of hit area around a 4px track.
+   */
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 4px;
+    background: linear-gradient(to right, var(--cobalt) 0 var(--pct, 50%), var(--inset) var(--pct, 50%) 100%);
+  }
+  .range::-moz-range-track { height: 4px; background: var(--inset); }
+  .range::-moz-range-progress { height: 4px; background: var(--cobalt); }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -8px;
+    background: var(--ink);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--ink);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .range::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border: 3px solid var(--surface); border-radius: 0; box-shadow: 0 0 0 1px var(--ink); }
+  .range:active::-webkit-slider-thumb { transform: scale(1.15); }
+  .range:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 4px; }
 
   /* --- Scroll reveal ----------------------------------------------------- */
   .reveal {
@@ -371,6 +447,7 @@
   }
   .reveal { opacity: 1 !important; transform: none !important; }
   .scroll-progress { display: none !important; }
-  .plate-zoom:hover img, .btn:active:not(:disabled) { transform: none !important; }
+  .plate-zoom:hover img, .btn:active:not(:disabled), .btn:hover .btn-arrow,
+  [data-clip-card]:hover .clip video, .range:active::-webkit-slider-thumb { transform: none !important; }
   .indeterminate-rule::after { animation: none !important; inline-size: 100% !important; opacity: 0.55; }
 }

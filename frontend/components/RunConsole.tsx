@@ -1,5 +1,7 @@
 "use client";
 
+import { CheckIcon } from "@phosphor-icons/react";
+import { motion } from "motion/react";
 import { useState } from "react";
 
 import {
@@ -94,25 +96,12 @@ export function RunConsole({
                     />
                     {/* Drawn, so the whole 44px block is the target rather
                         than a 13px native box. [a11y touch-target-size] */}
-                    <svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" className="shrink-0">
-                      <rect
-                        x="0.75"
-                        y="0.75"
-                        width="12.5"
-                        height="12.5"
-                        fill={on ? "var(--lime)" : "transparent"}
-                        stroke={on ? "var(--lime)" : "currentColor"}
-                        strokeWidth="1.5"
-                      />
-                      <path
-                        d="M3.5 7.2 6 9.6l4.5-5.2"
-                        fill="none"
-                        stroke="var(--on-lime)"
-                        strokeWidth="1.8"
-                        strokeLinecap="square"
-                        style={{ opacity: on ? 1 : 0 }}
-                      />
-                    </svg>
+                    <span
+                      aria-hidden="true"
+                      className={`grid h-4 w-4 shrink-0 place-items-center border-2 ${on ? "border-lime bg-lime text-on-lime" : "border-current"}`}
+                    >
+                      {on && <CheckIcon size={12} weight="bold" />}
+                    </span>
                     <span className="font-mono">{suite}</span>
                   </label>
                 );
@@ -191,11 +180,17 @@ function Results({ run }: { run: RunDetail }) {
         {/* Counts per verdict, side by side at equal weight. No total score,
             and no verdict is summed into another. */}
         <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-          {VERDICT_ORDER.filter((v) => counts[v]).map((v) => (
-            <li key={v} className="flex items-center gap-2 bg-surface px-2 py-1">
+          {VERDICT_ORDER.filter((v) => counts[v]).map((v, i) => (
+            <motion.li
+              key={`${run.id}-${v}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 420, damping: 26, delay: i * 0.05 }}
+              className="flex items-center gap-2 bg-surface px-2 py-1"
+            >
               <VerdictBadge verdict={v} />
               <span className="font-mono text-sm font-semibold text-ink">{counts[v]}</span>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </header>
@@ -212,8 +207,8 @@ function Results({ run }: { run: RunDetail }) {
             </tr>
           </thead>
           <tbody>
-            {run.results.map((result) => (
-              <ResultRow key={result.id} result={result} />
+            {run.results.map((result, i) => (
+              <ResultRow key={result.id} result={result} index={i} />
             ))}
           </tbody>
         </table>
@@ -222,12 +217,19 @@ function Results({ run }: { run: RunDetail }) {
   );
 }
 
-function ResultRow({ result }: { result: ResultSummary }) {
+function ResultRow({ result, index }: { result: ResultSummary; index: number }) {
+  // Rows arrive in sequence, 40ms apart, capped so a long run is not still
+  // arriving after the eye has moved on. Opacity only: no transform on <tr>.
+  const arrive = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.24, delay: Math.min(index, 12) * 0.04 },
+  };
   const gated = result.verdict === "INSUFFICIENT_EVIDENCE";
 
   return (
     <>
-      <tr className="row-interactive">
+      <motion.tr {...arrive} className="row-interactive">
         <td>
           <span className="whitespace-nowrap font-mono font-semibold text-link">
             {result.control_ref}
@@ -257,10 +259,10 @@ function ResultRow({ result }: { result: ResultSummary }) {
             ? "n/a"
             : `${result.ci_lower.toFixed(3)} to ${result.ci_upper.toFixed(3)}`}
         </td>
-      </tr>
+      </motion.tr>
 
       {gated && (
-        <tr>
+        <motion.tr {...arrive}>
           <td className="bg-inset" />
           <td colSpan={4} className="bg-inset">
             {/* Why, then what would resolve it. A gate that cannot say how
@@ -281,7 +283,7 @@ function ResultRow({ result }: { result: ResultSummary }) {
               ))}
             </div>
           </td>
-        </tr>
+        </motion.tr>
       )}
     </>
   );
