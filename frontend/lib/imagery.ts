@@ -64,7 +64,7 @@ export const PLATES = {
       "The Vidhana Soudha in Bengaluru, seat of the Karnataka state " +
       "legislature, photographed from its lawns in low afternoon sun.",
     caption:
-      "Vidhana Soudha, Bengaluru — where the law this workbench executes is made.",
+      "Vidhana Soudha, Bengaluru: where the law this workbench executes is made.",
     credit: { name: "@passiondroid", href: "https://unsplash.com/@passiondroid" },
     ratio: 4 / 3,
   },

@@ -5,21 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 /**
- * Six destinations do not need a sidebar, and a sidebar is the SaaS reflex.
- * Tabs with a 2px rule on the active item. No pills. [UX 3]
+ * Six destinations do not need a sidebar. A ruled rail of full-height cells,
+ * sticky under the masthead; the active cell is a lime block with an ink
+ * foot (`.tab` in globals.css). [DESIGN.md 4]
  *
- * v2.0 adds three things, each of which is a behaviour rather than a
- * decoration:
- *
- * * The rail is **sticky under the masthead**, so navigation survives a long
- *   table. `top` is bound to the masthead's condensed height.
- * * The active rule is **drawn by CSS scaleX** (`.tab` in globals.css), and a
- *   terracotta rule wipes in on hover. No measuring, no layout reads, so it
- *   cannot desynchronise from the DOM the way a positioned indicator does.
- * * On a narrow screen the rail **scrolls the active tab into view** on
- *   navigation and fades at both edges, so "Report" is discoverable on a
- *   375px phone instead of sitting silently off-screen.
- *   [a11y nav-state-active, horizontal-scroll]
+ * On a narrow screen the rail scrolls the active tab into view on navigation
+ * and fades at both edges, so "Report" is discoverable on a 375px phone.
+ * [a11y nav-state-active, horizontal-scroll]
  */
 
 const TABS = [
@@ -83,31 +75,20 @@ export function TabNav() {
       aria-label="Sections"
       ref={navRef}
       style={{ top: "var(--masthead-h, 64px)" }}
-      className="sticky z-30 border-b border-n-200 bg-veil backdrop-blur-md"
+      className="sticky z-30 border-b-2 border-rule-strong bg-surface"
     >
-      <div
-        ref={railRef}
-        className="scroll-x edge-fade mx-auto max-w-content px-4 md:px-5"
-      >
-        <ul className="flex list-none gap-5 p-0 md:gap-6">
+      <div ref={railRef} className="scroll-x edge-fade mx-auto max-w-content md:px-6">
+        <ul className="m-0 flex list-none divide-x divide-rule p-0 md:border-x md:border-rule">
           {TABS.map((tab) => {
             const active =
-              tab.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(tab.href);
+              tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
 
             return (
               <li key={tab.href}>
                 <Link
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
-                  className={[
-                    "tab -mb-px inline-block whitespace-nowrap py-3 text-sm no-underline",
-                    "transition-colors duration-base ease-out",
-                    active
-                      ? "font-semibold text-n-800"
-                      : "text-n-500 hover:text-n-800",
-                  ].join(" ")}
+                  className="tab"
                 >
                   {tab.label}
                 </Link>

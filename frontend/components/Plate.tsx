@@ -2,7 +2,7 @@
 import { plateSrc, plateSrcSet, type Plate as PlateSpec } from "@/lib/imagery";
 
 /**
- * A photograph, on a tinted plate, under a warm wash.
+ * A photograph on a plate that reserves its box.
  *
  * `<img>` rather than `next/image` on purpose — see the note in lib/imagery.ts.
  * The eslint rule is disabled here and only here.
@@ -12,12 +12,11 @@ import { plateSrc, plateSrcSet, type Plate as PlateSpec } from "@/lib/imagery";
  * * **Reserves its box.** `aspect-ratio` on the plate means the layout is
  *   final before a byte of image arrives. No CLS on a slow connection.
  *   [a11y image-dimension]
- * * **Survives a failed load.** The plate carries its own teal-to-terracotta
- *   gradient, so a blocked CDN leaves a composed rectangle with a caption
- *   rather than a broken-image glyph in the middle of an audit report.
- * * **Desaturates and washes.** A full-colour stock photograph next to a
- *   muted palette reads as pasted in. The multiply layer puts it in the same
- *   ink as everything else. [UX 2.6]
+ * * **Survives a failed load.** The plate carries its own inset fill, so a
+ *   blocked CDN leaves a composed rectangle with a caption rather than a
+ *   broken-image glyph in the middle of an audit report.
+ * * **Stays a photograph.** v5 removed the v2-v4 duotone and wash: on a bright
+ *   page a full-colour image belongs, and square corners keep it on the grid.
  *
  * `sizes` must be passed by the caller: getting it wrong is how a 1800px
  * asset gets downloaded for a 320px slot.
@@ -82,20 +81,17 @@ export function Figure({
   className?: string;
 }) {
   return (
-    // v3.0: the figure is a tile. Its caption used to sit on the page
-    // ground, which is now a moving gradient; small grey text on coral fails
-    // contrast, so the caption comes onto the tile with the photograph.
-    <figure data-tilt className={`panel m-0 p-2 md:p-3 ${className}`}>
+    <figure className={`m-0 flex flex-col ${className}`}>
       <Plate plate={plate} sizes={sizes} priority={priority} />
-      <figcaption className="mt-2 flex flex-wrap items-baseline justify-between gap-2 px-1 pb-1 text-2xs text-n-500">
+      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3 text-meta text-ink-2">
         <span className="max-w-prose">{plate.caption}</span>
         <a
           href={plate.credit.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="link-grow whitespace-nowrap font-mono text-n-400 no-underline transition-colors duration-base ease-out hover:text-n-600"
+          className="link whitespace-nowrap font-mono text-xs"
         >
-          {plate.credit.name} · Unsplash
+          {plate.credit.name} on Unsplash
         </a>
       </figcaption>
     </figure>

@@ -1,9 +1,9 @@
 /**
- * Day 1 scaffolding. Each route renders what it will become and which day
- * builds it, so the deployed skeleton is honest about being a skeleton
- * rather than showing a fake dashboard.
+ * Scaffolding. Each route renders what it will become and which day builds
+ * it, so the deployed skeleton is honest about being a skeleton rather than
+ * showing a fake dashboard. Every instance is deleted by the day it names.
  *
- * Every instance of this component is deleted by the day it names.
+ * v5: a dashed frame (unbuilt) with a lime tag stating when it lands.
  */
 export function Placeholder({
   title,
@@ -15,23 +15,12 @@ export function Placeholder({
   buildsOn: string;
 }) {
   return (
-    <section data-tilt className="panel relative overflow-hidden p-5 md:p-6">
-      {/* A hatched corner: this panel is scaffolding and says so at a glance,
-          without a banner taking up a line of the layout. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-6 -top-6 h-[72px] w-[72px] rotate-45"
-        style={{
-          background:
-            "repeating-linear-gradient(45deg, var(--warm-100) 0 6px, transparent 6px 12px)",
-        }}
-      />
-      <h2>{title}</h2>
-      <p className="mt-3 max-w-prose text-n-600">{summary}</p>
-      <p className="mt-4 inline-flex items-center gap-2 font-mono text-xs text-n-400">
-        <span aria-hidden="true" className="h-px w-5 bg-warm-500" />
+    <section className="border-2 border-dashed border-control bg-surface p-5 md:p-7">
+      <p className="m-0 inline-flex bg-lime px-2 py-1 font-mono text-meta font-medium text-on-lime">
         Builds on {buildsOn}
       </p>
+      <h2 className="mt-4">{title}</h2>
+      <p className="m-0 mt-3 max-w-prose text-base text-ink-2">{summary}</p>
     </section>
   );
 }

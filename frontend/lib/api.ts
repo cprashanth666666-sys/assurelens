@@ -179,13 +179,17 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
   NOT_APPLICABLE: "Not applicable",
 };
 
+/**
+ * v5: every verdict is a SOLID chip of equal weight and size. Insufficient
+ * evidence is the ink chip, the most assertive fill in the set: it is a
+ * conclusion the product stands behind, not a grey absence of one. It is
+ * still never red, amber or yellow. [DESIGN.md 2, UX_BRIEF 14.4]
+ */
 export const VERDICT_CLASS: Record<Verdict, string> = {
-  PASS: "text-verdict-pass",
-  FAIL: "text-verdict-fail",
-  // Neutral ink, deliberately. Never red, amber or yellow -- it is not a
-  // warning and must not be dressed as one.
-  INSUFFICIENT_EVIDENCE: "text-verdict-insufficient",
-  NOT_APPLICABLE: "text-verdict-na",
+  PASS: "bg-pass text-on-verdict",
+  FAIL: "bg-fail text-on-verdict",
+  INSUFFICIENT_EVIDENCE: "bg-insufficient text-on-verdict",
+  NOT_APPLICABLE: "border border-dashed border-control text-na",
 };
 
 export const fetchSuites = () => get<SuiteCatalogue>("/api/suites");

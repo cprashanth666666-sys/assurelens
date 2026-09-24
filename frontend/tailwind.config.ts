@@ -1,12 +1,15 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Tailwind configured to the AssureLens token scale.
+ * Tailwind configured to the AssureLens v5 "Signal" token scale.
  *
- * CRITICAL: these keys sit under `theme`, NOT `theme.extend`. They REPLACE
- * Tailwind's defaults rather than adding to them. Extending would leave
- * `bg-blue-500`, `rounded-2xl` and `shadow-lg` reachable, and the untouched
- * default look creeps back in — an explicit fail condition. [UX 9, PLAN Day 1]
+ * These keys sit under `theme`, NOT `theme.extend`, so they REPLACE the
+ * defaults: `bg-blue-500`, `rounded-2xl` and `shadow-lg` stay unreachable and
+ * every colour resolves to a token in styles/tokens.css. [DESIGN.md 2]
+ *
+ * v5 renamed the palette (n-*, accent-*, warm-* are gone) so that no
+ * component could keep its v4 styling by accident: every call site had to be
+ * rewritten against the new roles.
  */
 const config: Config = {
   content: [
@@ -15,93 +18,84 @@ const config: Config = {
     "./lib/**/*.{ts,tsx}",
   ],
   theme: {
-    // Replaces the default palette entirely. Every colour resolves to a token.
     colors: {
       transparent: "transparent",
       current: "currentColor",
-      n: {
-        0: "var(--n-0)",
-        25: "var(--n-25)",
-        50: "var(--n-50)",
-        100: "var(--n-100)",
-        200: "var(--n-200)",
-        300: "var(--n-300)",
-        400: "var(--n-400)",
-        500: "var(--n-500)",
-        600: "var(--n-600)",
-        700: "var(--n-700)",
-        800: "var(--n-800)",
-        900: "var(--n-900)",
+      page: "var(--page)",
+      surface: "var(--surface)",
+      inset: "var(--inset)",
+      ink: {
+        DEFAULT: "var(--ink)",
+        2: "var(--ink-2)",
+        3: "var(--ink-3)",
       },
-      white: "var(--pure-white)",
-      // Translucent panel for sticky chrome. Literal rgba behind the var, so
-      // backdrop-blur has something to blur through. [tokens.css]
-      veil: "var(--surface-veil)",
-      scrim: "var(--surface-scrim)",
-      accent: {
-        50: "var(--accent-50)",
-        100: "var(--accent-100)",
-        400: "var(--accent-400)",
-        500: "var(--accent-500)",
-        600: "var(--accent-600)",
-        700: "var(--accent-700)",
+      rule: {
+        DEFAULT: "var(--rule)",
+        strong: "var(--rule-strong)",
       },
-      // The second voice. Rules, hover marks, active filters — never status.
-      warm: {
-        50: "var(--warm-50)",
-        100: "var(--warm-100)",
-        400: "var(--warm-400)",
-        500: "var(--warm-500)",
-        600: "var(--warm-600)",
+      control: "var(--control)",
+      cobalt: {
+        DEFAULT: "var(--cobalt)",
+        deep: "var(--cobalt-deep)",
+        tint: "var(--cobalt-tint)",
       },
+      "on-cobalt": {
+        DEFAULT: "var(--on-cobalt)",
+        2: "var(--on-cobalt-2)",
+      },
+      link: "var(--link)",
+      lime: "var(--lime)",
+      "on-lime": "var(--on-lime)",
+      band: "var(--band)",
+      "on-band": {
+        DEFAULT: "var(--on-band)",
+        2: "var(--on-band-2)",
+      },
+      // Verdicts: solid fills, one text colour on all three filled chips.
+      pass: { DEFAULT: "var(--pass)", text: "var(--pass-text)" },
+      fail: { DEFAULT: "var(--fail)", text: "var(--fail-text)" },
+      insufficient: "var(--insufficient)",
+      "on-verdict": "var(--on-verdict)",
+      na: "var(--na-text)",
       sev: {
         critical: "var(--sev-critical)",
+        "on-critical": "var(--on-sev-critical)",
         high: "var(--sev-high)",
         medium: "var(--sev-medium)",
         low: "var(--sev-low)",
-        "critical-bg": "var(--sev-critical-bg)",
-        "high-bg": "var(--sev-high-bg)",
-        "medium-bg": "var(--sev-medium-bg)",
-        "low-bg": "var(--sev-low-bg)",
-      },
-      verdict: {
-        pass: "var(--verdict-pass)",
-        fail: "var(--verdict-fail)",
-        // Neutral ink by design. Never red, amber or yellow. [UX 6.1]
-        insufficient: "var(--verdict-insufficient)",
-        na: "var(--verdict-na)",
-        "pass-bg": "var(--verdict-pass-bg)",
-        "fail-bg": "var(--verdict-fail-bg)",
-        "insufficient-bg": "var(--verdict-insufficient-bg)",
-        "na-bg": "var(--verdict-na-bg)",
       },
     },
 
     fontFamily: {
       sans: "var(--font-sans)",
       mono: "var(--font-mono)",
-      // Report preview only, where it signals "document" against the UI's
-      // "instrument". [UX 2.2]
-      serif: "var(--font-serif)",
     },
 
+    // [size, line-height]. The step names carry the role, so a call site
+    // says what the text IS, not how big it happens to be.
     fontSize: {
-      "2xs": "var(--fs-2xs)",
-      xs: "var(--fs-xs)",
-      sm: "var(--fs-sm)",
-      base: "var(--fs-base)",
-      md: "var(--fs-md)",
-      lg: "var(--fs-lg)",
-      xl: "var(--fs-xl)",
-      "2xl": "var(--fs-2xl)",
-      // v2.0: one display size, for the single statement line on the
-      // overview. It carries a sentence, never a percentage — the KPI
-      // numeral is still a fail condition. [UX 1.1, 1.3]
-      "3xl": "var(--fs-3xl)",
+      xs: ["var(--fs-xs)", "1.4"],
+      meta: ["var(--fs-meta)", "1.4"],
+      sm: ["var(--fs-sm)", "var(--lh-table)"],
+      base: ["var(--fs-base)", "var(--lh-prose)"],
+      lg: ["var(--fs-lg)", "1.3"],
+      xl: ["var(--fs-xl)", "var(--lh-tight)"],
+      "2xl": ["var(--fs-2xl)", "1.02"],
+      num: ["var(--fs-num)", "1"],
+      display: ["var(--fs-display)", "var(--lh-display)"],
+    },
+
+    letterSpacing: {
+      normal: "0",
+      display: "var(--track-display)",
+      title: "var(--track-title)",
+      head: "var(--track-head)",
+      label: "0.04em",
     },
 
     spacing: {
       0: "0",
+      px: "1px",
       1: "var(--sp-1)",
       2: "var(--sp-2)",
       3: "var(--sp-3)",
@@ -111,27 +105,20 @@ const config: Config = {
       7: "var(--sp-7)",
       8: "var(--sp-8)",
       9: "var(--sp-9)",
-      px: "1px",
+      10: "var(--sp-10)",
     },
 
-    // Controls stay at 2-3px. `lg` (10px) is reachable but exists only for
-    // image plates — a hard corner on a photograph reads as an unstyled
-    // <img>. rounded-xl / -2xl / -full remain unreachable. [UX 2.3]
+    // All-sharp. `full` survives only for the indeterminate rule and the
+    // scrollbar thumb, which are lines, not surfaces.
     borderRadius: {
       none: "0",
-      sm: "var(--radius-sm)",
-      md: "var(--radius-md)",
-      lg: "var(--radius-lg)",
-      tile: "var(--radius-tile)",
+      DEFAULT: "var(--radius)",
       full: "999px",
     },
 
-    // Two shadows. `raise` is the hover state of an interactive surface and
-    // is tinted warm; `overlay` is for genuine overlays. shadow-sm/md/lg/xl
-    // stay unreachable. [UX 2.3]
+    // One shadow, for genuine overlays. Nothing on the page floats.
     boxShadow: {
       none: "none",
-      raise: "var(--shadow-raise)",
       overlay: "var(--shadow-overlay)",
     },
 
@@ -140,9 +127,12 @@ const config: Config = {
       DEFAULT: "1px",
       2: "2px",
       3: "3px",
+      4: "4px",
     },
 
     lineHeight: {
+      none: "1",
+      display: "var(--lh-display)",
       tight: "var(--lh-tight)",
       table: "var(--lh-table)",
       prose: "var(--lh-prose)",
@@ -150,42 +140,29 @@ const config: Config = {
 
     maxWidth: {
       content: "var(--content-max)",
-      prose: "75ch",
+      prose: "68ch",
       full: "100%",
     },
 
     extend: {
-      // Extending is permitted only where there is no default to displace.
       gridTemplateColumns: {
-        detail: "2fr 1fr",
-        heatmap: "auto repeat(5, minmax(0, 1fr))",
+        detail: "minmax(0, 2fr) minmax(0, 1fr)",
       },
 
-      /**
-       * Column widths, restored.
-       *
-       * Replacing `theme.spacing` (above) also removes every numeric width,
-       * because Tailwind derives `width` from the spacing scale. The result
-       * is that `w-32` on a table header emits NOTHING — the class is simply
-       * absent from the stylesheet, the browser reports no error, and the
-       * column silently falls back to auto-layout. Every `w-*` in this
-       * project had been dead since Day 1 and the tables had been laying
-       * themselves out by content width the whole time.
-       *
-       * These are the Tailwind defaults for the steps actually used, named
-       * so the call sites did not have to change.
-       */
+      // Replacing `theme.spacing` also deletes every numeric width, because
+      // Tailwind derives `width` from it. These restore the steps used, so a
+      // `w-32` on a table header emits a rule rather than silently nothing.
+      // [UX_BRIEF 11.6]
       width: {
         24: "6rem",
         28: "7rem",
         32: "8rem",
+        36: "9rem",
         40: "10rem",
         44: "11rem",
+        48: "12rem",
       },
 
-      // One motion rhythm, shared by utilities and by the component classes
-      // in globals.css. A transition written against anything else is
-      // out of step with the rest of the product. [UX 7.1]
       transitionDuration: {
         fast: "var(--dur-fast)",
         base: "var(--dur-base)",

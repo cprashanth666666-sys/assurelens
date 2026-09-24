@@ -1,184 +1,57 @@
-# AssureLens — UI/UX Design Brief
+# AssureLens: UI/UX Design Brief
 
 | | |
 |---|---|
-| Version | 3.0 — *Tidal* |
-| Date | 23 September 2026 (v2.0: 22 September; v1.0: 21 September 2026) |
-| Status | Approved for build |
-| Related | [PRD.md](PRD.md) · [TRD.md](TRD.md) · [SCHEMA.md](SCHEMA.md) |
+| Version | 5.0, *Signal* |
+| Date | 24 September 2026 (v4.0 and v3.0: 23-24 September; v2.0: 22 September; v1.0: 21 September 2026) |
+| Status | Shipped on branch `workd` |
+| Related | [DESIGN.md](DESIGN.md) (the specification) · [PRD.md](PRD.md) · [TRD.md](TRD.md) · [SCHEMA.md](SCHEMA.md) |
 
-> **v3.0 revision.** A vivid, continuously moving gradient ground with wave motion, and raised tiles that tilt toward the cursor and the finger. §12 records the change, the positions it reverses, and the one rule that keeps it readable: text never sits on the moving ground. Everything in §12.7 is unchanged.
+> **v5.0 revision.** The built v4 product was judged dark, dull and low-energy, and the owner explicitly overrode every earlier visual position, including the muted severity scale and the neutral styling of `INSUFFICIENT_EVIDENCE`. v5 replaces the design at its foundation: a bright, light-first, high-contrast colour system; a real type scale; a ruled grid of flat colour blocks instead of translucent tiles over a moving gradient. **§14 is the full record**: the award research it rests on, the audit of v4, measured contrast for every pair, and what changed structurally. §§1-2 below are rewritten for v5. §§11-13 are kept as history and are **superseded** wherever they conflict with §14.
 
-> **v2.0 revision.** The v1.0 aesthetic was judged, on the built product, to have overshot restraint into plainness. §1.3 records exactly which constraints were lifted and which were re-affirmed; §11 records the full change and the reasoning. Everything not named in §1.3 still stands as written.
-
-> At build time, run the `design-taste-frontend` / `ui-ux-pro-max` skill against this brief before writing components, and again as a review pass before Day 10. This document is the input to that review and the standard it is judged against.
+> [DESIGN.md](DESIGN.md) is the specification a new screen is built from; this file is the reasoning.
 
 ---
 
 ## 1. The aesthetic, in one line
 
-**Audit-grade restraint.** It should look like an instrument a Big Four manager would sign a workpaper out of — dense, calm, legible under fluorescent light, with the numbers doing all the talking.
+**A bright instrument with a loud verdict.** It should look like a precise tool you trust at a glance: a white work surface, near-black ink, one cobalt voice and one lime highlighter, with the conclusions set larger and in stronger colour than anything decorative on the page.
 
-The reference points are the *printed workpaper*, the *statistical table*, and the *regulatory filing* — not the SaaS dashboard.
+The reference points are award-winning editorial data and fintech sites (§14.1), not the SaaS dashboard and no longer the photocopied workpaper.
 
 ### 1.1 Negative constraints (binding)
 
-These are rejections, not preferences. A design review that finds any of them fails.
-
 | ✗ Not this | Why it's wrong here |
 |---|---|
-| **Rounded cards floating on a grey page** | The default AI-generated dashboard. Instantly reads as templated. |
-| **Purple/blue gradients, glassmorphism, glows** | Decoration where the content is a legal conclusion. |
-| **Emoji status icons** (✅ ⚠️ 🚨) | Nothing undermines an assurance verdict faster. |
-| **Dark "security ops console"** | Wrong genre — this is audit, not a SOC. Theatre over judgement. |
-| **Full-width marketing hero** | It's a workbench. There is no landing page. |
-| **Big number + percentage-change tiles** | The KPI-tile reflex. Actively wrong here: we refuse a headline compliance %. [PRD §7.3] |
+| **Rounded cards floating on a grey page** | Still the templated AI dashboard. v5 uses a ruled grid with square corners. |
+| **Moving or gradient backgrounds, translucent tiles, backdrop blur** | v4's ground made every text pair depend on what was moving behind it. Retired. |
+| **Muted, desaturated status colour** | v4's severity and verdict inks sat at 1.3-1.4:1 luminance from each other. Status is now full strength. |
+| **Small grey uppercase labels** | v4's 11px tracked labels measured 3.0-3.4:1. Labels are now 13px, sentence case, AA ink. |
+| **Purple gradients, neon glows** | Still decoration where the content is a legal conclusion. Cobalt is used flat, never as a gradient. |
+| **Emoji status icons** | Verdict marks remain geometric shapes. |
+| **Big number + percentage-change tiles, any headline compliance %** | A product decision, not a visual one. [PRD §7.3] Large numerals are allowed only for counts and dates. |
 | **Animated counters, confetti, progress celebration** | Compliance progress is not a game. |
-| **Colour-only severity encoding** | Fails accessibility and fails print. |
-| **Pill badges for everything** | Rounded pills everywhere is a tell. Used sparingly and only for framework mappings. |
-| **Default shadcn/Tailwind look, untouched** | Recognisable at a glance as unmodified defaults. |
-| **Icon next to every label** | Decoration density without information density. |
+| **Colour-only encoding** | Every verdict and severity has a word and a shape. |
+| **Em-dashes in UI copy** | A generated-copy tell. Colons, commas, full stops. |
 
 ### 1.2 Positive direction
 
 | Do this | Because |
 |---|---|
-| **Information density without crowding** | Auditors read tables. Give them a real table, 32px rows, not a card grid. |
-| **Rules, not shadows** | 1px hairlines define structure. Elevation only for genuine overlays. |
-| **One accent colour, earned** | Accent is reserved for severity and interactive affordance. Never decorative. |
-| **Tabular figures everywhere** | Numbers in columns must align. `font-variant-numeric: tabular-nums`, no exceptions. |
-| **Generous line-height inside dense tables** | Density comes from tight margins, not cramped text. |
-| **Left-aligned page structure, max 1440px** | A workpaper has a margin. Content does not stretch to a 27" monitor. |
-| **Typographic hierarchy over colour hierarchy** | Weight and size carry structure; colour carries meaning. |
-| **Monospace for identifiers and evidence** | Control refs, run IDs, hashes, probe payloads. |
-
-### 1.3 v2.0 — what was lifted, and what was not
-
-v1.0 was written against one failure mode: the templated AI dashboard. It succeeded, and then kept going. Built out, the product read as *unfinished* rather than *restrained* — and an assurance tool that looks unfinished is not read as disciplined, it is read as a prototype.
-
-The diagnosis matters, because "make it less plain" and "make it a SaaS dashboard" are one careless step apart. Three findings:
-
-1. **Nothing was actually wrong with the rules.** The three faces named in §2.2 were never loaded — no `next/font`, no stylesheet link — so every screen had been rendering in Segoe UI since Day 1. The brief specified Inter Tight, JetBrains Mono and Source Serif 4; the build shipped the system font. A large share of "it looks plain" was a missing `<link>`.
-2. **Restraint was being confused with absence.** "One accent colour, earned" is a good rule. One accent colour on a neutral ground *with no second voice anywhere* is a monochrome, and a monochrome has no way to signal that anyone made a decision.
-3. **Motion was banned outright** (§7, v1.0: "the product has exactly one animation"). But a page with no state transitions does not read as calm — it reads as static, and on a phone it gives the reader no feedback that anything responded to them.
-
-**Lifted:**
-
-| v1.0 constraint | v2.0 position | Why |
-|---|---|---|
-| Page ground is near-white `#fcfcfb` | **Warm oat `#f6f2e8`**, under a three-tint radial wash at ≤7% chroma | The ground is the largest surface on every screen. A near-white ground is the one that reads as "unstyled default". Oat reads as paper, which is the reference this brief named in the first line. |
-| One accent colour only | **Two inks: teal `#1c6b84` + terracotta `#bb6640`** | Terracotta is a second *voice*, not a second status colour: rules under headings, hover marks, the active filter. It is never permitted to carry severity or verdict — those stay on their own scale. |
-| "The product has exactly one animation" | **A motion system with one rhythm** (`--dur-fast/base/slow`, `--ease-out/in/inout`) | The test is unchanged and is now written down: *motion must report state*. Hover, focus, entrance and run progress all report something. §11.3 lists what is still banned. |
-| No imagery at all | **Four duotone plates, credited** | See §11.4. The programme is deliberately short and every image is mapped into the two inks, so no photograph sits in the layout at full saturation. |
-| No radius above 4px | **Controls stay at 2–3px; `--radius-lg: 10px` exists for image plates only** | A hard corner on a photograph looks like an unstyled `<img>`. Nothing else may use it. |
-| One shadow token, overlays only | **Two: `--shadow-overlay` and `--shadow-raise`** | `raise` is the hover state of an interactive surface and is tinted *warm*. A neutral-grey shadow on warm paper is the tell that a palette was applied afterwards. |
-
-**Re-affirmed, and not negotiable:**
-
-- **No headline compliance percentage.** Still the product's whole position. [PRD §7.3]
-- **`INSUFFICIENT_EVIDENCE` renders in neutral ink, as a peer verdict.** Every visual revision must leave this alone. If `PASS` ever gets a flourish that a gated verdict does not, the interface is quietly telling the reader which answer it prefers.
-- **No animated counters, no progress celebration, no confetti.** Compliance progress is not a game, and a number that ticks upward is a number the reader is being encouraged to feel rather than check.
-- **No emoji status icons.** The verdict marks added in v2.0 are geometric *shapes* — full disc, half disc, empty ring, dash — carrying the verdict without colour. That is an accessibility gain, not an icon set.
-- **No dark security-ops console.** Dark mode keeps the warmth and stays a document.
-- **No full-width marketing hero.** The overview gained a **cover sheet**, which is a different object: no call to action, no pitch, no metric tile. A workpaper file has a cover; a product has a hero. The distinction is the whole discipline here, because "the page looks plain" leads to a hero section faster than to anything else.
-- **Tabular figures everywhere.** Unchanged.
+| **Flat colour blocks for structure** | The reference set builds hierarchy from blocks of saturated colour, not from shadows. §14.2 P1 |
+| **A type scale with real steps** | Display ≈ 5.75× body (92 / 16px). v4 topped out at 2.7× (38 / 14px). §14.2 P2 |
+| **Rules and a grid, square corners** | One radius (zero), one shadow (overlays only). §14.2 P3 |
+| **Mono for every identifier and measurement** | Data should read as data. Refs, seeds, hashes, counts, intervals. §14.2 P4 |
+| **Maximum contrast for anything that must be read** | Every text pair ≥ 4.5:1, most ≥ 7:1, measured. §14.3 |
+| **Tabular figures everywhere** | Unchanged. |
 
 ---
 
 ## 2. Design tokens
 
-CSS custom properties in `frontend/styles/tokens.css`. Nothing hardcodes a hex.
+All colour, type, spacing and motion values live in `frontend/styles/tokens.css`; Tailwind (`frontend/tailwind.config.ts`) replaces its defaults with those tokens, so no default colour, radius or shadow is reachable. The v4 names (`n-*`, `accent-*`, `warm-*`, `verdict-*`, `ground-*`) no longer exist, so no component could keep v4 styling by accident.
 
-### 2.1 Colour
-
-Neutrals are **slightly warm** — a cool grey ramp is the default-SaaS tell. Warmth reads as paper.
-
-```css
-:root {
-  /* Neutral — warm grey, paper-leaning */
-  --n-0:   #ffffff;
-  --n-25:  #fcfcfb;   /* page ground */
-  --n-50:  #f7f6f4;   /* table zebra, inset panels */
-  --n-100: #eeece8;   /* hairlines, dividers */
-  --n-200: #dedbd5;   /* borders */
-  --n-300: #c2beb6;   /* disabled */
-  --n-400: #9b968c;   /* placeholder */
-  --n-500: #6f6a61;   /* secondary text */
-  --n-600: #55504a;   /* body on light */
-  --n-700: #3b3733;   /* headings */
-  --n-800: #262320;   /* primary text */
-  --n-900: #14120f;   /* max contrast */
-
-  /* Accent — deep ink blue. Interactive + structural only. */
-  --accent-700: #1b3a5c;
-  --accent-600: #24506f;
-  --accent-500: #2f6690;
-  --accent-100: #dce7ef;
-  --accent-50:  #eef4f8;
-
-  /* Severity — 4 steps, muted. Never neon. */
-  --sev-critical: #8c2f2a;
-  --sev-high:     #b4612c;
-  --sev-medium:   #8a7124;
-  --sev-low:      #4a6b52;
-  --sev-critical-bg: #f7e9e8;
-  --sev-high-bg:     #faefe4;
-  --sev-medium-bg:   #f7f2e0;
-  --sev-low-bg:      #eaf1ec;
-
-  /* Verdicts — see §6. INSUFFICIENT is NEUTRAL by design. */
-  --verdict-pass:         #3f6b4a;
-  --verdict-fail:         #8c2f2a;
-  --verdict-insufficient: #55504a;   /* deliberately neutral ink */
-  --verdict-na:           #9b968c;
-}
-```
-
-**Dark mode.** Tokens redefined under `@media (prefers-color-scheme: dark)` and `[data-theme="dark"]`, both guarded so an explicit choice wins. Dark mode inverts the neutral ramp and *desaturates* severity further. Light is the primary design; dark must not become the ops-console look §1.1 rejects.
-
-### 2.2 Type
-
-```css
---font-sans: "Inter Tight", "Inter", -apple-system, "Segoe UI", sans-serif;
---font-mono: "JetBrains Mono", "SF Mono", "Cascadia Mono", monospace;
---font-serif: "Source Serif 4", Georgia, serif;   /* report headings only */
-
---fs-2xs: 0.6875rem;  /* 11px — table meta, captions */
---fs-xs:  0.75rem;    /* 12px — dense table body */
---fs-sm:  0.8125rem;  /* 13px — default UI */
---fs-base:0.875rem;   /* 14px — body prose */
---fs-md:  1rem;
---fs-lg:  1.25rem;
---fs-xl:  1.5rem;
---fs-2xl: 1.875rem;   /* largest on screen — no 48px hero numbers */
-```
-
-Rules:
-- **All numerals `tabular-nums`.** Set globally on `body`, never overridden.
-- Headings: `--font-sans`, weight 600, tight tracking (−0.011em). Serif is used **only** in the report preview, where it signals "document" against the UI's "instrument".
-- Body copy max ~75 characters.
-- Line-height 1.5 in tables, 1.6 in prose. Density from margin, not leading. [§1.2]
-
-### 2.3 Spacing, borders, elevation
-
-```css
---sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
---sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
-
---radius-sm: 2px;   /* inputs, buttons */
---radius-md: 3px;   /* panels */
-/* No radius above 4px anywhere. Rounded-2xl is the templated look. */
-
---border-hair:   1px solid var(--n-100);
---border-strong: 1px solid var(--n-200);
-
---shadow-overlay: 0 4px 16px rgb(20 18 15 / 0.10);
-/* The ONLY shadow token. Modals, popovers, dropdowns. Nothing else. */
-```
-
-Panels are defined by a 1px border and a background shift — never by a drop shadow. This single rule does most of the work of not looking templated.
-
----
+The full palette, the type scale and the measured ratio for every pair are in §14.3 and [DESIGN.md §2-3](DESIGN.md).
 
 ## 3. Layout
 
@@ -197,9 +70,9 @@ Panels are defined by a 1px border and a background shift — never by a drop sh
 └───────────────────────────────────────────────────────────────┘
 ```
 
-- **Masthead**, not a nav bar: entity name and engagement title carry the weight, product name is secondary. A workpaper is headed by whose it is.
-- **Tabs with a 2px bottom rule** on the active item. No pill nav, no sidebar. Six destinations do not need a sidebar, and a sidebar is the SaaS reflex.
-- **Persistent footer disclosure.** The synthetic-data and not-legal-advice statement is always visible, not a dismissible banner. [PRD §9]
+- **Masthead**, not a nav bar: a solid cobalt band. The entity name carries the weight, product and engagement name are secondary. v5: fixed height, no condense on scroll, the statutory date in a lime block. [§14.4]
+- **A ruled tab rail** of 48px cells; the active cell is a lime block with an ink foot. No pill nav, no sidebar. Six destinations do not need a sidebar.
+- **Persistent footer disclosure** on an ink band. The synthetic-data and not-legal-advice statement is always visible, not a dismissible banner. [PRD §9]
 
 ---
 
@@ -213,7 +86,7 @@ Client view lands here. Three blocks, stacked, full width.
 
 > **No headline compliance percentage anywhere on this screen.** [PRD §7.3] If a reviewer asks where the score is, the answer is the FAQ in the README — a domain with 40% coverage and a domain with 95% coverage cannot be averaged into one honest number.
 
-**B. Risk heatmap.** 5×5 likelihood × impact grid, findings plotted as counts per cell. Muted severity fill with a numeral — never colour alone. Clicking a cell filters the findings register.
+**B. Risk heatmap.** 5×5 likelihood × impact grid, findings plotted as counts per cell. Full-strength severity fill (`--sev-*`) with a numeral and an ink border, never colour alone. Clicking a cell filters the findings register.
 
 **C. Evidence quality meter.** The screen's distinctive element and the product's thesis made visual. A horizontal band showing what proportion of in-scope controls have: *sufficient evidence* / *thin evidence* / *no evidence*. Reading directly: **"You have graded 60% of your estate. Here is the other 40%."**
 
@@ -225,9 +98,9 @@ Dense table. 25 rows, no pagination, sticky header.
 |---|---|---|---|---|---|---|---|
 | `DPDP-06-02` | Access to personal data is restricted… | Security | R6(1)(b) | A.5.15 | — | **Fail** | 100% |
 
-- Ref in mono. Framework refs in mono at `--fs-2xs` — the only place pills are allowed, and only for framework mappings.
+- Ref in mono cobalt. Framework refs as sharp 12px mono tags; an unverified citation is dashed with a trailing "?".
 - Filter rail above: domain, framework, verdict, executable-vs-documented.
-- Row hover: `--n-50`. Zebra striping on even rows. No hover lift, no scale transform.
+- Row hover and keyboard focus: `--cobalt-tint` with a 3px cobalt bar at the left edge. No zebra (v5: hairlines only). No hover lift, no scale transform.
 - Sort by any column; sorted column header carries a 2px accent rule.
 
 ### 4.3 Control detail
@@ -244,7 +117,7 @@ The one screen permitted motion — and only functional motion.
 
 - Suite selector, seed field (pre-filled `42`, editable — visibly reproducible), Run.
 - Results stream into a log-style list as each control resolves: `ref · control · verdict · n/N · elapsed`.
-- **The only animation in the product:** a 1px indeterminate rule under the running control. No spinners, no skeletons that pulse, no progress celebration.
+- **Run progress:** a 3px cobalt indeterminate rule. No spinners (v5 removed the one on the Run button), no skeletons that pulse, no progress celebration.
 - Verdicts land in place. A gated verdict lands as calmly as a pass — that restraint is the point.
 - On completion: summary line, and newly raised findings listed with links.
 
@@ -269,7 +142,7 @@ A standing notice: **"Public demonstration. Do not upload real personal data."**
 
 ### 4.8 Report preview
 
-Paper metaphor, and the only place it is allowed: white page on `--n-100` ground, serif headings, page-width column, print margins visible. Export buttons: Workpaper (DOCX), Executive summary (DOCX).
+Paper metaphor, and the only place it is allowed: white page on the `--inset` field, page-width column, print margins visible, Geist headings on the v5 scale. Export buttons: Workpaper (DOCX), Executive summary (DOCX).
 
 ---
 
@@ -292,10 +165,10 @@ On switch:
 
 | Rule | |
 |---|---|
-| Colour | `--verdict-insufficient` — **neutral ink**. Never red, amber, or yellow. |
+| Colour | v5: the **ink chip** (`--insufficient`, 19:1), the highest-contrast fill in the set. Never red, amber, or yellow. See §14.5. |
 | Icon | None, or a neutral horizontal rule glyph. **Never** ⚠ 🚨 ❗ |
 | Language | *"Insufficient evidence"* — never "Unknown", "Error", "Incomplete", "N/A", "Pending" |
-| Weight | Same type weight as Pass and Fail. It is a peer verdict, not a lesser one. |
+| Weight | Same chip, size and weight as Pass and Fail. It is a peer verdict, not a lesser one. |
 | Position | Same slot. It does not get pushed to a footnote. |
 
 ### 6.2 The verdict block
@@ -324,7 +197,7 @@ Every gate reason is shown with its rule ID — never only the first. Every bloc
 
 ### 6.3 In tables
 
-`Insufficient` in `--verdict-insufficient`, plus a superscript gate code (`G3`) that is a tooltip target. Never a dash, never blank — an empty cell reads as "not run", which is a different and less honest thing.
+`Insufficient evidence` as the ink chip, followed by the gate code (`G3`) as a dotted-underline `<abbr>` tooltip target. Never a dash, never blank — an empty cell reads as "not run", which is a different and less honest thing.
 
 ---
 
@@ -332,12 +205,12 @@ Every gate reason is shown with its rule ID — never only the first. Every bloc
 
 | Requirement | |
 |---|---|
-| Contrast | WCAG AA throughout; AAA for body text. `--n-600` on `--n-25` = 8.1:1. |
+| Contrast | WCAG AA throughout, measured (§14.3). Body `ink-2` on surface 10.9:1, primary ink 19.0:1, labels 6.9:1. |
 | Colour independence | **Every** severity and verdict carries a text label. Colour is redundant encoding, always. |
 | Keyboard | Full path through the demo without a mouse. Tables: arrow navigation, Enter to expand, Esc to collapse. |
-| Focus | 2px `--accent-500` outline, 2px offset. Never `outline: none`. |
+| Focus | 3px `--cobalt` outline, 2px offset. Never `outline: none`. |
 | Screen reader | Tables use real `<th scope>`. Run console is an `aria-live="polite"` region so verdicts are announced. |
-| Motion | `prefers-reduced-motion` removes the one indeterminate rule. Nothing else moves. |
+| Motion | `prefers-reduced-motion`: reveals are immediate, the scroll-progress rule is hidden, the indeterminate rule is static. |
 | Zoom | Usable at 200% without horizontal scroll, except tables (which scroll in their own container). |
 
 ---
@@ -359,9 +232,9 @@ Side gutter never below 16px. Only tables, the heatmap and the scatter may excee
 
 ## 9. Component inventory
 
-`Masthead` · `RoleSwitch` · `TabNav` · `DataTable` (sortable, expandable, sticky header — the workhorse) · `VerdictBadge` · `VerdictBlock` · `SeverityIndicator` · `ReadinessBar` · `RiskHeatmap` · `EvidenceQualityMeter` · `StatPair` (label/value, tabular) · `ClauseQuote` (verbatim rule text, serif, ruled left margin) · `EvidenceViewer` (mono, request/response) · `ThresholdRow` · `RunConsole` · `EffortImpactScatter` · `ColumnMapper` · `ReportPreview` · `DisclosureFooter`
+`Masthead` · `RoleSwitch` · `TabNav` · `DataTable` (sortable, expandable, sticky header — the workhorse) · `VerdictBadge` · `VerdictBlock` · `SeverityIndicator` · `ReadinessBar` · `RiskHeatmap` · `EvidenceQualityMeter` · `StatPair` (label/value, tabular) · `ClauseQuote` (verbatim rule text, 20px behind a 4px cobalt rule) · `EvidenceViewer` (mono, request/response) · `ThresholdRow` · `RunConsole` · `EffortImpactScatter` · `ColumnMapper` · `ReportPreview` · `DisclosureFooter`
 
-Built on Radix primitives (behaviour and a11y) with **fully custom styling from the tokens above**. Tailwind is configured to the token scale — no default Tailwind palette, no default radius scale, no default shadows. An untouched shadcn look is an explicit fail condition. [§1.1]
+Built with **fully custom styling from the tokens** in `tokens.css`; v5 adds `PageHeader` and `DeadlineCount`. Tailwind is configured to the token scale — no default Tailwind palette, no default radius scale, no default shadows. An untouched shadcn look is an explicit fail condition. [§1.1]
 
 ---
 
@@ -373,13 +246,14 @@ Run before declaring the build done. Any ✗ blocks.
 - [ ] No headline compliance percentage exists on any screen
 - [ ] `INSUFFICIENT_EVIDENCE` renders neutral, with why / how to resolve / owner, in every location
 - [ ] All numerals are tabular and align in columns
-- [ ] No border-radius exceeds 4px
-- [ ] Exactly one shadow token is in use, only on overlays
+- [ ] Every corner is square (v5 radius is 0), except the indeterminate rule
+- [ ] No shadow on the page; `--shadow-overlay` only on genuine overlays
 - [ ] Every severity and verdict has a text label, not colour alone
 - [ ] Full demo path completes by keyboard alone
 - [ ] Contrast checked on every token pair in both themes
 - [ ] Phone width (390px): no horizontal body scroll, demo still completable
-- [ ] Dark mode does not read as a security-ops console
+- [ ] Dark mode keeps every pair at AA (§14.3) and does not read as a security-ops console
+- [ ] No em-dash in any visible UI string
 - [ ] Synthetic-data disclosure visible on every screen
 - [ ] `design-taste-frontend` / `ui-ux-pro-max` review passed against this brief
 - [ ] No `w-*` or spacing utility resolves to nothing (see §11.6 — the replaced Tailwind scale silently deletes classes)
@@ -389,6 +263,8 @@ Run before declaring the build done. Any ✗ blocks.
 ---
 
 ## 11. Revision 2.0 — *Warm instrument*
+
+> **Superseded by §14 (v5.0).** Kept as a record of the reasoning at the time. Where it conflicts with §14 or [DESIGN.md](DESIGN.md), those win.
 
 ### 11.1 Palette
 
@@ -509,6 +385,8 @@ The interesting part is that the first diagnosis was wrong. Tailwind 3's `@tailw
 
 ## 12. Revision 3.0 — *Tidal*
 
+> **Superseded by §14 (v5.0).** Kept as a record of the reasoning at the time. Where it conflicts with §14 or [DESIGN.md](DESIGN.md), those win.
+
 v2.0 made the product warm and considered. It was still read as too quiet. v3.0 answers a direct brief: **a bright, vibrant, colourful background with a gradient and continuous wave motion; depth and contrast; tiles that rise and respond to the cursor and to touch, equally on desktop and mobile.**
 
 This reverses several v2.0 positions outright, and they are recorded here rather than quietly edited out of §1.3.
@@ -612,3 +490,284 @@ The skill was applied except where it contradicts the brief:
 | Use picsum, not Unsplash | Unsplash kept | Every URL was fetched and checked for 200, each photo was looked at, and all are credited (§11.4) |
 
 Everything else in the skill is followed: Geist, no Inter, no pure black, no neon glows, no custom cursor, no emoji, transform/opacity-only animation, 44px touch targets, `dvh` rather than `vh`, and single-column collapse below 768px.
+
+---
+
+## 13. Revision 4.0 — *Living Ground*
+
+> **Superseded by §14 (v5.0).** Kept as a record of the reasoning at the time. Where it conflicts with §14 or [DESIGN.md](DESIGN.md), those win.
+
+> Status: **approved 24 September 2026, palette B.** Phases 1–3 complete; see §13.9 for the decisions and the measured results. Phase 4 (finish) has not started: the performance budget in §13.7 is missed by two pre-existing transitions and needs a decision first.
+
+v3.0 made the ground vivid and gave the tiles a physical response. v4.0 makes the ground feel **alive and expensive** without moving anything the reader needs to read. The rule from §12.0 still carries all the weight: **text never sits on the moving ground.**
+
+### 13.0 Non-negotiables, restated as the test every item below must pass
+
+1. Text never sits on the moving ground. Every line of copy is on a tile whose opacity sets its contrast; WCAG AA minimum on every text/tile pair, both themes.
+2. Continuous motion only in the ground and purely decorative, non-text layers. Tiles, tables and text move only in response to the reader.
+3. The ground carries no status. `INSUFFICIENT_EVIDENCE` renders in neutral ink as a peer verdict: same weight, slot and motion as Pass and Fail.
+4. No headline compliance %, no animated or tweened numbers, no celebration on PASS, no emoji, no custom cursor, no neon outer glows, no transform on `<tr>`. Tables, run console and evidence viewer never tilt.
+5. No purple or electric blue unless approved.
+6. Reduced motion: the ground renders one static frame with its full colour, every micro-movement stops, and all content is visible.
+7. Only transform, opacity, colour and shader uniforms animate. Zero CLS from any effect.
+
+Every subsection ends with one line per item showing which of these it could threaten and how it doesn't.
+
+### 13.1 Palette: three directions (choose one)
+
+Six hues each, ordered warm to cool, read by the shader and by the CSS fallback alike from `--ground-1..6`. None uses purple or electric blue; the most blue hue in any set is A's deep sea `#2a9db8`, carried over from the approved v3.0 palette.
+
+| | Light (1 → 6) | Dark (1 → 6) | Reasoning |
+|---|---|---|---|
+| **A — Tidal Coast** | `#ffc27a` saffron · `#ff8f7a` coral · `#f4b3a0` sand rose · `#9be3d2` sea glass · `#52d1be` turquoise · `#2a9db8` deep sea | `#3a2019` · `#552723` · `#5a3226` · `#16504a` · `#0f4a4a` · `#0a2f43` | Continuity with v3.0. The two new intermediates (sand rose, sea glass) give the mesh somewhere to blend instead of snapping warm to cool. Reads as a coastline at golden hour: calm, the least surprising of the three. |
+| **B — Spice Market** | `#f6c453` turmeric · `#ffa24c` marigold · `#f2745c` chilli coral · `#93c572` cardamom · `#3baa8c` jade · `#1f7a80` deep teal | `#3b2a0e` · `#4a2410` · `#4a1b17` · `#1e3a1c` · `#0f3b33` · `#0b2b30` | Warm-dominant, the most saturated. Rooted in the engagement's place without being a postcard. The greens stop it tipping into an all-orange "sunset" cliché. Highest energy; the photos have to hold their own against it. |
+| **C — Tea Garden** | `#ffb870` marigold · `#e6e27a` citron · `#9bd38a` tea leaf · `#5ccb9f` mint · `#20a57e` emerald · `#2b8c99` lake teal | `#3e2a12` · `#2e2f12` · `#1f3a1c` · `#103d30` · `#0b3a2c` · `#0c3440` | Cool-green dominant, the quietest to read beside dense tables. One marigold counterpoint keeps it from going monochrome. Greens read as "growth" and are easiest on the eye across a long session. |
+
+Screenshots of each on Overview and Controls at 1440 and 375px are listed in the Phase 2 report.
+
+- *NN1/3:* the palette only paints the ground; tiles, ink and verdict tokens are untouched, so contrast is unchanged and no hue can be read as a status.
+- *NN5:* no purple, no electric blue in any set.
+
+### 13.2 The ground: `LivingGround` (raw WebGL, no library)
+
+- **Colour field.** Six colour points on a 3×2 lattice, each on its own slow orbit (110–160s per lap), blended by inverse-distance weight at power 2.4 into a mesh gradient, warped by two octaves of simplex noise. A colour region crosses roughly one viewport width in 40–60s. The first cut used power 1.6, which averaged all six hues toward a muddy grey-beige; power 2.4 plus a 15% chroma lift keeps each region its own colour.
+- **(a) Pointer parallax.** The warp origin eases toward the pointer (lerp 0.06 per frame), maximum offset 3% of the viewport. The colour field moves at half that; near motes move up to 1.5×, which is where the depth comes from. On touch it follows the last touch point. Nothing calls `preventDefault`.
+- **(b) Scroll response.** Flow speed rises with scroll velocity and settles back on a slightly under-damped spring (stiffness 60, damping 10.8), so a flick surges the flow and it lands with a little overshoot. Scroll position is read **once per frame inside the render loop**, not in a scroll listener, so there is no scroll handler at all.
+- **(c) Light motes.** Sixteen soft, out-of-focus Gaussian discs drifting upward at 4–10px/s with a sinusoidal sway. Size (4–15px), opacity (0.10–0.30) and pointer parallax all scale with depth. Drawn in the same shader pass; no DOM nodes.
+- **(d) Film grain.** The existing SVG grain, now oversized to 200% and stepped between six offsets per 0.5s (12fps) with `steps(1)`: one pre-rasterised texture translated on the compositor, never repainted. Effective opacity ~4% light, ~3% dark. It stays above the ground and below content (§12.6's z-order). It is CSS rather than shader grain so it stays crisp: the shader renders at half resolution and grain upscaled from there turns to soft blobs.
+- **(e) Waves.** See §13.3.
+- **(f) Decorative travel.** A hairline highlight laps the border of the cover sheet and the three principle tiles once per 14s, drawn inside the border at ≤20% opacity with no blur outside it. The masthead aperture mark rotates one turn per 60s. Never on tables or text-bearing controls. *(Phase 3.)*
+
+- *NN2:* all of (a)–(f) are in the ground or on decorative, non-text layers. Tiles still move only on hover, press, focus, scroll-entry.
+- *NN3:* motes, grain and highlights are colourless or palette-derived and never sit near a verdict.
+- *NN7:* the shader animates only uniforms; grain, waves, highlight and aperture animate only `transform`/`opacity`. The canvas is `position:absolute; inset:0` in a fixed layer, so it cannot shift layout.
+
+### 13.3 Waves: kept as CSS, on top of the canvas
+
+The three seamless wave layers stay the v3.0 CSS layer, stacked **above** the WebGL canvas and below content, rather than being ported into the shader:
+
+1. **They survive the context.** If `webglcontextlost` fires, the canvas unmounts and the CSS ground returns underneath waves that never stopped. Shader waves would vanish with the context.
+2. **They stay crisp.** The shader renders at 0.5×; wave crests upscaled from half resolution would soften visibly. CSS waves are vector at full resolution.
+3. **They cost nothing extra.** Three `transform` animations on the compositor versus extra per-pixel work in a shader already doing noise, six-point blending and sixteen motes.
+4. **They are already proven** seamless and measured (§12.3).
+
+The cost is one extra composited layer, which is negligible.
+
+- *NN6:* the existing reduced-motion rule already freezes them.
+
+### 13.4 Tile finish (Phase 4)
+
+Every tile gets, in addition to the §12.4 behaviour:
+
+- a 1px **inner top highlight** (`inset 0 1px 0`, white ~50% light / ~8% dark);
+- a 1px **low-alpha outer hairline**, dark on light and light on dark, replacing today's light-only edge;
+- a **three-layer shadow**: contact (0 1px 1px), mid (0 6px 14px) and ambient (0 24px 48px), each tinted toward the ground hue, never neutral grey;
+- **2% noise** inside the tile, on a fixed-size pseudo-element so it cannot repaint on scroll;
+- frosting above 768px only (§12.6), unchanged.
+
+- *NN1:* the noise and highlight are ≤2% and ≤50% alpha on a 93% tile; text contrast is re-measured after the change (§13.8).
+
+### 13.5 Typography, spacing and states (Phase 4)
+
+- **Spacing:** every margin, padding and gap resolves to `--sp-*`. The audit found all spacing already on-scale; the off-scale values are **sizes** and **tracking**, listed in the Phase 2 report and fixed in Phase 4.
+- **Type:** `text-wrap: balance` on headings, `pretty` on prose. Tracking tightens as size grows (a token per size step). Emphasis by Geist's weight axis rather than size jumps. Only OpenType features Geist actually ships, verified against the font file before use. Tabular numerals everywhere (unchanged). Filing-style section numbers (`§01`, `§02`) in JetBrains Mono on page-level headings.
+- **Microstates:** every interactive element gets a designed default / hover / focus-visible / active / disabled / loading. The gap matrix is in the Phase 2 report.
+- **Micro-interactions:** buttons press to `scale(0.97)` with a spring release; a soft sheen follows the pointer across primary buttons; the focus ring animates in over `--dur-fast`; the tab underline slides between tabs as one element.
+- **Designed states:** API unreachable, no runs yet, a suite returning zero rows. Each says what happened and what to do, and uses the hairline indeterminate rule; no spinners, no pulsing skeletons. The Run button's current spinner is removed for the same reason.
+- **Entrance choreography (first load only):** ground fades in over 600ms, masthead next, tiles stagger at 40ms, with the whole sequence ≤900ms. It never blocks input, and is skipped on client-side navigation and under reduced motion.
+- **Route transitions:** React `<ViewTransition>` as sanctioned by the Next 16 guide (`name` + `share="morph"` + `default="none"`), morphing the control ref from its table row into the control-detail heading. Browsers without the View Transitions API navigate instantly.
+- **The Aperture** (Overview cover sheet): see §13.6.
+
+- *NN2:* the sheen and focus ring respond to the reader; the entrance runs once; no text moves continuously.
+- *NN4:* no transform lands on a `<tr>`. The route morph names a `<span>` inside the cell, not the row.
+- *NN6:* entrance, sheen, press spring and view transitions all collapse under reduced motion.
+
+### 13.6 The Aperture (Phase 4, pending a threshold decision)
+
+On the Overview cover sheet, the reader sets **k** (successes) and **n** (trials) with labelled range inputs. An SVG band shows the 95% Wilson interval against the threshold rule, and the verdict slot switches between **Insufficient evidence / Pass / Fail**, with its gate code, using one identical cross-fade for all three. It is input-driven only, keyboard operable, and announced through an `aria-live` region.
+
+Wilson is a pure function in `frontend/lib/`, asserted with `node -e` so that 12/12 at z=1.96 gives a lower bound of **0.7575 ± 0.0005**.
+
+**Blocked on a decision:** the frontend holds no gate constants, and the backend's (`min_sample_n = 30`, `max_ci_width = 0.20`, `min_coverage_pct = 10.0`) define when the gate fires, not what separates Pass from Fail. No existing constant is a pass/fail rate. It will not be invented.
+
+- *NN3:* the three verdicts share one component, one weight and one transition. Pass gets nothing Insufficient does not.
+- *NN4:* the interval bounds update instantly on input and are never tweened.
+
+### 13.7 Performance budget and how it is enforced
+
+| Rule | Value | Where |
+|---|---|---|
+| Render resolution | 0.5× of CSS size, upscaled by CSS | `RENDER_SCALE` |
+| DPR cap | 1.5 fine pointer, 1 coarse pointer | `dprCap` |
+| Frame cap | 30fps when `saveData` or `hardwareConcurrency <= 4` | `minFrameMs` |
+| Hidden tab | loop cancelled on `visibilitychange` | `onVisibility` |
+| Software GL | refused via `failIfMajorPerformanceCaveat` → CSS ground | context options |
+| Context lost | canvas unmounts → CSS ground | `onLost` |
+| Handlers | pointer/resize only stash numbers; all reads once per frame | — |
+| **Budget** | **p95 frame time ≤ 16.7ms at 1440px while scrolling Controls; no long task >50ms attributable to the ground** | measured in Phase 3 |
+
+Frame samples are exposed on `window.__livingGround.frames` for the Phase 3 measurement.
+
+**A defect caught in the first cut:** the CSS blooms were retired on a timer while the canvas was revealed inside a `requestAnimationFrame`. When frames were throttled, the timer won: the blooms vanished and the canvas never appeared, leaving a flat ground that was neither engine. The canvas is now revealed only inside the frame that first draws it, and the blooms are retired only by the canvas's own `transitionend`. This is the §11.7 lesson again, a timer standing in for an event.
+
+### 13.8 Reduced motion
+
+| Layer | Under `prefers-reduced-motion: reduce` |
+|---|---|
+| WebGL ground | One static frame, full colour. The loop never starts. |
+| Motes, parallax, scroll surge | Frozen in that frame. |
+| Grain | Stops on its first step. |
+| Waves, blooms | Frozen (existing §12 rule). |
+| Border highlight, aperture spin | Stopped. |
+| Entrance choreography | Skipped; everything visible immediately. |
+| Tile tilt, button spring, sheen | Off; hover states remain as colour only. |
+| Route transitions | Instant. |
+
+**Also found in the audit:** content revealed on scroll starts at opacity 0, so anything that renders the page **without scrolling it** (printing, full-page capture) shows below-the-fold tiles as blank. For a tool that prints workpapers that breaks NN6, and a `@media print` rule forcing every reveal visible ships in Phase 4.
+
+### 13.9 Decisions and Phase 3 results
+
+**Decisions (24 September 2026):** palette **B, Spice Market**; §13 approved as written; the Aperture judges Pass/Fail against a **5% tolerable exception rate** (Pass when the Wilson lower bound is ≥ 0.95, Fail when the upper bound is < 0.95, otherwise the gate decides), with G1/G2 mirroring `backend/app/engine/thresholds.py` (`min_sample_n = 30`, `max_ci_width = 0.20`). The skill's flags on em-dashes, per-tile eyebrow labels and hand-drawn SVG marks are **noted, not actioned**: fixing them means rewriting copy and adding an icon dependency, both outside scope.
+
+**Shipped in Phase 3:** palette B baked into `--ground-1..6` with the candidate block and the `?ground` switch removed; the border light (§13.2f) on the cover sheet and principle tiles; the aperture spin.
+
+**Fallbacks, all measured, all pass:**
+
+| Test | Result |
+|---|---|
+| WebGL unavailable | CSS ground, canvas never shown, blooms on, waves moving |
+| `webglcontextlost` mid-session | canvas unmounted, engine attribute removed, blooms back, waves never stopped |
+| Reduced motion | one static frame, 0 loop frames in 1.5s, 6/6 reveals visible without scrolling, border light hidden, 0 running animations |
+| Hidden tab | loop frozen while hidden, resumed on visible |
+| Transitions disabled | blooms retired correctly (see defect below) |
+
+**Defect found by measurement:** `transitionend` never fires for a zero-duration transition, so where transitions are switched off the blooms under an opaque canvas were never retired and both grounds rendered at once. The canvas now also checks its computed `transition-duration` once shown.
+
+**Performance: budget MISSED as shipped, and the cause is not the ground.** p95 while scrolling Controls, production build, 1440×900, integrated GPU (Intel Iris Xe):
+
+| Condition | p95 |
+|---|---|
+| Full v4 as built | 33.6 / 50.2 / 66.6 ms (three runs) |
+| Full v4, WebGL ground idle (no scroll) | 16.9 ms |
+| Full v4 while scrolling, **neither trigger below active** | **16.9 / 16.9 ms, within budget** |
+| … plus rows transitioning under the cursor | 33.5 ms |
+| … plus the masthead condense transition | 33.4 ms |
+| v3.0 CSS ground (WebGL off), dev build | 83.4 ms |
+
+At 375px (mobile emulation, coarse pointer, DPR 3 → canvas capped to 188×406) the full stack measures **33.4 ms**.
+
+The WebGL ground, the frosting, the grain and the waves together fit the budget. Both causes are v2/v3 transitions that run **during** scroll: the masthead's `transition-all` animating padding (layout on every frame) each time the scroll crosses 24px, and table rows running their background and edge-rule transitions as they slide under a stationary cursor. The fix is a decision the brief reserves for the reader of this report, so it is not applied.
+
+---
+
+## 14. Revision 5.0: *Signal*
+
+v4 was used and rejected: it read as dark, dull and low-energy, and the previous round had only changed colour values. The brief for v5 was a **base-level** redesign (colour, type, spacing, layout, component structure) with full authority to override every earlier position.
+
+### 14.1 Research: award-winning references
+
+Only sites whose award could be confirmed on the awarding body's own page are cited. Each live site was opened at 1440×900 and its computed styles sampled, so the notes below describe what the site does, not what it is remembered to do.
+
+| Site | Award (verified) | Colour strategy | Type hierarchy | Density / spacing | Why it feels bright and premium |
+|---|---|---|---|---|---|
+| **Breaking** (plastics data science; Maven Creative, The Limbo Society) | Awwwards Site of the Day, 14 Aug 2024, + Developer Award; tagged *Data Visualization* | Flat electric cobalt `#2D41D3` floods whole sections, white type on it; acid yellow-lime as the highlighter; pale ground between blocks | Grotesk display at poster size (~130px) against ~20px body; one family, weight does the rest | Full-bleed colour bands; generous section padding; one idea per band | Colour is used as **surface**, not tint. One saturated hue plus one high-key accent. No gradient, no shadow |
+| **Shift5** (fleet and defence operational intelligence; Non-Linear Studio) | Awwwards Site of the Day, 2 Mar 2026; tagged *Data Visualization, Retro* | Hard colour blocks on a grid: vermilion, light grey, near-black `#202020` | 200px display, tracking −4px; mono (NonSans) for the "System status" data list | A strict grid of rectangles; data set as a numbered mono list | Square corners, zero shadow, a ruled grid. Data looks like instrumentation |
+| **Jeton** (payments / e-wallet; Bürocratik) | Awwwards Site of the Day, 27 Jan 2025, + Developer Award (7.8) | One brand colour, saturated coral-red `#F73B20`, used big | Sequel Sans, headline 106px at weight 500 vs 16px body | Very few elements per viewport | A single committed hue at full saturation, and headline weight 500 rather than bold |
+| **AI in Banking UX Design** (Vide Infra) | CSS Design Awards Website of the Day, 15 Nov 2024 (scores 20/20 UI, UX, Innovation) | White ground, black ink in the reading sections | PP Neue Montreal, 235px display with −0.05em tracking; body 19px | Wide margins, long reading measure kept under control | Extreme scale contrast between display and body; body text is *large* |
+| **Madar** (logistics management platform; Vide Infra) | Awwwards Site of the Day, 19 Sep 2025 | Navy `#172E64` + orange `#FF6340` (Awwwards palette listing) | Not verified: the live site could not be reached at a verifiable URL | n/a | Listed for the palette only: one deep structural hue plus one hot accent |
+| **Navigate** (Web3 data platform; Resn) | Awwwards Site of the Day, 16 Apr 2025; tagged *Data Visualization, Colorful* | Orange `#FF6D38` + periwinkle `#8584FF` (Awwwards palette listing) | Not verified (site timed out) | n/a | Listed for the palette only |
+
+Sources: [awwwards.com/sites/breaking](https://www.awwwards.com/sites/breaking) · [awwwards.com/sites/shift-5](https://www.awwwards.com/sites/shift-5) · [awwwards.com/sites/jeton](https://www.awwwards.com/sites/jeton) · [cssdesignawards.com/sites/ai-in-banking-ux-design/46554](https://www.cssdesignawards.com/sites/ai-in-banking-ux-design/46554) · [awwwards.com/sites/madar](https://www.awwwards.com/sites/madar) · [awwwards.com/sites/navigate](https://www.awwwards.com/sites/navigate). No Webby or FWA winner in these categories could be verified on the awarding body's own page within the session, so none is cited.
+
+### 14.2 The recurring principles, and how v4 broke each
+
+| | Principle across winners | What v4 did instead |
+|---|---|---|
+| **P1** | **Saturated colour as flat surface.** One structural hue plus one high-key accent, used as blocks. | Colour lived only in a moving gradient *behind* 93%-opaque off-white tiles. Everything you read sat on the same near-white, so the colour was felt as noise at the edges, never as structure. |
+| **P2** | **Extreme type-scale contrast.** Display 100-235px against 16-19px body, one grotesk, weight 400-500 for display. | 83 of 91 font-size uses were 11-13px. The largest size (38px) was used once. Default UI was 13px, body 14px. Hierarchy had nowhere to come from, so everything read at the same volume. |
+| **P3** | **Grid and hard edges, not floating cards.** Square corners, rules, zero or near-zero shadow. | 14px-radius tiles with a layered drop shadow, tilting toward the cursor: exactly the "rounded cards floating on a page" the v1 brief rejected, dressed up with motion. |
+| **P4** | **Mono as the data voice.** Identifiers and measurements set as instrumentation. | Mono existed but at 11px in `n-400`/`n-500` grey, so the data was the faintest thing on the page. |
+| **P5** | **Maximum contrast for what must be read.** Near-black on white, white on the brand hue. | Labels at 3.0-3.4:1, severity high/medium below 4.5:1, verdict colours 1.3-1.4:1 apart in luminance (§14.3). |
+
+### 14.3 Contrast, measured
+
+Computed with the WCAG 2.x relative-luminance formula (script: `contrast.py`, kept with the session artefacts). v4's tile is 93% opaque, so it was composited over the ground before measuring.
+
+**v4 (as shipped), worst cases:**
+
+| Pair | Ratio | |
+|---|---|---|
+| `n-400` 11px uppercase labels on tile over deep teal | 3.23:1 | fails AA |
+| `n-400` on zebra row `n-50` | 3.02:1 | fails AA |
+| `verdict-na` on tile | 3.23:1 | fails AA |
+| `sev-high` on tile | 4.14:1 | fails AA |
+| `sev-medium` on tile over teal | 4.49:1 | fails AA |
+| unchecked chip box `n-300` vs panel (UI, needs 3:1) | 2.20:1 | fails |
+| hairline `n-100` vs tile | 1.31:1 | invisible |
+| pass vs fail ink (luminance only) | 1.28:1 | indistinguishable in greyscale |
+
+**v5 light:**
+
+| Pair | Ratio | Level |
+|---|---|---|
+| ink `#0d1017` on surface `#ffffff` | 19.03:1 | AAA |
+| ink on page `#f4f5f7` | 17.44:1 | AAA |
+| body `ink-2 #363d4a` on surface | 10.92:1 | AAA |
+| meta/labels `ink-3 #525a69` on surface / page / inset | 6.94 / 6.36 / 5.86:1 | AA |
+| link cobalt `#2436e6` on surface / inset | 7.65 / 6.46:1 | AAA / AA |
+| white on cobalt masthead, primary button | 7.65:1 | AAA |
+| white on cobalt-deep (hover) | 9.88:1 | AAA |
+| ink on lime `#cdf23a` (active tab, highlight) | 14.82:1 | AAA |
+| white on PASS `#0b8048` | 5.01:1 | AA |
+| white on FAIL `#d0231a` | 5.33:1 | AA |
+| white on INSUFFICIENT `#0d1017` | 19.03:1 | AAA |
+| N/A text on surface | 6.94:1 | AA |
+| pass / fail as inline text on surface | 5.41 / 5.91:1 | AA |
+| severity: white on critical / ink on high / medium / low | 5.33 / 7.30 / 12.39 / 10.22:1 | AA / AAA / AAA / AAA |
+| control borders `#7d8697` vs surface (UI) | 3.67:1 | ≥ 3:1 |
+| focus ring cobalt vs surface (UI) | 7.65:1 | ≥ 3:1 |
+
+**v5 dark** (surface `#151821`): ink 16.10, ink-2 10.57, ink-3 6.99, link `#9aa5ff` 7.77, pass text 9.78, fail text 6.98, white on cobalt block 6.61, ink on PASS / FAIL / INSUFFICIENT fills 8.62 / 6.96 / 17.65, ink on lime 15.14, control border 3.85:1. Every text pair clears AA and most clear AAA.
+
+**One known limit.** The severity-high (2.61:1) and severity-medium (1.54:1) *fills* do not separate from white as shapes. Their text passes (7.3 and 12.4:1), and every severity chip carries a 1px ink border and a word, so the boundary and the meaning never depend on the fill.
+
+Rendered values were also read back from the browser (`getComputedStyle`) to confirm the chips render the tokens (light Fail: white on `rgb(208,35,26)`; dark Fail: `rgb(11,13,18)` on `rgb(255,107,95)`).
+
+### 14.4 What changed, structurally
+
+| Layer | v4 | v5 | Principle |
+|---|---|---|---|
+| **Ground** | WebGL mesh gradient + CSS waves + film grain + drifting blooms (`LivingGround`, `AmbientBackground`) | A flat `#f4f5f7` page. The six decorative components (`LivingGround`, `AmbientBackground`, `EdgeTravel`, `SurfaceMotion`, `Spotlight`, `ScrollProgress`) are **deleted** | P1, P5 |
+| **Surfaces** | `.panel`: 93%-opaque tile, 14px radius, tinted drop shadow, backdrop blur, 3D tilt | `.ruled` grid (1px ink gaps between white cells), `.sheet` (white, 1px ink frame), `.section-rule` (2px ink top rule). Radius 0 everywhere, no shadow on the page | P3 |
+| **Colour** | Oat/teal/terracotta, muted severity, neutral-grey Insufficient | Cool neutrals, cobalt used as flat blocks (masthead, cover fact block, primary action), lime as highlighter (active tab, `<mark>`, scroll progress), full-strength verdict and severity fills | P1, P5 |
+| **Type** | 11/12/13/14px for almost everything; one 38px line | 12 / 13 / 14 / **16 body** / 20 / 28 / 36-56 page title / 40-64 counts / 44-92 cover display; tracking tightens with size; nothing below 12px | P2 |
+| **Labels** | 11px uppercase, 0.14-0.18em tracking, 3.2:1 | `.label`: 13px, sentence case, weight 500, 6.9:1 | P5 |
+| **Masthead** | Translucent veil, condensed on scroll (scroll listener + animated padding) | Solid cobalt band, fixed height, no scroll listener; deadline in a lime block | P1 |
+| **Navigation** | Text tabs with a 2px underline | Ruled rail of 48px cells; active cell is a lime block with an ink foot | P1, P3 |
+| **Page headers** | Title boxed inside a tile (text could not sit on the ground) | `PageHeader`: 36-56px title standing on the page, 16-20px lede | P2 |
+| **Overview** | Stack of tiles: cover, three equal principle cards, two photo tiles | One ruled cover grid: display statement (white), cobalt fact block with the day count, full-colour photograph, the three commitments as a numbered list | P1, P2, P3 |
+| **Controls** | Intro tile + photo; text-link filter rail; 12px zebra table | Page title + ruled count strip (25 / 13 / 12 / 1 in 40-64px mono); filters as 44px toggle blocks (active = ink fill); 14px table, 12/16px cells, inset header band with 2px ink rule, cobalt hover bar | P2, P3, P4 |
+| **Control detail** | Grid of tilting tiles with 11px uppercase headings | Title + ruled fact strip; main column in `section-rule` sections with 20px headings; side column in `sheet` asides with inset heading bands | P2, P3 |
+| **Run console** | Suite chips with pale tint, spinner on Run | 44px toggle blocks (selected = ink fill, lime check); Run button states the count ("Run 5 suites"), no spinner; ink results header band with per-verdict counts | P1, P4 |
+| **Verdicts** | Coloured text + 9px mark | Solid chips, one size and weight; Insufficient evidence is the **ink** chip | P5 |
+| **Statute quotation** | Source Serif 4 | 20px Geist behind a 4px cobalt rule, lime "Legal basis" tag. The serif is no longer loaded | P2 |
+| **Photographs** | Duotoned into the palette, 10px radius | Full colour, square, reserved box | P1 |
+| **Scroll progress** | JS component with a scroll listener | CSS scroll-driven animation (`animation-timeline: scroll()`), no JavaScript; hidden where unsupported and under reduced motion | P4 (no cost) |
+
+**Kept because it was right:** no headline compliance percentage; every verdict and severity has a word and a shape; tabular figures; `row-interactive` answering keyboard focus as well as hover; measured sticky heights; `Reveal` failing visible; the print rule; the full reduced-motion block. No npm dependency was added (Geist and JetBrains Mono were already loaded through `next/font`).
+
+### 14.5 The Insufficient-evidence decision, revisited
+
+The owner lifted the rule that `INSUFFICIENT_EVIDENCE` must be neutral grey. The **principle** behind that rule, that it is a peer verdict and never a warning, is kept; its **rendering** changes. In v4, grey ink next to coloured Pass and Fail read as the lesser verdict: the absence of a result. In v5 it is the ink chip, the highest-contrast fill in the set (19:1), same size, weight and slot as the others. It is still never red, amber or yellow.
+
+### 14.6 Tooling used, and what was missing
+
+- `design-taste-frontend` was loaded. Its own §13 declares dashboards and data tables out of scope, so only its anti-default rules (em-dash ban, no three-equal cards, eyebrow restraint, one radius system, colour lock) were applied.
+- `ui-ux-pro-max` was loaded and its design-system generator run. It recommended a dark OLED style, which contradicts the light-first brief, and was rejected; its accessibility and interaction checklists were applied.
+- **Not available:** the Figma connector is installed but unauthorised in this environment, so no design file could be read or produced, and no automated contrast/visual-regression tool exists in the project. Contrast was computed with a script and verified against computed styles instead.
+
+### 14.7 Verification
+
+- Screenshots before and after at 1440×900 and 390×844 for Overview, Controls, Control detail and Test runs, plus dark mode at 1440.
+- No horizontal page overflow at 375, 390, 768 and 1440px in either theme (measured `scrollWidth`).
+- `npm run typecheck`, `npm run lint` and `npm run build` (with `NEXT_PUBLIC_API_BASE_URL` set, as `next.config.mjs` requires) pass.

@@ -8,6 +8,7 @@ import {
   type ResultSummary,
   type RunDetail,
   type SuiteCatalogue,
+  type Verdict,
 } from "@/lib/api";
 import { VerdictBadge } from "./VerdictBadge";
 
@@ -22,8 +23,8 @@ import { VerdictBadge } from "./VerdictBadge";
  *   a sequence of findings rather than a block that blinked into place;
  * * the gate explanation, which expands from the row it belongs to.
  *
- * What is still banned: spinners over the whole panel, pulsing skeletons,
- * animated counters, and any celebration of a pass. A gated verdict must
+ * What is still banned: spinners (v5 removed the Run button's), pulsing
+ * skeletons, animated counters, and any celebration of a pass. A gated verdict must
  * land as calmly as a pass, because that restraint IS the argument. If
  * PASS got a flourish and INSUFFICIENT_EVIDENCE did not, the interface
  * would be quietly telling the reader which answer it prefers. [UX 4.4]
@@ -67,139 +68,96 @@ export function RunConsole({
     );
   }
 
-  return (
-    <div className="flex flex-col gap-5">
-      <section className="panel p-4 md:p-5">
-        <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">Run</h3>
+  const count = selected.length;
 
-        <div className="mt-3 flex flex-wrap items-end gap-5">
-          <fieldset className="border-0 p-0">
-            <legend className="text-2xs uppercase tracking-[0.14em] text-n-400">
-              Suites
-            </legend>
+  return (
+    <div className="flex flex-col gap-6">
+      <section className="sheet p-5 md:p-6" aria-labelledby="run-heading">
+        <h3 id="run-heading">Configure a run</h3>
+
+        <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end">
+          <fieldset className="m-0 min-w-0 flex-1 border-0 p-0">
+            <legend className="label">Suites</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {suites.length === 0 && (
-                <span className="text-sm text-n-500">No suites registered.</span>
+                <span className="text-sm text-ink-2">No suites registered.</span>
               )}
               {suites.map((suite) => {
                 const on = selected.includes(suite);
                 return (
-                  <label
-                    key={suite}
-                    data-selected={on ? "true" : "false"}
-                    className="chip"
-                  >
+                  <label key={suite} data-selected={on ? "true" : "false"} className="toggle">
                     <input
                       type="checkbox"
                       checked={on}
                       onChange={() => toggle(suite)}
                       className="sr-only"
                     />
-                    {/* Drawn rather than relying on the native box: the whole
-                        chip becomes a 36px target, which the 13px default
-                        checkbox is not. [a11y touch-target-size] */}
-                    <svg
-                      viewBox="0 0 14 14"
-                      width="13"
-                      height="13"
-                      aria-hidden="true"
-                      className="shrink-0"
-                    >
+                    {/* Drawn, so the whole 44px block is the target rather
+                        than a 13px native box. [a11y touch-target-size] */}
+                    <svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true" className="shrink-0">
                       <rect
-                        x="0.9"
-                        y="0.9"
-                        width="12.2"
-                        height="12.2"
-                        rx="2"
-                        fill={on ? "var(--accent-600)" : "transparent"}
-                        stroke={on ? "var(--accent-600)" : "var(--n-300)"}
-                        strokeWidth="1.2"
-                        className="transition-all duration-fast ease-out"
+                        x="0.75"
+                        y="0.75"
+                        width="12.5"
+                        height="12.5"
+                        fill={on ? "var(--lime)" : "transparent"}
+                        stroke={on ? "var(--lime)" : "currentColor"}
+                        strokeWidth="1.5"
                       />
                       <path
-                        d="M3.6 7.2 6 9.5l4.4-5"
+                        d="M3.5 7.2 6 9.6l4.5-5.2"
                         fill="none"
-                        stroke="var(--n-0)"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        style={{
-                          opacity: on ? 1 : 0,
-                          transition: "opacity var(--dur-fast) var(--ease-out)",
-                        }}
+                        stroke="var(--on-lime)"
+                        strokeWidth="1.8"
+                        strokeLinecap="square"
+                        style={{ opacity: on ? 1 : 0 }}
                       />
                     </svg>
-                    <span className="font-mono text-xs">{suite}</span>
+                    <span className="font-mono">{suite}</span>
                   </label>
                 );
               })}
             </div>
           </fieldset>
 
-          <div>
-            <label
-              htmlFor="seed"
-              className="block text-2xs uppercase tracking-[0.14em] text-n-400"
-            >
-              Seed
-            </label>
-            <input
-              id="seed"
-              value={seed}
-              onChange={(e) => setSeed(e.target.value)}
-              inputMode="numeric"
-              className="field mt-2 w-[5.5rem] font-mono text-sm"
-            />
-          </div>
+          <div className="flex items-end gap-3">
+            <div>
+              <label htmlFor="seed" className="label block">
+                Seed
+              </label>
+              <input
+                id="seed"
+                value={seed}
+                onChange={(e) => setSeed(e.target.value)}
+                inputMode="numeric"
+                className="field mt-2 w-24 font-mono"
+              />
+            </div>
 
-          <button
-            type="button"
-            onClick={execute}
-            disabled={running || selected.length === 0}
-            className="btn btn-primary"
-          >
-            {running && (
-              <svg
-                viewBox="0 0 16 16"
-                width="13"
-                height="13"
-                aria-hidden="true"
-                className="shrink-0 animate-spin"
-              >
-                <circle
-                  cx="8"
-                  cy="8"
-                  r="6.4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeOpacity="0.3"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M8 1.6A6.4 6.4 0 0 1 14.4 8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            )}
-            {running ? "Running" : "Run"}
-          </button>
+            <button
+              type="button"
+              onClick={execute}
+              disabled={running || count === 0}
+              className="btn btn-primary min-w-[10rem]"
+            >
+              {running
+                ? "Running"
+                : count === 0
+                  ? "Select a suite"
+                  : `Run ${count} suite${count === 1 ? "" : "s"}`}
+            </button>
+          </div>
         </div>
 
-        <p className="m-0 mt-3 max-w-prose text-xs text-n-500">
-          The seed is recorded on the run and printed in the workpaper. A
-          result nobody can regenerate is an assertion, not a finding.
+        <p className="m-0 mt-4 max-w-prose text-sm text-ink-2">
+          The seed is recorded on the run and printed in the workpaper. A result
+          nobody can regenerate is an assertion, not a finding.
         </p>
 
-        {running && <div className="indeterminate-rule mt-3" />}
+        {running && <div className="indeterminate-rule mt-4" />}
 
         {error && (
-          <p
-            role="alert"
-            className="m-0 mt-3 border-l-2 border-verdict-fail bg-verdict-fail-bg px-3 py-2 text-sm text-n-700"
-          >
+          <p role="alert" className="m-0 mt-4 border-l-4 border-fail bg-inset px-4 py-3 text-sm text-ink">
             {error}
           </p>
         )}
@@ -210,47 +168,52 @@ export function RunConsole({
   );
 }
 
+const VERDICT_ORDER: Verdict[] = ["PASS", "FAIL", "INSUFFICIENT_EVIDENCE", "NOT_APPLICABLE"];
+
 function Results({ run }: { run: RunDetail }) {
-  const counts = run.results.reduce<Record<string, number>>((acc, r) => {
+  const counts = run.results.reduce<Partial<Record<Verdict, number>>>((acc, r) => {
     acc[r.verdict] = (acc[r.verdict] ?? 0) + 1;
     return acc;
   }, {});
 
   return (
-    <section className="panel">
-      <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-n-200 px-4 py-3">
-        <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">
-          Run {run.id} &middot; {run.status.toLowerCase()}
-        </h3>
-        <p className="m-0 font-mono text-2xs text-n-500">
-          seed {run.seed} &middot; {run.result_count} results &middot;{" "}
-          {Object.entries(counts)
-            .map(([v, n]) => `${n} ${v.toLowerCase().replace(/_/g, " ")}`)
-            .join(" · ")}
-        </p>
+    <section className="sheet" aria-labelledby="results-heading">
+      <header className="flex flex-wrap items-center justify-between gap-4 bg-band px-5 py-4 text-on-band">
+        <div>
+          <h3 id="results-heading" className="text-on-band">
+            Run {run.id}{" "}
+            <span className="font-normal text-on-band-2">{run.status.toLowerCase()}</span>
+          </h3>
+          <p className="m-0 mt-1 font-mono text-meta text-on-band-2">
+            seed {run.seed} / {run.result_count} results
+          </p>
+        </div>
+        {/* Counts per verdict, side by side at equal weight. No total score,
+            and no verdict is summed into another. */}
+        <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+          {VERDICT_ORDER.filter((v) => counts[v]).map((v) => (
+            <li key={v} className="flex items-center gap-2 bg-surface px-2 py-1">
+              <VerdictBadge verdict={v} />
+              <span className="font-mono text-sm font-semibold text-ink">{counts[v]}</span>
+            </li>
+          ))}
+        </ul>
       </header>
 
       <div className="scroll-x">
-        <table className="w-full border-collapse text-xs leading-table">
+        <table className="data-table min-w-[46rem]">
           <thead>
-            <tr className="border-b border-n-200 bg-n-50 text-left">
-              <Th className="w-32">Ref</Th>
-              <Th>Control</Th>
-              <Th className="w-44">Verdict</Th>
-              <Th className="w-28">Sample</Th>
-              <Th className="w-40">95% interval</Th>
+            <tr>
+              <th scope="col" className="w-32">Ref</th>
+              <th scope="col">Control</th>
+              <th scope="col" className="w-48">Verdict</th>
+              <th scope="col" className="w-32">Sample</th>
+              <th scope="col" className="w-40">95% interval</th>
             </tr>
           </thead>
           <tbody>
-            {run.results.map((result, i) => (
-              <ResultRow
-                key={result.id}
-                result={result}
-                zebra={i % 2 === 1}
-                /* Capped: a stagger that runs past about 360ms stops reading
-                   as a sequence and starts reading as a slow page. */
-                delay={Math.min(i, 12) * 30}
-              />
+            {run.results.map((result) => (
+              <ResultRow key={result.id} result={result} />
             ))}
           </tbody>
         </table>
@@ -259,119 +222,67 @@ function Results({ run }: { run: RunDetail }) {
   );
 }
 
-function ResultRow({
-  result,
-  zebra,
-  delay,
-}: {
-  result: ResultSummary;
-  zebra: boolean;
-  delay: number;
-}) {
+function ResultRow({ result }: { result: ResultSummary }) {
   const gated = result.verdict === "INSUFFICIENT_EVIDENCE";
-  const stagger = { animationDelay: `${delay}ms` } as React.CSSProperties;
 
   return (
     <>
-      <tr
-        style={stagger}
-        className={`row-interactive row-enter border-b border-n-100 align-top ${
-          zebra ? "bg-n-25" : ""
-        }`}
-      >
-        <Td>
-          <span className="whitespace-nowrap font-mono text-accent-600">
+      <tr className="row-interactive">
+        <td>
+          <span className="whitespace-nowrap font-mono font-semibold text-link">
             {result.control_ref}
           </span>
-        </Td>
-        <Td className="text-n-800">{result.control_title}</Td>
-        <Td>
-          <VerdictBadge
-            verdict={result.verdict}
-            gateReasons={result.gate_reasons}
-          />
+        </td>
+        <td className="font-medium text-ink">{result.control_title}</td>
+        <td>
+          <VerdictBadge verdict={result.verdict} gateReasons={result.gate_reasons} />
           {result.gate_fired && result.raw_outcome && (
-            <div className="mt-1 text-2xs text-n-500">
+            <div className="mt-1 text-meta text-ink-3">
               measured {result.raw_outcome.toLowerCase()}
             </div>
           )}
-        </Td>
-        <Td className="font-mono text-n-600">
+        </td>
+        <td className="font-mono text-ink">
           {result.sample_size === null
-            ? "—"
+            ? "n/a"
             : `${result.sample_size.toLocaleString()}${
-                result.population_size
-                  ? ` / ${result.population_size.toLocaleString()}`
-                  : ""
+                result.population_size ? ` / ${result.population_size.toLocaleString()}` : ""
               }`}
           {result.coverage_pct !== null && (
-            <div className="text-2xs text-n-500">
-              {result.coverage_pct.toFixed(2)}% coverage
-            </div>
+            <div className="text-meta text-ink-3">{result.coverage_pct.toFixed(2)}% coverage</div>
           )}
-        </Td>
-        <Td className="font-mono text-n-600">
+        </td>
+        <td className="font-mono text-ink">
           {result.ci_lower === null || result.ci_upper === null
-            ? "—"
-            : `${result.ci_lower.toFixed(3)} – ${result.ci_upper.toFixed(3)}`}
-        </Td>
+            ? "n/a"
+            : `${result.ci_lower.toFixed(3)} to ${result.ci_upper.toFixed(3)}`}
+        </td>
       </tr>
 
       {gated && (
-        <tr
-          style={stagger}
-          className={`row-enter border-b border-n-100 ${zebra ? "bg-n-25" : ""}`}
-        >
-          <td />
-          <td colSpan={4} className="px-3 pb-3">
-            {/* Why, what would resolve it, in that order. A gate that cannot
-                say how to clear it is an excuse. [UX 6.2] */}
-            {result.gate_explanations.map((why, i) => (
-              <div
-                key={why}
-                className="mb-2 max-w-prose border-l-2 border-n-200 pl-3 transition-colors duration-base ease-out hover:border-warm-500"
-              >
-                <p className="m-0 text-xs text-n-700">{why}</p>
-                {result.gate_remedies[i] && (
-                  <p className="m-0 mt-1 text-xs text-n-500">
-                    <span className="uppercase tracking-[0.14em] text-n-400">
-                      Resolve
-                    </span>{" "}
-                    {result.gate_remedies[i]}
+        <tr>
+          <td className="bg-inset" />
+          <td colSpan={4} className="bg-inset">
+            {/* Why, then what would resolve it. A gate that cannot say how
+                to clear it is an excuse. [UX 6.2] */}
+            <div className="flex flex-col gap-3">
+              {result.gate_explanations.map((why, i) => (
+                <div key={why} className="max-w-prose border-l-4 border-insufficient pl-3">
+                  <p className="m-0 text-sm text-ink">
+                    <span className="font-semibold">Why.</span> {why}
                   </p>
-                )}
-              </div>
-            ))}
+                  {result.gate_remedies[i] && (
+                    <p className="m-0 mt-1 text-sm text-ink-2">
+                      <span className="font-semibold text-ink">Resolve.</span>{" "}
+                      {result.gate_remedies[i]}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </td>
         </tr>
       )}
     </>
   );
-}
-
-function Th({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <th
-      scope="col"
-      className={`px-3 py-2 text-2xs font-semibold uppercase tracking-[0.14em] text-n-500 ${className}`}
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <td className={`px-3 py-2 ${className}`}>{children}</td>;
 }

@@ -23,7 +23,7 @@ import { VerdictBadge } from "./VerdictBadge";
 export function EvidenceViewer({ latest }: { latest: LatestResult }) {
   if (latest.kind === "unreachable") {
     return (
-      <p className="m-0 text-sm text-n-600">
+      <p className="m-0 text-base text-ink-2">
         The API could not be reached, so the latest result is unknown. That is
         different from the control never having run, and is reported as such.
       </p>
@@ -32,9 +32,9 @@ export function EvidenceViewer({ latest }: { latest: LatestResult }) {
 
   if (latest.kind === "never-run") {
     return (
-      <p className="m-0 text-sm text-n-600">
+      <p className="m-0 text-base text-ink-2">
         No run has tested this control yet. Start one from{" "}
-        <Link href="/runs" className="link-grow text-accent-600 no-underline">
+        <Link href="/runs" className="link">
           Test Runs
         </Link>
         .
@@ -50,19 +50,19 @@ export function EvidenceViewer({ latest }: { latest: LatestResult }) {
   const substantive = Object.keys(r.detail).some((k) => k !== "population_source");
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <Header result={r} />
 
       {r.gate_fired && (
         <div className="flex flex-col gap-2">
           {r.gate_explanations.map((why, i) => (
-            <div key={why} className="border-l-2 border-n-200 pl-3">
-              <p className="m-0 text-xs text-n-700">{why}</p>
+            <div key={why} className="border-l-4 border-insufficient bg-inset px-4 py-3">
+              <p className="m-0 text-sm text-ink">
+                <span className="font-semibold">Why.</span> {why}
+              </p>
               {r.gate_remedies[i] && (
-                <p className="m-0 mt-1 text-xs text-n-500">
-                  <span className="uppercase tracking-[0.14em] text-n-400">
-                    Resolve
-                  </span>{" "}
+                <p className="m-0 mt-1 text-sm text-ink-2">
+                  <span className="font-semibold text-ink">Resolve.</span>{" "}
                   {r.gate_remedies[i]}
                 </p>
               )}
@@ -75,7 +75,7 @@ export function EvidenceViewer({ latest }: { latest: LatestResult }) {
 
       {substantive && (
         <details className="group">
-          <summary className="cursor-pointer text-2xs uppercase tracking-[0.14em] text-n-500 transition-colors duration-base ease-out hover:text-n-800">
+          <summary className="cursor-pointer text-sm font-semibold text-link">
             Full finding record
           </summary>
           <MonoBlock label="Finding record" value={r.detail} />
@@ -91,7 +91,7 @@ function Header({ result }: { result: ControlResult }) {
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-2">
       <VerdictBadge verdict={result.verdict} gateReasons={result.gate_reasons} />
-      <p className="m-0 font-mono text-2xs text-n-500">
+      <p className="m-0 font-mono text-meta text-ink-3">
         run {result.run_id} &middot; seed {result.seed}
         {result.completed_at && <> &middot; {result.completed_at.slice(0, 10)}</>}
       </p>
@@ -134,18 +134,18 @@ const CHECK_LABEL: Record<string, string> = {
 function RankedProcessors({ rows }: { rows: RankedRow[] }) {
   return (
     <div>
-      <h4 className="text-2xs font-semibold uppercase tracking-[0.14em] text-n-500">
+      <h4 className="text-base font-semibold">
         Processors, worst first
       </h4>
       <ol className="m-0 mt-2 flex list-none flex-col gap-2 p-0">
         {rows.map((row) => (
           <li
             key={row.processor}
-            className="border-b border-n-100 pb-2 text-xs last:border-b-0"
+            className="border-b border-rule pb-3 text-sm last:border-b-0"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-n-800">{row.processor}</span>
-              <span className="font-mono text-2xs text-n-500">
+              <span className="font-medium text-ink">{row.processor}</span>
+              <span className="font-mono text-meta text-ink-3">
                 {row.issues.length === 0
                   ? row.status === "offboarded"
                     ? "offboarded"
@@ -156,11 +156,11 @@ function RankedProcessors({ rows }: { rows: RankedRow[] }) {
             {row.issues.length > 0 && (
               <ul className="m-0 mt-1 list-none p-0">
                 {row.issues.map((issue) => (
-                  <li key={issue.check} className="mt-1 text-n-600">
-                    <span className="font-semibold text-verdict-fail">
+                  <li key={issue.check} className="mt-1 text-ink-2">
+                    <span className="font-semibold text-fail-text">
                       {CHECK_LABEL[issue.check] ?? issue.check}
                     </span>{" "}
-                    &mdash; {issue.detail}
+                    {issue.detail}
                   </li>
                 ))}
               </ul>
@@ -177,7 +177,7 @@ function RankedProcessors({ rows }: { rows: RankedRow[] }) {
 function Ledger({ items }: { items: EvidenceOut[] }) {
   if (items.length === 0) {
     return (
-      <p className="m-0 text-xs text-n-500">
+      <p className="m-0 text-sm text-ink-3">
         No evidence was collected for this result.
       </p>
     );
@@ -185,20 +185,20 @@ function Ledger({ items }: { items: EvidenceOut[] }) {
 
   return (
     <div>
-      <h4 className="text-2xs font-semibold uppercase tracking-[0.14em] text-n-500">
+      <h4 className="text-base font-semibold">
         Evidence collected
       </h4>
       <ul className="m-0 mt-2 flex list-none flex-col gap-3 p-0">
         {items.map((item) => (
-          <li key={item.label} className="text-xs">
+          <li key={item.label} className="border-l-2 border-rule pl-3 text-sm">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="font-mono text-n-800">{item.label}</span>
-              <span className="font-mono text-2xs text-n-400">
+              <span className="font-mono font-semibold text-ink">{item.label}</span>
+              <span className="font-mono text-meta text-ink-3">
                 {item.kind.toLowerCase().replace(/_/g, " ")}
               </span>
             </div>
             <p
-              className="m-0 mt-1 break-all font-mono text-2xs text-n-500"
+              className="m-0 mt-1 break-all font-mono text-meta text-ink-2"
               title={item.content_hash}
             >
               sha256 {item.content_hash.slice(0, 16)}&hellip;
@@ -206,7 +206,7 @@ function Ledger({ items }: { items: EvidenceOut[] }) {
             </p>
             {item.summary != null && (
               <details className="mt-1">
-                <summary className="cursor-pointer text-2xs text-n-500 transition-colors duration-base ease-out hover:text-n-800">
+                <summary className="cursor-pointer text-meta font-semibold text-link">
                   Summary
                 </summary>
                 <MonoBlock label={`${item.label} summary`} value={item.summary} />
@@ -231,7 +231,7 @@ function MonoBlock({ label, value }: { label: string; value: unknown }) {
     <pre
       tabIndex={0}
       aria-label={label}
-      className="scroll-x m-0 mt-2 max-h-[22rem] overflow-y-auto rounded-md border border-n-200 bg-n-50 p-3 font-mono text-2xs leading-table text-n-700"
+      className="scroll-x m-0 mt-2 max-h-[22rem] overflow-y-auto border border-rule bg-inset p-4 font-mono text-meta leading-table text-ink"
     >
       {JSON.stringify(value, null, 2)}
     </pre>

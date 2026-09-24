@@ -1,23 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 
-import { AmbientBackground } from "@/components/AmbientBackground";
 import { DisclosureFooter } from "@/components/DisclosureFooter";
 import { Masthead } from "@/components/Masthead";
-import { ScrollProgress } from "@/components/ScrollProgress";
-import { SurfaceMotion } from "@/components/SurfaceMotion";
 import { TabNav } from "@/components/TabNav";
 import "@/styles/globals.css";
 
 /**
- * The three faces the design brief has always specified, now actually
- * loaded. Until v2.0 they were named in tokens.css and never fetched, so
- * every screen rendered in the system UI font — a large part of why the
- * product read as unstyled.
+ * Two faces: Geist for everything read, JetBrains Mono for identifiers and
+ * measurements. v5 retires Source Serif; quoted statute is marked by its rule
+ * and size instead. [DESIGN.md 3]
  *
- * `display: swap` shows the fallback immediately rather than holding text
- * invisible, and the fallback metrics Next generates keep the swap from
- * shifting the line. [a11y font-loading]
+ * `display: swap` shows the fallback immediately, and Next's generated
+ * fallback metrics keep the swap from shifting the line. [a11y font-loading]
  */
 const sans = Geist({
   subsets: ["latin"],
@@ -31,15 +26,8 @@ const mono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
-const serif = Source_Serif_4({
-  subsets: ["latin"],
-  display: "swap",
-  style: ["normal", "italic"],
-  variable: "--font-source-serif",
-});
-
 export const metadata: Metadata = {
-  title: "AssureLens — DPDP + AI Controls Assurance",
+  title: "AssureLens: DPDP + AI Controls Assurance",
   description:
     "Turns the DPDP Act and Rules 2025 into executable controls, runs real " +
     "tests, and gates every verdict on evidence sufficiency.",
@@ -50,9 +38,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   // Never `maximum-scale: 1` / `user-scalable: no`. [a11y viewport-meta]
   themeColor: [
-    // The browser chrome matches the top-left of the ground gradient.
-    { media: "(prefers-color-scheme: light)", color: "#ffc27a" },
-    { media: "(prefers-color-scheme: dark)", color: "#3a2019" },
+    // The browser chrome continues the cobalt masthead.
+    { media: "(prefers-color-scheme: light)", color: "#2436e6" },
+    { media: "(prefers-color-scheme: dark)", color: "#3342f0" },
   ],
 };
 
@@ -64,7 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${mono.variable} ${serif.variable}`}
+      className={`${sans.variable} ${mono.variable}`}
     >
       <head>
         {/* The reveal animation starts at opacity 0 and is cleared by an
@@ -77,18 +65,16 @@ export default function RootLayout({
         </noscript>
       </head>
       <body>
-        {/* First child: it is fixed at z-0, and every later sibling paints
-            above it. See AmbientBackground and the grain note in globals.css. */}
-        <AmbientBackground />
-        <SurfaceMotion />
-        <ScrollProgress />
+        {/* A lime rule tracking scroll position, drawn by a CSS
+            scroll-driven animation. No listener, no JavaScript. */}
+        <div aria-hidden="true" className="scroll-progress" />
 
         {/* Keyboard users should not have to tab through the masthead, the
             role switch and six tabs to reach a 25-row table.
             [a11y skip-links] */}
         <a
           href="#main"
-          className="sr-only fixed left-4 top-4 z-50 rounded-md border border-accent-600 bg-n-0 px-4 py-2 text-sm font-semibold text-accent-700 focus:not-sr-only"
+          className="sr-only fixed left-4 top-4 z-50 bg-lime px-4 py-3 text-sm font-semibold text-on-lime focus:not-sr-only"
         >
           Skip to content
         </a>
@@ -96,7 +82,7 @@ export default function RootLayout({
         <Masthead />
         <TabNav />
 
-        <main id="main" className="mx-auto max-w-content px-4 py-6 md:px-5 md:py-7">
+        <main id="main" className="mx-auto max-w-content px-4 pb-9 pt-7 md:px-6 md:pt-8">
           {children}
         </main>
 

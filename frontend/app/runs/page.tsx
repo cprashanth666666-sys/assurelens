@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/PageHeader";
 import { RunConsole } from "@/components/RunConsole";
 import { fetchEngagement, fetchRun, fetchRuns, fetchSuites } from "@/lib/api";
 
@@ -8,13 +9,10 @@ export default async function RunsPage() {
 
   if (engagement === null) {
     return (
-      <section className="panel p-6">
-        <h2>Test run console</h2>
-        <p className="mt-3 max-w-prose text-n-600">
-          The API is unreachable, so a run cannot be started. The page renders
-          regardless &mdash; content never waits on a cold backend.
-        </p>
-      </section>
+      <PageHeader
+        title="Test run console"
+        lede="The API is unreachable, so a run cannot be started. The page renders regardless; content never waits on a cold backend."
+      />
     );
   }
 
@@ -28,22 +26,13 @@ export default async function RunsPage() {
   const latest = runs && runs.length > 0 ? await fetchRun(runs[0]!.id) : null;
 
   return (
-    <div className="flex flex-col gap-5">
-      <header className="panel p-4 md:p-5">
-        <h2>Test run console</h2>
-        <p className="mt-2 max-w-prose text-n-600">
-          Select suites and run. Each control resolves to a verdict, and where
-          the evidence cannot carry a conclusion the result says so, with what
-          would resolve it. A gated verdict is a peer of a pass, not a failure
-          to produce one.
-        </p>
-      </header>
-
-      <RunConsole
-        engagementId={engagement.id}
-        catalogue={catalogue}
-        initialRun={latest}
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        title="Test run console"
+        lede="Select suites and run. Each control resolves to a verdict, and where the evidence cannot carry a conclusion the result says so, with what would resolve it. A gated verdict is a peer of a pass, not a failure to produce one."
       />
+
+      <RunConsole engagementId={engagement.id} catalogue={catalogue} initialRun={latest} />
     </div>
   );
 }

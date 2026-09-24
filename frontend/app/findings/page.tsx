@@ -5,7 +5,7 @@ export default function FindingsPage() {
     <Placeholder
       title="Findings register"
       summary={
-        "Findings raised by tests that actually ran — none are seeded. " +
+        "Findings raised by tests that actually ran; none are seeded. " +
         "Severity is likelihood × impact, carried as a left border and a text " +
         "label, never colour alone. Expand a row for the evidence: for a " +
         "probe finding, the HTTP exchange itself."

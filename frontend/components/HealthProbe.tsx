@@ -53,41 +53,47 @@ export function HealthProbe() {
   }, []);
 
   return (
-    <section
-      aria-live="polite"
-      data-tilt
-      className="panel p-4 md:p-5"
-    >
-      <h3 className="text-2xs uppercase tracking-[0.14em] text-n-400">
-        Backend connectivity
-      </h3>
+    <section aria-live="polite" className="sheet flex flex-wrap items-center gap-x-7 gap-y-3 px-5 py-4">
+      <h3 className="text-base font-semibold">Backend connectivity</h3>
 
       {state.kind === "probing" && (
-        <>
-          <p className="mt-2 text-sm text-n-500">Waking the API&hellip;</p>
+        <div className="min-w-[12rem] flex-1">
+          <p className="m-0 text-sm text-ink-2">Waking the API&hellip;</p>
           <div className="indeterminate-rule mt-2" />
-        </>
+        </div>
       )}
 
       {state.kind === "up" && (
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
-          <dt className="text-n-500">API</dt>
-          <dd className="m-0 font-mono text-n-800">{state.health.status}</dd>
-          <dt className="text-n-500">Database</dt>
-          <dd className="m-0 font-mono text-n-800">{state.health.database}</dd>
-          <dt className="text-n-500">Engine</dt>
-          <dd className="m-0 font-mono text-n-800">
-            {state.health.engine_version}
-          </dd>
+        <dl className="m-0 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <Stat label="API" value={state.health.status} ok={state.health.status === "ok"} />
+          <Stat label="Database" value={state.health.database} ok={state.health.database === "up"} />
+          <Stat label="Engine" value={state.health.engine_version} />
         </dl>
       )}
 
       {state.kind === "down" && (
-        <p className="mt-2 text-sm text-n-600">
-          API unreachable ({state.reason}). The shell renders regardless —
-          content never waits on a cold backend.
+        <p className="m-0 text-sm text-ink-2">
+          <span className="chip mr-2 bg-fail text-on-verdict">Unreachable</span>
+          {state.reason}. The shell renders regardless; content never waits on a
+          cold backend.
         </p>
       )}
     </section>
+  );
+}
+
+/** A status pair. The square is real state (up or not), never decoration. */
+function Stat({ label, value, ok }: { label: string; value: string; ok?: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      {ok !== undefined && (
+        <span
+          aria-hidden="true"
+          className={`inline-block h-[10px] w-[10px] ${ok ? "bg-pass" : "bg-fail"}`}
+        />
+      )}
+      <dt className="text-ink-3">{label}</dt>
+      <dd className="m-0 font-mono font-semibold text-ink">{value}</dd>
+    </div>
   );
 }

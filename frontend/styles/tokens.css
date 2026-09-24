@@ -1,401 +1,178 @@
-/* AssureLens design tokens.
+/* AssureLens design tokens -- v5.0 "Signal".
  *
- * Implements docs/UX_BRIEF.md section 2, as revised at v2.0 ("Warm
- * instrument") and v3.0 ("Tidal", section 12 -- the moving ground, tiles and
- * tilt). docs/DESIGN.md is the semantic summary. Nothing in this project
- * hardcodes a hex outside this file.
+ * Implements docs/DESIGN.md (the specification) and docs/UX_BRIEF.md section
+ * 14 (the rationale). Nothing in this project hardcodes a colour outside this
+ * file.
  *
- * Aesthetic: an instrument on warm paper. The reference points are still the
- * printed workpaper, the statistical table and the regulatory filing — but
- * set with the care of a journal rather than photocopied. UX_BRIEF 1.1 lists
- * what is still rejected; 1.3 lists what v2.0 deliberately lifted.
+ * v5.0 replaces the v2-v4 system at its foundation rather than re-skinning
+ * it. The warm oat ramp, the muted severity scale, the moving gradient ground
+ * and the translucent tiles that existed only to keep text legible over that
+ * ground are all gone. What replaces them:
+ *
+ *   - A cool, bright, light-first neutral set: white work surfaces on a pale
+ *     grey page, near-black ink. No beige.
+ *   - Two brand colours used as FLAT BLOCKS, not gradients: cobalt (the
+ *     instrument: masthead, primary action, links, focus) and signal lime
+ *     (the highlighter: active tab, emphasis, scroll progress). Lime only
+ *     ever carries ink text.
+ *   - Verdicts and severities as SOLID fills with a text label and a shape,
+ *     at full strength. Muting them was a v2 decision; v5 reverses it.
+ *
+ * Every text/background pair below states its measured WCAG ratio. They were
+ * computed, not estimated; the script and results are in UX_BRIEF 14.3.
  */
 
 :root {
-  /* --- Neutral -----------------------------------------------------------
-   * WARM, and never pure white as a surface. The page ground is a low-chroma
-   * oat; panels sit a few steps lighter but keep the warmth. A cool grey ramp
-   * on #ffffff is the default-SaaS tell. [UX 2.1]
+  /* --- Neutrals (cool, bright) ------------------------------------------ */
+  --page:        #f4f5f7;   /* page field */
+  --surface:     #ffffff;   /* work surfaces: tables, forms, sections */
+  --inset:       #e9ecf1;   /* table header band, code blocks, asides */
+  --ink:         #0d1017;   /* primary text      19.0:1 surface, 17.4:1 page */
+  --ink-2:       #363d4a;   /* body prose        10.9:1 surface */
+  --ink-3:       #525a69;   /* meta, labels       6.9:1 surface, 5.9:1 inset */
+  --rule:        #d6dae1;   /* hairlines between rows (decorative only) */
+  --rule-strong: #0d1017;   /* structural rules: section tops, grid frames */
+  --control:     #7d8697;   /* input and chip borders  3.7:1 surface (UI) */
+
+  /* --- Brand: cobalt, the instrument ------------------------------------ */
+  --cobalt:      #2436e6;   /* fill with white text 7.7:1; as text 7.7:1 */
+  --cobalt-deep: #1a28c2;   /* hover/pressed, white text 9.9:1 */
+  --cobalt-tint: #e7eaff;   /* row hover, selected tint; cobalt-deep text 8.3:1 */
+  --on-cobalt:   #ffffff;
+  --on-cobalt-2: rgb(255 255 255 / 0.82);   /* secondary text on the band */
+  --link:        #2436e6;   /* cobalt AS TEXT; separate so dark can lighten it */
+
+  /* --- Brand: signal lime, the highlighter ------------------------------ */
+  --lime:        #cdf23a;   /* ink text on it 14.8:1. NEVER white text. */
+  --on-lime:     #0d1017;
+
+  /* --- Ink band (footer, run header) ------------------------------------- */
+  --band:        #0d1017;
+  --on-band:     #ffffff;
+  --on-band-2:   rgb(255 255 255 / 0.72);
+
+  /* --- Verdicts ---------------------------------------------------------
+   * Solid chips, one weight, one size, one slot. INSUFFICIENT_EVIDENCE is
+   * the INK chip: the most assertive fill in the set, because it is a
+   * conclusion the product stands behind, not a grey absence of one.
    */
-  --n-0:   #fdfbf6;   /* panel — off-white, never #ffffff */
-  --n-25:  #f6f2e8;   /* page ground — warm oat */
-  --n-50:  #efe9db;   /* table zebra, inset panels */
-  --n-100: #e4ddcb;   /* hairlines, dividers */
-  --n-200: #d3cab4;   /* borders */
-  --n-300: #b5ab93;   /* disabled */
-  --n-400: #8e8571;   /* placeholder */
-  --n-500: #6a6353;   /* secondary text — 5.4:1 on ground */
-  --n-600: #524b3e;   /* body on light  — 7.6:1 on ground */
-  --n-700: #393328;   /* headings */
-  --n-800: #241f17;   /* primary text */
-  --n-900: #14100a;   /* max contrast */
+  --pass:          #0b8048;  /* white text 5.0:1 */
+  --fail:          #d0231a;  /* white text 5.3:1 */
+  --insufficient:  #0d1017;  /* white text 19.0:1 */
+  --on-verdict:    #ffffff;
+  --na-text:       #525a69;  /* N/A is an outline chip, 6.9:1 */
+  --pass-text:     #0a7a44;  /* verdict as inline text 5.4:1 surface */
+  --fail-text:     #c41f17;  /*                        5.9:1 surface */
 
-  /* True white, for the rare case that needs it (image plates, print). */
-  --pure-white: #ffffff;
-
-  /* --- Accent ------------------------------------------------------------
-   * Deep teal ink. Interactive and structural. Warmer and more alive than the
-   * v1 navy, which read as institutional default.
+  /* --- Severity: four steps, full strength -------------------------------
+   * Text labels and a 1px ink border on every chip; high and medium are too
+   * light to separate from white by fill alone (2.6:1, 1.5:1), so the border
+   * carries the boundary and the label carries the meaning.
    */
-  --accent-700: #0f3f52;
-  --accent-600: #15566c;
-  --accent-500: #1c6b84;
-  --accent-400: #2f8a9e;
-  --accent-100: #cde2e6;
-  --accent-50:  #e7f1f2;
+  --sev-critical: #d0231a;  /* white text 5.3:1 */
+  --on-sev-critical: #ffffff;
+  --sev-high:     #ff7a1f;  /* ink text 7.3:1 */
+  --sev-medium:   #ffc93c;  /* ink text 12.4:1 */
+  --sev-low:      #8cc2ff;  /* ink text 10.2:1 */
 
-  /* --- Warm secondary ----------------------------------------------------
-   * Terracotta: the second voice in a pairing — a rule under a heading, a
-   * hover mark, the active filter. NEVER status. Teal and terracotta is an
-   * editorial pairing, not a SaaS gradient.
+  /* --- Type ---------------------------------------------------------------
+   * Geist for everything read; JetBrains Mono for everything that is an
+   * identifier or a measurement. Both loaded by next/font in layout.tsx.
+   * The serif is retired: quoted statute is marked by its rule and size.
    */
-  --warm-600: #9c4e2f;
-  --warm-500: #bb6640;
-  --warm-400: #d08a63;
-  --warm-100: #f2ddce;
-  --warm-50:  #f9eee5;
+  --font-sans: var(--font-geist), "Geist", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", "SF Mono",
+               "Cascadia Mono", Consolas, monospace;
 
-  /* --- Severity — four steps, muted. Never neon. ------------------------- */
-  --sev-critical: #8f322a;
-  --sev-high:     #ad6027;
-  --sev-medium:   #836c1f;
-  --sev-low:      #476b51;
-  --sev-critical-bg: #f6e2dd;
-  --sev-high-bg:     #f7e7d6;
-  --sev-medium-bg:   #f4eed6;
-  --sev-low-bg:      #e5eee6;
+  /* A real scale with real contrast between steps. v4 set 83 of 91 sizes
+   * at 11-13px and topped out at 38px; hierarchy had nowhere to come from.
+   * Nothing in v5 is smaller than 12px, body is 16px, and the display step
+   * is roughly 5x body, the ratio the reference set shares. */
+  --fs-xs:      0.75rem;    /* 12px: gate codes, credits only */
+  --fs-meta:    0.8125rem;  /* 13px: labels, table header, captions */
+  --fs-sm:      0.875rem;   /* 14px: table body, controls */
+  --fs-base:    1rem;       /* 16px: body prose */
+  --fs-lg:      1.25rem;    /* 20px: section titles */
+  --fs-xl:      1.75rem;    /* 28px: block headlines */
+  --fs-2xl:     clamp(2.25rem, 2.6vw + 1.4rem, 3.5rem);   /* 36-56px page titles */
+  --fs-num:     clamp(2.5rem, 3vw + 1.5rem, 4rem);        /* 40-64px counts */
+  --fs-display: clamp(2.75rem, 5.2vw + 1rem, 5.75rem);    /* 44-92px cover */
 
-  /* --- Verdicts ----------------------------------------------------------
-   * INSUFFICIENT is NEUTRAL INK by design. It is a peer verdict, not a soft
-   * fail, and must never be styled as a warning. This survives every visual
-   * revision — it is the argument the product exists to make.
-   * [PRD 6.5, UX 6.1]
+  --track-display: -0.045em;
+  --track-title:   -0.035em;
+  --track-head:    -0.02em;
+
+  --lh-display: 0.98;
+  --lh-tight:   1.15;
+  --lh-table:   1.45;
+  --lh-prose:   1.6;
+
+  /* --- Spacing: 4pt scale ----------------------------------------------- */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 24px;  --sp-6: 32px;  --sp-7: 48px;  --sp-8: 64px;
+  --sp-9: 96px;  --sp-10: 128px;
+
+  /* --- Shape --------------------------------------------------------------
+   * All-sharp. One radius system for the whole product: zero. Structure is
+   * drawn with rules and colour blocks, never with rounded floating cards.
    */
-  --verdict-pass:         #3e6b4c;
-  --verdict-fail:         #8f322a;
-  --verdict-insufficient: #524b3e;
-  --verdict-na:           #8e8571;
+  --radius: 0;
 
-  --verdict-pass-bg:         #e5eee6;
-  --verdict-fail-bg:         #f6e2dd;
-  --verdict-insufficient-bg: #ebe5d7;
-  --verdict-na-bg:           #efe9db;
+  --shadow-overlay: 0 12px 32px rgb(13 16 23 / 0.18);
 
-  /* --- Semantic surfaces ------------------------------------------------- */
-  --surface-page:    var(--n-25);
-  --surface-panel:   var(--n-0);
-  --surface-inset:   var(--n-50);
-  --text-primary:    var(--n-800);
-  --text-secondary:  var(--n-500);
-  --text-heading:    var(--n-700);
-
-  /* Translucent panel, for the sticky masthead and tab rail. Declared as
-   * literal rgb() rather than an alpha modifier on --n-0: Tailwind cannot
-   * inject an alpha channel into a var() colour, so `bg-n-0/85` silently
-   * emits nothing. Getting a transparent header wrong gives you an opaque
-   * one, which looks fine and is not what was designed. */
-  --surface-veil:  rgb(253 251 246 / 0.84);
-  --surface-scrim: rgb(253 251 246 / 0.94);
-
-  /* --- v3.0 "Tidal" ground ------------------------------------------------
-   * A sunset-to-sea gradient: saffron, coral, turquoise, deep sea. Vivid by
-   * request, and chosen as a warm/cool PAIR so no single hue dominates -- a
-   * one-colour gradient reads as a brand splash; two temperatures read as a
-   * horizon. No purple and no electric blue, which are the AI-gradient
-   * cliché. [UX 12.1]
-   *
-   * The ground moves; TEXT NEVER SITS ON IT. Every line of copy lives on a
-   * tile (below), so contrast is set by the tile, not by wherever the
-   * gradient happens to be under it this second.
-   */
-  --ground-1: #ffc27a;   /* saffron   */
-  --ground-2: #ff8f7a;   /* coral     */
-  --ground-3: #52d1be;   /* turquoise */
-  --ground-4: #2a9db8;   /* deep sea  */
-
-  --blob-sun:    rgb(255 214 102 / 0.60);
-  --blob-coral:  rgb(255 111 97 / 0.46);
-  --blob-lagoon: rgb(38 196 178 / 0.52);
-
-  --wave-foam: rgb(255 255 255 / 0.30);
-  --wave-mid:  rgb(27 138 158 / 0.30);
-  --wave-deep: rgb(12 84 104 / 0.36);
-
-  /* Tiles: near-opaque so body text keeps AA contrast over any part of the
-   * ground, with a light top edge and a shadow tinted toward the sea hue.
-   * A neutral grey shadow on a coloured ground looks pasted on. */
-  --surface-tile:      rgb(253 251 246 / 0.93);
-  --surface-tile-edge: rgb(255 255 255 / 0.72);
-  --shadow-tile:
-    0 1px 2px rgb(16 64 74 / 0.10),
-    0 12px 30px -10px rgb(16 72 88 / 0.34);
-  --shadow-tile-lift:
-    0 2px 6px rgb(16 64 74 / 0.12),
-    0 28px 50px -14px rgb(16 72 88 / 0.46);
-
-  /* Photograph wash. Its own tokens, deliberately NOT the ground colours and
-   * deliberately not overridden in dark mode: a multiply wash darkens by
-   * definition, so the dark ground (ember, deep lagoon) laid over a photo at
-   * 42% buried it as a flat grey block. The wash has to stay light in both
-   * themes for the photograph to survive it. */
-  --plate-wash-a: #52d1be;
-  --plate-wash-b: #ff8f7a;
-
-  /* Tilt: small enough that dense text stays readable while it moves. */
-  --tilt-max: 6deg;
-  --tile-lift: -6px;
-
-  /* --- Page ground wash --------------------------------------------------
-   * Three very low-chroma radial tints over the oat base. This is what keeps
-   * a flat fill from reading as dull, without putting a gradient on a card.
-   * Chroma ceiling is about 7%: once it is noticeable as colour it has gone
-   * too far.
-   */
-  --wash-teal:  rgb(28 107 132 / 0.07);
-  --wash-warm:  rgb(187 102 64 / 0.06);
-  --wash-green: rgb(62 107 76 / 0.05);
-
-  --grain-opacity: 0.5;
-
-  /* --- Type --------------------------------------------------------------
-   * --font-inter-tight / -jetbrains-mono / -source-serif are injected by
-   * next/font in app/layout.tsx, with the stacks below as fallback.
-   *
-   * Before v2.0 these faces were NAMED here but never loaded — no next/font,
-   * no stylesheet link — so the product shipped in Segoe UI. That single
-   * omission is a large part of why it read as unstyled.
-   */
-  /* v3.0: Geist replaces Inter Tight. Inter is the default face of
-   * generated interfaces; Geist keeps the same neutrality with its own
-   * character. [UX 12.2] */
-  --font-sans:  var(--font-geist), "Geist",
-                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono:  var(--font-jetbrains-mono), "JetBrains Mono", "SF Mono",
-                "Cascadia Mono", Consolas, "Liberation Mono", monospace;
-  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia,
-                "Times New Roman", serif;
-
-  --fs-2xs:  0.6875rem;  /* 11px — table meta, captions */
-  --fs-xs:   0.75rem;    /* 12px — dense table body */
-  --fs-sm:   0.8125rem;  /* 13px — default UI */
-  --fs-base: 0.875rem;   /* 14px — body prose */
-  --fs-md:   1rem;
-  --fs-lg:   1.25rem;
-  --fs-xl:   1.5rem;
-  --fs-2xl:  1.875rem;   /* 30px */
-  /* The one display size, fluid. At a fixed 38px the cover-sheet sentence
-   * ran to four lines on a 375px phone and read as a shouted headline; the
-   * clamp keeps it a sentence at every width. */
-  --fs-3xl:  clamp(1.625rem, 4.4vw + 0.75rem, 2.375rem);
-
-  --lh-tight: 1.35;
-  --lh-table: 1.5;
-  --lh-prose: 1.6;
-
-  /* --- Spacing ----------------------------------------------------------- */
-  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
-  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
-  --sp-9: 96px;
-
-  /* --- Borders and radius ------------------------------------------------
-   * Controls stay at 2-3px: a sharp control reads as an instrument.
-   * `lg` (10px) exists ONLY for image figures, where a hard corner on a
-   * photograph looks like an unstyled <img>. [UX 2.3]
-   */
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 10px;
-  /* v3.0: tiles are physical cards, so they get a card radius. Controls
-   * inside them (buttons, fields, chips) keep 2-3px. [UX 12.4] */
-  --radius-tile: 14px;
-
-  --border-hair:   1px solid var(--n-100);
-  --border-strong: 1px solid var(--n-200);
-
-  /* Elevation. `overlay` is for genuine overlays. `raise` is the hover state
-   * of an interactive surface, tinted WARM — a neutral-grey drop shadow on
-   * warm paper is the tell that a palette was bolted on afterwards.
-   */
-  --shadow-raise:   0 1px 2px rgb(57 51 40 / 0.05), 0 6px 18px rgb(57 51 40 / 0.07);
-  --shadow-overlay: 0 4px 24px rgb(36 31 23 / 0.16);
-
-  /* --- Motion ------------------------------------------------------------
-   * One rhythm for the whole product. Every transition reads from these, so
-   * nothing drifts out of step. [UX 7]
-   */
+  /* --- Motion ------------------------------------------------------------ */
   --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in:    cubic-bezier(0.55, 0, 1, 0.45);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
-  /* Settling only: a small overshoot so a released tile lands. */
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
-  --dur-fast: 120ms;   /* press, tint */
-  --dur-base: 200ms;   /* hover, focus, state */
-  --dur-slow: 340ms;   /* entrance, reveal */
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 320ms;
 
   --content-max: 1440px;
 
   color-scheme: light;
 }
 
-/* --- Dark theme -----------------------------------------------------------
- * Inverts the neutral ramp, KEEPS the warmth, and desaturates severity
- * further. Dark mode must not become the security-ops-console look that
- * UX 1.1 still rejects. Light remains the primary design.
- *
- * Declared twice so an explicit user choice wins in both directions.
+/* --- Dark ------------------------------------------------------------------
+ * Same structure, lighter tonal variants of each colour so every pair still
+ * clears AA (ratios measured against --surface #151821). Declared twice so an
+ * explicit data-theme choice wins in both directions.
  */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --n-0:   #1a1712;
-    --n-25:  #14110d;
-    --n-50:  #221e18;
-    --n-100: #2e2921;
-    --n-200: #3e382d;
-    --n-300: #564f41;
-    --n-400: #746c5b;
-    --n-500: #988f7c;
-    --n-600: #b8af9c;
-    --n-700: #d4cbb8;
-    --n-800: #ebe4d4;
-    --n-900: #f8f4ea;
-
-    --accent-700: #8fc4d4;
-    --accent-600: #7ab5c7;
-    --accent-500: #64a3b7;
-    --accent-400: #4f8fa4;
-    --accent-100: #1d333c;
-    --accent-50:  #16262d;
-
-    --warm-600: #dba184;
-    --warm-500: #c98d6d;
-    --warm-400: #b0755a;
-    --warm-100: #3a2519;
-    --warm-50:  #2b1c13;
-
-    --sev-critical: #d99b96;
-    --sev-high:     #d9a877;
-    --sev-medium:   #cfbc7e;
-    --sev-low:      #9cbda6;
-    --sev-critical-bg: #30201d;
-    --sev-high-bg:     #30271b;
-    --sev-medium-bg:   #2d291b;
-    --sev-low-bg:      #1f2c23;
-
-    --verdict-pass:         #8fb89a;
-    --verdict-fail:         #d99b96;
-    --verdict-insufficient: #b8af9c;
-    --verdict-na:           #746c5b;
-
-    --verdict-pass-bg:         #1f2c23;
-    --verdict-fail-bg:         #30201d;
-    --verdict-insufficient-bg: #2b2620;
-    --verdict-na-bg:           #221e18;
-
-    --ground-1: #3a2019;
-    --ground-2: #552723;
-    --ground-3: #0f4a4a;
-    --ground-4: #0a2f43;
-    --blob-sun:    rgb(255 176 80 / 0.16);
-    --blob-coral:  rgb(255 110 90 / 0.16);
-    --blob-lagoon: rgb(40 190 175 / 0.18);
-    --wave-foam: rgb(150 230 220 / 0.08);
-    --wave-mid:  rgb(60 180 200 / 0.12);
-    --wave-deep: rgb(4 30 40 / 0.45);
-    --surface-tile:      rgb(26 23 18 / 0.90);
-    --surface-tile-edge: rgb(255 255 255 / 0.08);
-    --shadow-tile:
-      0 1px 2px rgb(0 0 0 / 0.40),
-      0 12px 32px -10px rgb(0 0 0 / 0.60);
-    --shadow-tile-lift:
-      0 2px 6px rgb(0 0 0 / 0.45),
-      0 28px 52px -14px rgb(0 0 0 / 0.70);
-    --surface-veil:  rgb(26 23 18 / 0.86);
-    --surface-scrim: rgb(26 23 18 / 0.90);
-    --wash-teal:  rgb(100 163 183 / 0.07);
-    --wash-warm:  rgb(201 141 109 / 0.05);
-    --wash-green: rgb(143 184 154 / 0.04);
-    --grain-opacity: 0.3;
-
-    --shadow-raise:   0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.35);
-    --shadow-overlay: 0 4px 24px rgb(0 0 0 / 0.55);
-
+    --page: #0b0d12; --surface: #151821; --inset: #1e222d;
+    --ink: #f2f4f8;          /* 16.1:1 */
+    --ink-2: #c3c8d3;        /* 10.6:1 */
+    --ink-3: #9ba3b2;        /*  7.0:1 */
+    --rule: #2a2f3b; --rule-strong: #f2f4f8; --control: #6d7589;
+    --cobalt: #3342f0; --cobalt-deep: #2432d4; --cobalt-tint: #1d2350;
+    --on-cobalt: #ffffff;    /* 6.6:1 */
+    --link: #9aa5ff;         /* 7.8:1 */
+    --lime: #cdf23a; --on-lime: #0b0d12;
+    --band: #1e222d; --on-band: #f2f4f8; --on-band-2: rgb(242 244 248 / 0.72);
+    --pass: #33c47a; --fail: #ff6b5f; --insufficient: #f2f4f8;
+    --on-verdict: #0b0d12;   /* 8.6 / 7.0 / 17.7:1 */
+    --na-text: #9ba3b2; --pass-text: #4ad98a; --fail-text: #ff7a70;
+    --sev-critical: #ff6b5f; --on-sev-critical: #0b0d12;   /* 7.0:1 */
+    --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.55);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --n-0:   #1a1712;
-  --n-25:  #14110d;
-  --n-50:  #221e18;
-  --n-100: #2e2921;
-  --n-200: #3e382d;
-  --n-300: #564f41;
-  --n-400: #746c5b;
-  --n-500: #988f7c;
-  --n-600: #b8af9c;
-  --n-700: #d4cbb8;
-  --n-800: #ebe4d4;
-  --n-900: #f8f4ea;
-
-  --accent-700: #8fc4d4;
-  --accent-600: #7ab5c7;
-  --accent-500: #64a3b7;
-  --accent-400: #4f8fa4;
-  --accent-100: #1d333c;
-  --accent-50:  #16262d;
-
-  --warm-600: #dba184;
-  --warm-500: #c98d6d;
-  --warm-400: #b0755a;
-  --warm-100: #3a2519;
-  --warm-50:  #2b1c13;
-
-  --sev-critical: #d99b96;
-  --sev-high:     #d9a877;
-  --sev-medium:   #cfbc7e;
-  --sev-low:      #9cbda6;
-  --sev-critical-bg: #30201d;
-  --sev-high-bg:     #30271b;
-  --sev-medium-bg:   #2d291b;
-  --sev-low-bg:      #1f2c23;
-
-  --verdict-pass:         #8fb89a;
-  --verdict-fail:         #d99b96;
-  --verdict-insufficient: #b8af9c;
-  --verdict-na:           #746c5b;
-
-  --verdict-pass-bg:         #1f2c23;
-  --verdict-fail-bg:         #30201d;
-  --verdict-insufficient-bg: #2b2620;
-  --verdict-na-bg:           #221e18;
-
-  --ground-1: #3a2019;
-  --ground-2: #552723;
-  --ground-3: #0f4a4a;
-  --ground-4: #0a2f43;
-  --blob-sun:    rgb(255 176 80 / 0.16);
-  --blob-coral:  rgb(255 110 90 / 0.16);
-  --blob-lagoon: rgb(40 190 175 / 0.18);
-  --wave-foam: rgb(150 230 220 / 0.08);
-  --wave-mid:  rgb(60 180 200 / 0.12);
-  --wave-deep: rgb(4 30 40 / 0.45);
-  --surface-tile:      rgb(26 23 18 / 0.90);
-  --surface-tile-edge: rgb(255 255 255 / 0.08);
-  --shadow-tile:
-    0 1px 2px rgb(0 0 0 / 0.40),
-    0 12px 32px -10px rgb(0 0 0 / 0.60);
-  --shadow-tile-lift:
-    0 2px 6px rgb(0 0 0 / 0.45),
-    0 28px 52px -14px rgb(0 0 0 / 0.70);
-  --surface-veil:  rgb(26 23 18 / 0.86);
-  --surface-scrim: rgb(26 23 18 / 0.90);
-  --wash-teal:  rgb(100 163 183 / 0.07);
-  --wash-warm:  rgb(201 141 109 / 0.05);
-  --wash-green: rgb(143 184 154 / 0.04);
-  --grain-opacity: 0.3;
-
-  --shadow-raise:   0 1px 2px rgb(0 0 0 / 0.4), 0 6px 18px rgb(0 0 0 / 0.35);
-  --shadow-overlay: 0 4px 24px rgb(0 0 0 / 0.55);
-
+  --page: #0b0d12; --surface: #151821; --inset: #1e222d;
+  --ink: #f2f4f8; --ink-2: #c3c8d3; --ink-3: #9ba3b2;
+  --rule: #2a2f3b; --rule-strong: #f2f4f8; --control: #6d7589;
+  --cobalt: #3342f0; --cobalt-deep: #2432d4; --cobalt-tint: #1d2350;
+  --on-cobalt: #ffffff;
+  --link: #9aa5ff;
+  --lime: #cdf23a; --on-lime: #0b0d12;
+  --band: #1e222d; --on-band: #f2f4f8; --on-band-2: rgb(242 244 248 / 0.72);
+  --pass: #33c47a; --fail: #ff6b5f; --insufficient: #f2f4f8;
+  --on-verdict: #0b0d12;
+  --na-text: #9ba3b2; --pass-text: #4ad98a; --fail-text: #ff7a70;
+  --sev-critical: #ff6b5f; --on-sev-critical: #0b0d12;
+  --shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.55);
   color-scheme: dark;
 }
