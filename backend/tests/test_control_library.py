@@ -8,6 +8,8 @@ instrument, and nothing is scoped out without a written reason.
 from __future__ import annotations
 
 import datetime as dt
+import shutil
+from pathlib import Path
 
 import pytest
 from sqlalchemy import select
@@ -20,6 +22,12 @@ from app.models.control import (
     EngagementControl,
     Framework,
     FrameworkClause,
+)
+from app.seed.controls import (
+    FRAMEWORK_FILES,
+    ControlLibraryError,
+    controls_directory,
+    load_control_library,
 )
 
 pytestmark = pytest.mark.usefixtures("seeded_db")
@@ -199,3 +207,37 @@ def test_database_refuses_scoping_out_without_a_reason(seeded_db: Session) -> No
     with pytest.raises(IntegrityError):
         seeded_db.flush()
     seeded_db.rollback()
+
+
+def test_every_population_source_names_required_evidence(seeded_db: Session) -> None:
+    """What the loader enforces, checked against what it actually stored."""
+    for control in seeded_db.scalars(select(Control)).all():
+        for procedure in control.procedures:
+            contract = procedure.evidence_contract or {}
+            source = contract.get("population_source")
+            if source is not None:
+                names = [item["name"] for item in contract.get("required", [])]
+                assert source in names, f"{control.ref}: {source!r} not in {names}"
+
+
+def test_the_loader_refuses_a_population_source_that_matches_nothing(
+    seeded_db: Session, tmp_path: Path
+) -> None:
+    for filename in FRAMEWORK_FILES:
+        shutil.copy(controls_directory() / filename, tmp_path / filename)
+    dpdp = tmp_path / "dpdp.yaml"
+    text = dpdp.read_text(encoding="utf-8")
+    assert "population_source: third_parties" in text
+    dpdp.write_text(
+        text.replace("population_source: third_parties", "population_source: third_party", 1),
+        encoding="utf-8",
+    )
+
+    # A savepoint, so the framework upserts that precede the refusal do not
+    # leak into the session every other test shares.
+    savepoint = seeded_db.begin_nested()
+    try:
+        with pytest.raises(ControlLibraryError, match="'third_party'"):
+            load_control_library(seeded_db, tmp_path)
+    finally:
+        savepoint.rollback()
