@@ -509,3 +509,7 @@ def test_a_real_suite_persists_its_declared_population_source(
     # it is still the only key, so the evidence viewer keeps treating the
     # record as bookkeeping rather than a finding.
     assert results["DPDP-08-02"] == {"population_source": "erased_principals"}
+    # The run raised a finding for DPDP-TP-01; left uncommitted on the shared
+    # session, it holds the open-finding unique index and blocks any later
+    # committed run that raises the same finding.
+    seeded_db.rollback()
