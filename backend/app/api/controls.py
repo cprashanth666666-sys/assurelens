@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.schemas import ClauseRef, ControlDetail, ControlSummary, EngagementSummary
 from app.db import get_db
 from app.models.control import Control, Engagement, EngagementControl
+from app.models.results import TestResult, TestRun
 
 router = APIRouter()
 
@@ -171,4 +173,134 @@ def get_engagement(db: Session = Depends(get_db)) -> EngagementSummary:
         control_count=len(controls),
         executable_count=sum(1 for c in controls if c.is_executable),
         out_of_scope_count=sum(1 for s in scope.values() if not s.in_scope),
+    )
+
+
+# --- Readiness: overview, heatmap, evidence quality --------------------------
+#
+# Five real states, not the four the brief names, because a fourth state
+# ("Insufficient evidence") only exists for a control the gate actually
+# ran and gated. A documented control has no TestProcedure at all, and the
+# runner's own loop skips it outright -- no TestResult row is ever created
+# for one. Reporting it as "insufficient evidence" would be exactly the
+# fabrication this project refuses everywhere else: a gate reason nobody
+# computed, attached to a control nobody ran. It is its own state,
+# "not measured", alongside an executable control a run has not reached yet.
+
+
+class DomainReadiness(BaseModel):
+    domain: str
+    total: int
+    pass_: int
+    fail: int
+    insufficient_evidence: int
+    not_measured: int
+    not_applicable: int
+    # Share of the domain a verdict actually exists for -- pass, fail or
+    # insufficient evidence all count, because each is a real conclusion
+    # about a control that was run. [PRD 7.3: never a single headline %]
+    coverage_pct: float
+
+
+class EvidenceQuality(BaseModel):
+    sufficient: int
+    thin: int
+    no_evidence: int
+    total: int
+
+
+class ReadinessOut(BaseModel):
+    by_domain: list[DomainReadiness]
+    evidence_quality: EvidenceQuality
+    heatmap_note: str
+
+
+HEATMAP_NOTE = (
+    "Findings plotted by their likelihood x impact cell, both 1-5. A cell "
+    "with a count is not itself a finding; click it to filter the register."
+)
+
+
+def _latest_results(db: Session, engagement_id: int) -> dict[int, TestResult]:
+    """The most recent TestResult per control, for this engagement's run
+    history. `max(id)` rather than `max(run_at)`: ids are append-only and
+    strictly increasing, so it is exact where two results could in
+    principle share a timestamp."""
+    latest_ids = select(func.max(TestResult.id)).join(
+        TestRun, TestRun.id == TestResult.run_id
+    ).where(TestRun.engagement_id == engagement_id).group_by(TestResult.control_id)
+
+    rows = db.scalars(select(TestResult).where(TestResult.id.in_(latest_ids))).all()
+    return {r.control_id: r for r in rows}
+
+
+@router.get("/engagements/{engagement_id}/readiness", response_model=ReadinessOut)
+def get_readiness(engagement_id: int, db: Session = Depends(get_db)) -> ReadinessOut:
+    engagement = db.get(Engagement, engagement_id)
+    if engagement is None:
+        raise HTTPException(status_code=404, detail="Engagement not found.")
+
+    controls = db.scalars(select(Control)).all()
+    scope = _scope_index(db)
+    latest = _latest_results(db, engagement_id)
+
+    by_domain: dict[str, dict[str, int]] = {}
+    quality = {"sufficient": 0, "thin": 0, "no_evidence": 0}
+
+    for control in controls:
+        row = by_domain.setdefault(
+            control.domain,
+            {"total": 0, "PASS": 0, "FAIL": 0, "INSUFFICIENT_EVIDENCE": 0,
+             "NOT_MEASURED": 0, "NOT_APPLICABLE": 0},
+        )
+        row["total"] += 1
+
+        scoped = scope.get(control.id)
+        if scoped is not None and not scoped.in_scope:
+            row["NOT_APPLICABLE"] += 1
+            continue
+
+        result = latest.get(control.id)
+        if result is None:
+            row["NOT_MEASURED"] += 1
+            quality["no_evidence"] += 1
+            continue
+
+        if result.verdict == "NOT_APPLICABLE":
+            # The runner's own applicability check, distinct from the scope
+            # table's in_scope flag handled above -- still not evidence.
+            row["NOT_APPLICABLE"] += 1
+            continue
+        row[result.verdict] = row.get(result.verdict, 0) + 1
+        if result.verdict == "INSUFFICIENT_EVIDENCE":
+            quality["thin"] += 1
+        else:
+            quality["sufficient"] += 1
+
+    domains = [
+        DomainReadiness(
+            domain=domain,
+            total=row["total"],
+            pass_=row["PASS"],
+            fail=row["FAIL"],
+            insufficient_evidence=row["INSUFFICIENT_EVIDENCE"],
+            not_measured=row["NOT_MEASURED"],
+            not_applicable=row["NOT_APPLICABLE"],
+            # Out of the controls that could have produced a verdict, not
+            # out of the domain's raw count -- a control ruled not
+            # applicable was never eligible to be "covered" or not.
+            coverage_pct=round(
+                100.0 * (row["PASS"] + row["FAIL"] + row["INSUFFICIENT_EVIDENCE"])
+                / (row["total"] - row["NOT_APPLICABLE"]),
+                1,
+            ) if row["total"] - row["NOT_APPLICABLE"] else 0.0,
+        )
+        for domain, row in sorted(by_domain.items())
+    ]
+
+    total_quality = sum(quality.values())
+    return ReadinessOut(
+        by_domain=domains,
+        evidence_quality=EvidenceQuality(**quality, total=total_quality),
+        heatmap_note=HEATMAP_NOTE,
     )

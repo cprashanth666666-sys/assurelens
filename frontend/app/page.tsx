@@ -2,15 +2,21 @@ import { ArrowDownIcon, ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 import { DeadlineCount } from "@/components/DeadlineCount";
+import { EvidenceQualityMeter } from "@/components/EvidenceQualityMeter";
 import { GateExplorer } from "@/components/GateExplorer";
 import { HealthProbe } from "@/components/HealthProbe";
 import { MediaClip } from "@/components/MediaClip";
 import { Plate } from "@/components/Plate";
 import { Placeholder } from "@/components/Placeholder";
+import { ReadinessByDomain } from "@/components/ReadinessBar";
 import { Reveal } from "@/components/Reveal";
+import { RiskHeatmap } from "@/components/RiskHeatmap";
+import { OPEN_FINDING_STATUSES, fetchEngagement, fetchFindings, fetchReadiness } from "@/lib/api";
 import { ENGAGEMENT } from "@/lib/engagement";
 import { CLIPS, type Clip } from "@/lib/media";
 import { PLATES } from "@/lib/imagery";
+
+export const dynamic = "force-dynamic";
 
 /**
  * The overview: the engagement's cover sheet, then the product's argument
@@ -23,7 +29,15 @@ import { PLATES } from "@/lib/imagery";
  *   2. The evidence gate, as something the reader can move.
  *   3. How the instrument works: an asymmetric media bento.
  */
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const engagement = await fetchEngagement();
+  const [readiness, findings] = engagement
+    ? await Promise.all([
+        fetchReadiness(engagement.id),
+        fetchFindings(engagement.id),
+      ])
+    : [null, null];
+
   return (
     <div className="flex flex-col gap-9">
       <Hero />
@@ -45,18 +59,44 @@ export default function OverviewPage() {
         <HowItWorks />
       </Reveal>
 
-      <Reveal delay={40}>
-        <Placeholder
-          title="Engagement overview"
-          summary={
-            "Readiness by domain, a 5×5 risk heatmap, and the evidence quality " +
-            "meter: what proportion of the estate has been graded, and what " +
-            "has not. Deliberately no headline compliance percentage. A domain " +
-            "at 40% coverage and one at 95% cannot be averaged into an honest " +
-            "number."
-          }
-          buildsOn="Day 8"
-        />
+      <Reveal delay={40} as="section" className="flex flex-col gap-7">
+        <div className="flex max-w-prose flex-col gap-3">
+          <h2 className="text-2xl font-medium tracking-title">Engagement overview</h2>
+          <p className="m-0 text-base text-ink-2 md:text-lg md:leading-prose">
+            Readiness by domain, a 5×5 risk heatmap, and the evidence quality
+            meter: what proportion of the estate has been graded, and what has
+            not. Deliberately no headline compliance percentage — a domain at
+            40% coverage and one at 95% cannot be averaged into an honest
+            number.
+          </p>
+        </div>
+
+        {readiness === null || findings === null ? (
+          <Placeholder
+            title="Engagement overview"
+            summary="The API is unreachable, so readiness cannot be graded right now. This section renders once the backend responds; content never waits on a cold backend."
+            buildsOn="Day 8"
+          />
+        ) : (
+          <div className="ruled lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+            <div className="flex flex-col gap-6 bg-surface p-5 md:p-7">
+              <h3 className="m-0 text-lg font-medium">Readiness by domain</h3>
+              <ReadinessByDomain rows={readiness.by_domain} />
+            </div>
+            <div className="grid gap-px bg-rule-strong">
+              <div className="flex flex-col gap-4 bg-surface p-5 md:p-6">
+                <h3 className="m-0 text-lg font-medium">Risk heatmap</h3>
+                <RiskHeatmap
+                  findings={findings.filter((f) => OPEN_FINDING_STATUSES.includes(f.status))}
+                />
+              </div>
+              <div className="flex flex-col gap-4 bg-surface p-5 md:p-6">
+                <h3 className="m-0 text-lg font-medium">Evidence quality</h3>
+                <EvidenceQualityMeter quality={readiness.evidence_quality} />
+              </div>
+            </div>
+          </div>
+        )}
       </Reveal>
 
       <Reveal delay={80}>

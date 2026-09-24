@@ -20,6 +20,7 @@ from typing import Any, Protocol
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.engine import findings
 from app.engine import gate as gate_module
 from app.engine.evidence import (
     EvidenceBroker,
@@ -324,6 +325,13 @@ def _run_one(
         {**raw.detail, "population_source": primary_source},
     )
     _persist_model_assessments(db, result, raw.detail)
+
+    # Only a clean FAIL raises a finding -- never a gated result. The gate's
+    # own explanation already says what is missing; a "finding" built from a
+    # verdict the product itself calls inconclusive would undercut the whole
+    # argument for the gate existing. [Day 8, TRD 1.3]
+    if outcome.verdict == Verdict.FAIL and control.auto_raise:
+        findings.raise_from_result(db, control, result)
 
 
 def _persist_model_assessments(

@@ -266,3 +266,203 @@ export async function fetchLatestResult(ref: string): Promise<LatestResult> {
     return { kind: "unreachable" };
   }
 }
+
+// --- Findings and roadmap ---------------------------------------------------
+
+export type Severity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+
+export const SEVERITIES: Severity[] = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+
+export const SEVERITY_LABEL: Record<Severity, string> = {
+  CRITICAL: "Critical",
+  HIGH: "High",
+  MEDIUM: "Medium",
+  LOW: "Low",
+};
+
+/**
+ * Full-strength fills, an ink border and a text label on every chip, the
+ * same discipline as VERDICT_CLASS: colour is never the only carrier of
+ * meaning. [DESIGN.md 2]
+ */
+export const SEVERITY_CLASS: Record<Severity, string> = {
+  CRITICAL: "border border-rule-strong bg-sev-critical text-sev-on-critical",
+  HIGH: "border border-rule-strong bg-sev-high text-ink",
+  MEDIUM: "border border-rule-strong bg-sev-medium text-ink",
+  LOW: "border border-rule-strong bg-sev-low text-ink",
+};
+
+export type FindingStatus =
+  | "OPEN"
+  | "IN_REMEDIATION"
+  | "RETEST_PENDING"
+  | "CLOSED"
+  | "ACCEPTED_RISK";
+
+export const FINDING_STATUSES: FindingStatus[] = [
+  "OPEN",
+  "IN_REMEDIATION",
+  "RETEST_PENDING",
+  "CLOSED",
+  "ACCEPTED_RISK",
+];
+
+/**
+ * The statuses a finding is still live under -- mirrors `OPEN_STATUSES` in
+ * `engine/findings.py` and the roadmap endpoint's own filter, so a closed
+ * or accepted-risk finding never shows up as current exposure on the
+ * overview heatmap the way it correctly doesn't on the roadmap.
+ */
+export const OPEN_FINDING_STATUSES: FindingStatus[] = [
+  "OPEN",
+  "IN_REMEDIATION",
+  "RETEST_PENDING",
+];
+
+export const FINDING_STATUS_LABEL: Record<FindingStatus, string> = {
+  OPEN: "Open",
+  IN_REMEDIATION: "In remediation",
+  RETEST_PENDING: "Retest pending",
+  CLOSED: "Closed",
+  ACCEPTED_RISK: "Accepted risk",
+};
+
+export type Finding = {
+  ref: string;
+  control_ref: string;
+  control_title: string;
+  domain: Domain;
+  title: string;
+  description: string;
+  root_cause: string | null;
+  recommendation: string | null;
+  likelihood: number;
+  impact: number;
+  risk_score: number;
+  severity: Severity;
+  owner: string | null;
+  effort_days: number | null;
+  status: FindingStatus;
+  is_internal_note_only: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FindingHistoryEntry = {
+  changed_at: string;
+  field: string;
+  old_value: string | null;
+  new_value: string | null;
+};
+
+export type FindingDetail = Finding & {
+  origin_result_id: number | null;
+  history: FindingHistoryEntry[];
+};
+
+export type FindingFilter = {
+  domain?: Domain;
+  severity?: Severity;
+  status?: FindingStatus;
+  likelihood?: number;
+  impact?: number;
+};
+
+function toQuery(filter: FindingFilter): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filter)) {
+    if (value !== undefined) params.set(key, String(value));
+  }
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
+export const fetchFindings = (engagementId: number, filter: FindingFilter = {}) =>
+  get<Finding[]>(`/api/engagements/${engagementId}/findings${toQuery(filter)}`);
+
+export const fetchFinding = (ref: string) =>
+  get<FindingDetail>(`/api/findings/${encodeURIComponent(ref)}`);
+
+export type FindingUpdate = Partial<{
+  title: string;
+  description: string;
+  root_cause: string | null;
+  recommendation: string | null;
+  likelihood: number;
+  impact: number;
+  owner: string | null;
+  effort_days: number | null;
+  status: FindingStatus;
+  is_internal_note_only: boolean;
+}>;
+
+export async function updateFinding(
+  ref: string,
+  patch: FindingUpdate,
+): Promise<FindingDetail | null> {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/findings/${encodeURIComponent(ref)}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as FindingDetail;
+  } catch {
+    return null;
+  }
+}
+
+export type RoadmapItem = {
+  sequence: number;
+  ref: string;
+  control_ref: string;
+  action: string;
+  owner: string | null;
+  effort_days: number;
+  impact: number;
+  likelihood: number;
+  severity: Severity;
+  priority: number;
+  expected_residual_reduction: number;
+};
+
+export type Roadmap = {
+  ordering_rule: string;
+  items: RoadmapItem[];
+};
+
+export const fetchRoadmap = (engagementId: number) =>
+  get<Roadmap>(`/api/engagements/${engagementId}/roadmap`);
+
+// --- Readiness: overview, heatmap, evidence quality -------------------------
+
+export type DomainReadiness = {
+  domain: Domain;
+  total: number;
+  pass_: number;
+  fail: number;
+  insufficient_evidence: number;
+  not_measured: number;
+  not_applicable: number;
+  coverage_pct: number;
+};
+
+export type EvidenceQuality = {
+  sufficient: number;
+  thin: number;
+  no_evidence: number;
+  total: number;
+};
+
+export type Readiness = {
+  by_domain: DomainReadiness[];
+  evidence_quality: EvidenceQuality;
+  heatmap_note: string;
+};
+
+export const fetchReadiness = (engagementId: number) =>
+  get<Readiness>(`/api/engagements/${engagementId}/readiness`);

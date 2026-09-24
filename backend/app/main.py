@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # name `app` in this module, shadowing the FastAPI instance defined below --
 # so `app.include_router` would look for a router method on the package.
 from app import suites as _suites  # noqa: F401
-from app.api import controls, health, runs
+from app.api import controls, findings, health, runs
 from app.config import get_settings
 
 settings = get_settings()
@@ -44,3 +44,4 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(controls.router, prefix="/api", tags=["controls"])
 app.include_router(runs.router, prefix="/api", tags=["runs"])
+app.include_router(findings.router, prefix="/api", tags=["findings"])

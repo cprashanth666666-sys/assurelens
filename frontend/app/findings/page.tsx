@@ -1,16 +1,59 @@
+import { FindingsRegister } from "@/components/FindingsRegister";
+import { PageHeader } from "@/components/PageHeader";
 import { Placeholder } from "@/components/Placeholder";
+import { Reveal } from "@/components/Reveal";
+import { fetchEngagement, fetchFindings } from "@/lib/api";
 
-export default function FindingsPage() {
+export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<{ likelihood?: string; impact?: string }>;
+
+export default async function FindingsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const engagement = await fetchEngagement();
+
+  if (engagement === null) {
+    return (
+      <PageHeader
+        title="Findings register"
+        lede="The API is unreachable, so findings cannot be listed. The page renders regardless; content never waits on a cold backend."
+      />
+    );
+  }
+
+  const findings = await fetchFindings(engagement.id);
+
+  if (findings === null) {
+    return (
+      <Placeholder
+        title="Findings register"
+        summary="The API is unreachable, so findings cannot be listed right now."
+        buildsOn="Day 8"
+      />
+    );
+  }
+
+  const likelihood = Number(params.likelihood);
+  const impact = Number(params.impact);
+
   return (
-    <Placeholder
-      title="Findings register"
-      summary={
-        "Findings raised by tests that actually ran; none are seeded. " +
-        "Severity is likelihood × impact, carried as a left border and a text " +
-        "label, never colour alone. Expand a row for the evidence: for a " +
-        "probe finding, the HTTP exchange itself."
-      }
-      buildsOn="Day 8"
-    />
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        title="Findings register"
+        lede="Findings raised by tests that actually ran; none are seeded. Severity is likelihood × impact, carried as a left border and a text label, never colour alone. Expand a row for the evidence, the root cause, and the history of what changed."
+      />
+
+      <Reveal>
+        <FindingsRegister
+          findings={findings}
+          initialLikelihood={Number.isInteger(likelihood) ? likelihood : undefined}
+          initialImpact={Number.isInteger(impact) ? impact : undefined}
+        />
+      </Reveal>
+    </div>
   );
 }
