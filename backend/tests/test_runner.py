@@ -15,7 +15,9 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.orm import Session
 
+from app import suites as _suites  # noqa: F401  registers procedures
 from app.engine import runner
+from app.engine.collectors import default_broker
 from app.engine.evidence import (
     EvidenceBroker,
     EvidenceBundle,
@@ -452,3 +454,58 @@ def test_a_mixed_bundle_is_not_attestation_only() -> None:
     )
 
     assert bundle.is_attestation_only is False
+
+
+# --- Population source -------------------------------------------------------
+
+
+def test_the_contract_level_population_source_marks_its_requirement() -> None:
+    """The YAML declares the population once, beside the list, not per item."""
+    contract = runner._contract_from_spec(
+        {
+            "required": [
+                {"name": "erased_principals", "kind": "DB_QUERY"},
+                {"name": "third_parties", "kind": "DB_QUERY"},
+            ],
+            "population_source": "erased_principals",
+        }
+    )
+
+    assert [r.name for r in contract.required if r.defines_population] == [
+        "erased_principals"
+    ]
+
+
+def test_an_explicit_per_item_flag_is_still_honoured() -> None:
+    contract = runner._contract_from_spec(
+        {"required": [{"name": "records", "kind": "DB_QUERY", "defines_population": True}]}
+    )
+
+    assert contract.required[0].defines_population is True
+
+
+@pytest.mark.usefixtures("seeded_estate")
+def test_a_real_suite_persists_its_declared_population_source(
+    seeded_db: Session, engagement_id: int
+) -> None:
+    """Every result names the population it was drawn from -- including one the
+    gate stopped before it executed."""
+    run = runner.run_suites(
+        seeded_db, engagement_id, ["third_party"], seed=42,
+        broker=default_broker(), engine_version="test",
+    )
+
+    results = {
+        ref: detail
+        for ref, detail in seeded_db.execute(
+            select(Control.ref, ResultRow.detail)
+            .join(Control, Control.id == ResultRow.control_id)
+            .where(ResultRow.run_id == run.id)
+        )
+    }
+
+    assert results["DPDP-TP-01"]["population_source"] == "third_parties"
+    # Gated on G4 and never executed: the population is still recorded, and
+    # it is still the only key, so the evidence viewer keeps treating the
+    # record as bookkeeping rather than a finding.
+    assert results["DPDP-08-02"] == {"population_source": "erased_principals"}
