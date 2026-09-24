@@ -74,12 +74,18 @@ def get_procedure(plugin_key: str) -> Procedure | None:
 
 
 def _contract_from_spec(spec: dict[str, Any]) -> EvidenceContract:
-    """Build a contract from the YAML the control declares."""
+    """Build a contract from the YAML the control declares.
+
+    The population is declared at the contract level (``population_source``),
+    not per item; an explicit per-item ``defines_population`` still counts.
+    """
+    population_source = spec.get("population_source")
     required = tuple(
         EvidenceRequirement(
             name=item["name"],
             kind=EvidenceKind(item["kind"]),
-            defines_population=bool(item.get("defines_population")),
+            defines_population=bool(item.get("defines_population"))
+            or item["name"] == population_source,
         )
         for item in spec.get("required", [])
     )

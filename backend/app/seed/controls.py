@@ -173,6 +173,27 @@ def _sync_mappings(
     db.flush()
 
 
+def _validate_evidence_contract(spec: dict[str, Any], source: str) -> None:
+    """Refuse a population_source that names no required evidence.
+
+    The runner records the population a result was drawn from by matching
+    this name against the required items. A typo there does not fail a run;
+    it records the population as null on every result, which reads as
+    "undeclared" rather than "wrong".
+    """
+    contract = spec.get("evidence_contract") or {}
+    population_source = contract.get("population_source")
+    if population_source is None:
+        return
+    names = [item.get("name") for item in contract.get("required", [])]
+    if population_source not in names:
+        raise ControlLibraryError(
+            f"Control {spec.get('ref')} in {source} declares population_source "
+            f"{population_source!r}, which is not one of its required evidence "
+            f"items {names}."
+        )
+
+
 def _sync_procedure(db: Session, control: Control, spec: dict[str, Any]) -> None:
     """Upsert the control's procedure rather than replacing it.
 
@@ -247,6 +268,7 @@ def load_control_library(db: Session, controls_dir: Path | None = None) -> dict[
             clause = _upsert_clause(db, framework, clause_spec)
             clause_index[(framework.code, clause.ref)] = clause
         for control_spec in data.get("controls", []):
+            _validate_evidence_contract(control_spec, filename)
             control_specs.append((control_spec, filename))
 
     controls_loaded = 0
