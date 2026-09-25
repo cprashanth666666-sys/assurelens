@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
-
+import { useRoleSwitch } from "./RoleProvider";
 import { ROLE_LABEL, type Role } from "@/lib/engagement";
 
 /**
  * The role switch is a lens, not a different product: it changes framing and
  * permissions and never a number. [PRD 4.4, UX 5]
  *
- * Day 1 ships the control and the disclosure line. Day 9 wires it to content.
+ * Wired to `RoleProvider`: setting a role updates the cookie `getRole()`
+ * reads server-side and calls `router.refresh()`, so server-rendered
+ * framing changes on the same click as this component's own.
  */
 export function RoleSwitch() {
-  const [role, setRole] = useState<Role>("consultant");
+  const { role, setRole } = useRoleSwitch();
 
   return (
     <div className="relative">

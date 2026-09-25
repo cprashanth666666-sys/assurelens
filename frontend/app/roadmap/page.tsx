@@ -4,11 +4,12 @@ import { Reveal } from "@/components/Reveal";
 import { RoadmapList } from "@/components/RoadmapList";
 import { RoadmapScatter } from "@/components/RoadmapScatter";
 import { fetchEngagement, fetchRoadmap } from "@/lib/api";
+import { getRole } from "@/lib/role-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function RoadmapPage() {
-  const engagement = await fetchEngagement();
+  const [engagement, role] = await Promise.all([fetchEngagement(), getRole()]);
 
   if (engagement === null) {
     return (
@@ -42,14 +43,16 @@ export default async function RoadmapPage() {
         lede="A plan, not a scoreboard: effort against impact, then an ordered list of actions with owners and the expected reduction in risk score. The ordering rule is printed below, not summarised, so it can be argued with rather than accepted."
       />
 
-      <Reveal as="section" className="flex flex-col gap-4">
-        <h3 className="m-0 text-lg font-medium">Effort × impact</h3>
-        <RoadmapScatter items={roadmap.items} />
-      </Reveal>
+      {role === "consultant" && (
+        <Reveal as="section" className="flex flex-col gap-4">
+          <h3 className="m-0 text-lg font-medium">Effort × impact</h3>
+          <RoadmapScatter items={roadmap.items} />
+        </Reveal>
+      )}
 
       <Reveal as="section" className="flex flex-col gap-4">
         <h3 className="m-0 text-lg font-medium">Sequence</h3>
-        <RoadmapList orderingRule={roadmap.ordering_rule} items={roadmap.items} />
+        <RoadmapList orderingRule={roadmap.ordering_rule} items={roadmap.items} role={role} />
       </Reveal>
     </div>
   );

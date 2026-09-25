@@ -12,6 +12,7 @@ import { ReadinessByDomain } from "@/components/ReadinessBar";
 import { Reveal } from "@/components/Reveal";
 import { RiskHeatmap } from "@/components/RiskHeatmap";
 import { OPEN_FINDING_STATUSES, fetchEngagement, fetchFindings, fetchReadiness } from "@/lib/api";
+import { getRole } from "@/lib/role-server";
 import { ENGAGEMENT } from "@/lib/engagement";
 import { CLIPS, type Clip } from "@/lib/media";
 import { PLATES } from "@/lib/imagery";
@@ -30,13 +31,18 @@ export const dynamic = "force-dynamic";
  *   3. How the instrument works: an asymmetric media bento.
  */
 export default async function OverviewPage() {
-  const engagement = await fetchEngagement();
-  const [readiness, findings] = engagement
+  const [engagement, role] = await Promise.all([fetchEngagement(), getRole()]);
+  const [readiness, allFindings] = engagement
     ? await Promise.all([
         fetchReadiness(engagement.id),
         fetchFindings(engagement.id),
       ])
     : [null, null];
+  // Internal reviewer notes never leave the server for the client role.
+  // [PRD 4.4]
+  const findings = allFindings !== null && role === "client"
+    ? allFindings.filter((f) => !f.is_internal_note_only)
+    : allFindings;
 
   return (
     <div className="flex flex-col gap-9">

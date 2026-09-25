@@ -4,7 +4,9 @@ import { Geist, JetBrains_Mono } from "next/font/google";
 import { DisclosureFooter } from "@/components/DisclosureFooter";
 import { Masthead } from "@/components/Masthead";
 import { MotionProvider } from "@/components/MotionProvider";
+import { RoleProvider } from "@/components/RoleProvider";
 import { TabNav } from "@/components/TabNav";
+import { getRole } from "@/lib/role-server";
 import "@/styles/globals.css";
 
 /**
@@ -45,11 +47,13 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const role = await getRole();
+
   return (
     <html
       lang="en"
@@ -80,16 +84,18 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <Masthead />
-        <TabNav />
+        <RoleProvider initialRole={role}>
+          <Masthead />
+          <TabNav />
 
-        <MotionProvider>
-          <main id="main" className="mx-auto max-w-content px-4 pb-9 pt-7 md:px-6 md:pt-8">
-            {children}
-          </main>
-        </MotionProvider>
+          <MotionProvider>
+            <main id="main" className="mx-auto max-w-content px-4 pb-9 pt-7 md:px-6 md:pt-8">
+              {children}
+            </main>
+          </MotionProvider>
 
-        <DisclosureFooter />
+          <DisclosureFooter />
+        </RoleProvider>
       </body>
     </html>
   );

@@ -1,4 +1,7 @@
+"use client";
+
 import { VERDICT_CLASS, VERDICT_LABEL, type Verdict } from "@/lib/api";
+import { useRole } from "./RoleProvider";
 
 /**
  * A verdict, rendered as a peer of the others: one chip, one size, one
@@ -6,6 +9,13 @@ import { VERDICT_CLASS, VERDICT_LABEL, type Verdict } from "@/lib/api";
  * carry the verdict on their own (full disc, half disc, empty ring, dash),
  * so it survives monochrome print and colour-vision deficiency.
  * [PRD 6.5, a11y color-not-only]
+ *
+ * The raw gate codes (G1, G3, ...) are consultant instrumentation -- a
+ * client reads the plain-language "Why / Resolve" block that sits beside
+ * this badge wherever it appears, not a code they would have to look up.
+ * [PRD 4.4: "shows the failed rule and threshold" vs "shows what evidence
+ * is needed and who supplies it"] A single client leaf, not a server/client
+ * split per caller, since every caller already sits inside `RoleProvider`.
  */
 
 const SHAPE: Record<Verdict, React.ReactNode> = {
@@ -40,6 +50,7 @@ export function VerdictBadge({
   verdict: Verdict;
   gateReasons?: string[];
 }) {
+  const role = useRole();
   const codes = gateReasons.map((r) => r.split("_")[0]).join(" ");
 
   return (
@@ -51,7 +62,7 @@ export function VerdictBadge({
         {VERDICT_LABEL[verdict]}
       </span>
 
-      {codes && (
+      {codes && role === "consultant" && (
         <abbr
           className="cursor-help font-mono text-xs font-medium text-ink-2 underline decoration-dotted underline-offset-2"
           title={gateReasons.join(", ")}

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -21,7 +21,9 @@ from app.db import get_db
 from app.engine import runner
 from app.engine.collectors import default_broker, registered_evidence
 from app.models.control import Control, Engagement
-from app.models.results import TestResult, TestRun
+from app.models.results import AuditEntry, TestResult, TestRun
+from app.reporting.summary import build_summary
+from app.reporting.workpaper import build_workpaper
 
 router = APIRouter()
 
@@ -206,6 +208,39 @@ def list_runs(
     return [_summarise(r, _result_rows(db, r.id)) for r in runs]
 
 
+@router.get("/engagements/{engagement_id}/summary")
+def get_summary(engagement_id: int, db: Session = Depends(get_db)) -> Response:
+    """The one-page executive summary DOCX. [PRD 7.2, S5]
+
+    Engagement-scoped, not run-scoped: it reads the engagement's current
+    readiness and roadmap, the same live state the overview page shows.
+    """
+    try:
+        content = build_summary(db, engagement_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    db.add(
+        AuditEntry(
+            action="REPORT_EXPORTED",
+            entity_type="engagement",
+            entity_id=str(engagement_id),
+            detail={"format": "executive_summary_docx"},
+        )
+    )
+    db.commit()
+
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="assurelens-summary-{engagement_id}.docx"'
+            )
+        },
+    )
+
+
 @router.get("/runs/{run_id}", response_model=RunDetail)
 def get_run(run_id: int, db: Session = Depends(get_db)) -> RunDetail:
     run = db.scalar(
@@ -227,6 +262,38 @@ def get_run(run_id: int, db: Session = Depends(get_db)) -> RunDetail:
     return RunDetail(
         **_summarise(run, results).model_dump(),
         results=[_to_summary(r, controls) for r in results],
+    )
+
+
+@router.get("/runs/{run_id}/workpaper")
+def get_workpaper(run_id: int, db: Session = Depends(get_db)) -> Response:
+    """The DOCX workpaper for one run. [PRD 7.1, M9]
+
+    A GET, not a POST: exporting a document a second time changes nothing
+    about the run it describes, and a GET is what a plain link/download
+    button issues without extra client code.
+    """
+    try:
+        content = build_workpaper(db, run_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    db.add(
+        AuditEntry(
+            action="REPORT_EXPORTED",
+            entity_type="test_run",
+            entity_id=str(run_id),
+            detail={"format": "workpaper_docx"},
+        )
+    )
+    db.commit()
+
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": f'attachment; filename="assurelens-workpaper-run-{run_id}.docx"'
+        },
     )
 
 

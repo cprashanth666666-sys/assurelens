@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.main import app
@@ -204,3 +204,50 @@ def test_a_control_that_has_never_run_returns_null() -> None:
 
 def test_an_unknown_control_is_404() -> None:
     assert client.get("/api/controls/NOPE-00-00/latest-result").status_code == 404
+
+
+def test_the_workpaper_downloads_as_a_docx(
+    engagement_id: int, seeded_db: Session
+) -> None:
+    started = client.post(
+        f"/api/engagements/{engagement_id}/runs",
+        json={"suite_ids": ["pii_retention"], "seed": 42},
+    )
+    run_id = started.json()["id"]
+
+    response = client.get(f"/api/runs/{run_id}/workpaper")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == (
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    assert f"run-{run_id}.docx" in response.headers["content-disposition"]
+    # The ZIP local-file-header signature every OOXML document starts with.
+    assert response.content[:2] == b"PK"
+
+    logged = seeded_db.execute(
+        text(
+            "SELECT action FROM audit_log WHERE entity_type = 'test_run' "
+            "AND entity_id = :run_id AND action = 'REPORT_EXPORTED'"
+        ),
+        {"run_id": str(run_id)},
+    ).first()
+    assert logged is not None
+
+
+def test_the_workpaper_for_an_unknown_run_is_404() -> None:
+    assert client.get("/api/runs/999999/workpaper").status_code == 404
+
+
+def test_the_summary_downloads_as_a_docx(engagement_id: int) -> None:
+    response = client.get(f"/api/engagements/{engagement_id}/summary")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == (
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    assert response.content[:2] == b"PK"
+
+
+def test_the_summary_for_an_unknown_engagement_is_404() -> None:
+    assert client.get("/api/engagements/999999/summary").status_code == 404

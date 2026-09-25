@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Placeholder } from "@/components/Placeholder";
 import { Reveal } from "@/components/Reveal";
 import { fetchEngagement, fetchFindings } from "@/lib/api";
+import { getRole } from "@/lib/role-server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function FindingsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const params = await searchParams;
+  const [params, role] = await Promise.all([searchParams, getRole()]);
   const engagement = await fetchEngagement();
 
   if (engagement === null) {
@@ -39,6 +40,12 @@ export default async function FindingsPage({
 
   const likelihood = Number(params.likelihood);
   const impact = Number(params.impact);
+  // Internal reviewer notes never leave the server for the client role --
+  // filtering client-side only would still ship the text in the RSC
+  // payload. [PRD 4.4: "internal reviewer notes hidden"]
+  const visibleFindings = role === "client"
+    ? findings.filter((f) => !f.is_internal_note_only)
+    : findings;
 
   return (
     <div className="flex flex-col gap-7">
@@ -49,7 +56,7 @@ export default async function FindingsPage({
 
       <Reveal>
         <FindingsRegister
-          findings={findings}
+          findings={visibleFindings}
           initialLikelihood={Number.isInteger(likelihood) ? likelihood : undefined}
           initialImpact={Number.isInteger(impact) ? impact : undefined}
         />

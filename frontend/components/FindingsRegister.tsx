@@ -19,6 +19,7 @@ import {
   type FindingStatus,
   type Severity,
 } from "@/lib/api";
+import { useRole } from "./RoleProvider";
 
 /**
  * The findings register. [UX_BRIEF 4.5]
@@ -42,6 +43,7 @@ export function FindingsRegister({
   initialLikelihood?: number;
   initialImpact?: number;
 }) {
+  const role = useRole();
   const [rows, setRows] = useState(findings);
   const [domain, setDomain] = useState<Domain | "all">("all");
   const [severity, setSeverity] = useState<Severity | "all">("all");
@@ -55,15 +57,22 @@ export function FindingsRegister({
 
   const filtered = useMemo(() => {
     return rows.filter((f) => {
+      // Internal reviewer notes -- a finding drafted for the file, not yet
+      // meant for the client -- are hidden from the client view entirely,
+      // not just read-only. [PRD 4.4: "internal reviewer notes hidden"]
+      if (role === "client" && f.is_internal_note_only) return false;
       if (domain !== "all" && f.domain !== domain) return false;
       if (severity !== "all" && f.severity !== severity) return false;
       if (status !== "all" && f.status !== status) return false;
       if (cell && (f.likelihood !== cell.likelihood || f.impact !== cell.impact)) return false;
       return true;
     });
-  }, [rows, domain, severity, status, cell]);
+  }, [rows, domain, severity, status, cell, role]);
 
   const anyFilter = domain !== "all" || severity !== "all" || status !== "all" || cell !== null;
+  const visibleTotal = role === "client"
+    ? rows.filter((f) => !f.is_internal_note_only).length
+    : rows.length;
 
   function toggle(ref: string) {
     setExpanded((prev) => {
@@ -104,7 +113,7 @@ export function FindingsRegister({
       <p className="m-0 flex flex-wrap items-center gap-3 text-sm text-ink-2" aria-live="polite">
         <span>
           Showing <strong className="font-mono text-ink">{filtered.length}</strong> of{" "}
-          <span className="font-mono">{rows.length}</span> findings
+          <span className="font-mono">{visibleTotal}</span> findings
         </span>
         {cell && (
           <button
@@ -132,7 +141,7 @@ export function FindingsRegister({
         <div className="border-2 border-dashed border-control bg-surface px-5 py-7">
           <p className="m-0 text-lg font-semibold text-ink">No finding matches.</p>
           <p className="m-0 mt-2 text-base text-ink-2">
-            Nothing in the register fits these filters. Clear them to see all {rows.length}.
+            Nothing in the register fits these filters. Clear them to see all {visibleTotal}.
           </p>
         </div>
       ) : (
@@ -240,6 +249,7 @@ function ExpandedFinding({
   finding: Finding;
   onSaved: (updated: FindingDetail) => void;
 }) {
+  const role = useRole();
   const [detail, setDetail] = useState<FindingDetail | null | "loading">("loading");
   const [status, setStatus] = useState<FindingStatus>(finding.status);
   const [owner, setOwner] = useState(finding.owner ?? "");
@@ -291,34 +301,46 @@ function ExpandedFinding({
         </Field>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4 border-t border-rule pt-4">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="label">Status</span>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as FindingStatus)}
-            className="field"
-          >
-            {FINDING_STATUSES.map((s) => (
-              <option key={s} value={s}>{FINDING_STATUS_LABEL[s]}</option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="label">Owner</span>
-          <input
-            type="text"
-            value={owner}
-            onChange={(e) => setOwner(e.target.value)}
-            placeholder="Unassigned"
-            className="field"
-          />
-        </label>
-        <button type="button" onClick={save} disabled={saving} className="btn btn-secondary">
-          {saving ? "Saving…" : "Save"}
-        </button>
-        {error && <p className="m-0 text-sm text-fail-text">Could not save. Try again.</p>}
-      </div>
+      {role === "consultant" ? (
+        <div className="flex flex-wrap items-end gap-4 border-t border-rule pt-4">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="label">Status</span>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as FindingStatus)}
+              className="field"
+            >
+              {FINDING_STATUSES.map((s) => (
+                <option key={s} value={s}>{FINDING_STATUS_LABEL[s]}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="label">Owner</span>
+            <input
+              type="text"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+              placeholder="Unassigned"
+              className="field"
+            />
+          </label>
+          <button type="button" onClick={save} disabled={saving} className="btn btn-secondary">
+            {saving ? "Saving…" : "Save"}
+          </button>
+          {error && <p className="m-0 text-sm text-fail-text">Could not save. Try again.</p>}
+        </div>
+      ) : (
+        // Read-only for the client: same fields, no form. [PRD 4.4]
+        <div className="flex flex-wrap gap-6 border-t border-rule pt-4">
+          <Field label="Status">
+            <p className="m-0 text-sm text-ink">{FINDING_STATUS_LABEL[finding.status]}</p>
+          </Field>
+          <Field label="Owner">
+            <p className="m-0 text-sm text-ink">{finding.owner ?? "Unassigned"}</p>
+          </Field>
+        </div>
+      )}
 
       <div className="border-t border-rule pt-4">
         <p className="label m-0 mb-2">History</p>
