@@ -41,10 +41,27 @@ class Settings(BaseSettings):
     engine_version: str = "0.1.0"
 
     # --- Document intake ----------------------------------------------------
-    # Local filesystem today; the interface in app/ingest/storage.py is shaped
-    # so an S3/R2 backend is a second implementation, not a rewrite. Raw bytes
-    # never go into Postgres — see migration 0006's docstring.
+    # Raw bytes never go into Postgres — see migration 0006's docstring.
+    #
+    # "local" is correct for docker-compose and for a host with a real
+    # persistent disk. It is WRONG on Render's free plan, which this project
+    # actually deploys on (render.yaml): free-plan services have no
+    # persistent-disk option, so the container filesystem — and every
+    # uploaded document in it — is wiped on the next deploy or scale-to-zero
+    # cycle. "s3" (Cloudflare R2's free tier, or any S3-compatible bucket) is
+    # what production must set, the same reasoning that put Postgres on Neon
+    # rather than Render's own free database. See ingest/storage.py.
+    storage_backend: str = "local"
     document_storage_dir: str = "/tmp/assurelens-documents"
+
+    s3_bucket: str = ""
+    # Empty means "real AWS S3"; set to R2's account endpoint
+    # (https://<account-id>.r2.cloudflarestorage.com) for Cloudflare.
+    s3_endpoint_url: str = ""
+    s3_region: str = "auto"
+    s3_access_key_id: str = ""
+    s3_secret_access_key: str = ""
+
     # 25MB: generous for a policy PDF, small enough that a handful of
     # concurrent uploads cannot exhaust a free-tier container's disk.
     document_max_size_bytes: int = 25 * 1024 * 1024
@@ -52,6 +69,14 @@ class Settings(BaseSettings):
     # payload pattern (small, queryable). Beyond this it is truncated and the
     # full text goes to storage instead. [SCHEMA D4 precedent]
     document_max_inline_text_chars: int = 200_000
+
+    @field_validator("storage_backend")
+    @classmethod
+    def _validate_storage_backend(cls, value: str) -> str:
+        value = value.strip().lower()
+        if value not in ("local", "s3"):
+            raise ValueError(f"STORAGE_BACKEND must be 'local' or 's3', got {value!r}")
+        return value
 
     @field_validator("database_url")
     @classmethod

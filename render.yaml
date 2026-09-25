@@ -62,6 +62,23 @@ services:
         sync: false
       - key: LOG_LEVEL
         value: INFO
+      # Free plan has no persistent-disk option: the container filesystem is
+      # wiped on every deploy and every scale-to-zero cycle. A submitted
+      # document stored there would silently disappear on the next push —
+      # the same reasoning that put Postgres on Neon instead of Render's own
+      # free database. See DEPLOY.md step 1b and app/ingest/storage.py.
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
 
   # Deliberately vulnerable. Deployed separately and reached only over HTTP,
   # so a defect that is not network-reachable is not found — same as reality.
