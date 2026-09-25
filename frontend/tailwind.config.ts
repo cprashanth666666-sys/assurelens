@@ -154,6 +154,7 @@ const config: Config = {
       // `w-32` on a table header emits a rule rather than silently nothing.
       // [UX_BRIEF 11.6]
       width: {
+        20: "5rem",
         24: "6rem",
         28: "7rem",
         32: "8rem",

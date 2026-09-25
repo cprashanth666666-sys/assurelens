@@ -22,7 +22,7 @@ export default async function IntakePage() {
     <div className="flex flex-col gap-7">
       <PageHeader
         title="Document intake"
-        lede="Submit a policy, notice or agreement as a file, or point at a published page. Each submission is stored, its text extracted, and classified against known DPDP document types — a submission the classifier cannot confidently place is reported as such, not guessed."
+        lede="Submit a policy, notice or agreement as a file, or point at a published page. Each submission is stored, its text extracted, and classified against known DPDP document types. A submission the classifier cannot confidently place is reported as such, not guessed."
       />
 
       <IntakePortal engagementId={engagement.id} initialDocuments={documents} />

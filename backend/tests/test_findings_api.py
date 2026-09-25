@@ -81,7 +81,7 @@ def ran(db: Session, engagement_id: int) -> Session:
     reads from."""
     run_suites(
         db, engagement_id,
-        ["consent", "pii_retention", "third_party", "ai_assurance"],
+        ["consent", "pii_retention", "access_probes", "third_party", "ai_assurance"],
         seed=42, broker=default_broker(), engine_version="test",
     )
     db.commit()
@@ -94,7 +94,7 @@ def test_listing_findings_returns_what_the_run_raised(
     response = client.get(f"/api/engagements/{engagement_id}/findings")
     assert response.status_code == 200
     body = response.json()
-    assert len(body) == 8
+    assert len(body) == 12
     assert {f["control_ref"] for f in body} >= {"DPDP-TP-01", "DPDP-13-02"}
     for f in body:
         assert f["severity"] in {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
@@ -133,7 +133,7 @@ def test_the_status_filter_uses_the_status_query_param_not_status_(
         f"/api/engagements/{engagement_id}/findings", params={"status": "OPEN"},
     )
     assert response.status_code == 200
-    assert len(response.json()) == 8
+    assert len(response.json()) == 12
 
     response = client.get(
         f"/api/engagements/{engagement_id}/findings", params={"status": "CLOSED"},

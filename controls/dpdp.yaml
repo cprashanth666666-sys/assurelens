@@ -477,9 +477,13 @@ controls:
     suite: access_probes
     plugin_key: access.log_visibility
     evidence_contract:
+      # `access_logs` (the seeded estate's own DB table) is deliberately not
+      # required here: it is unrelated to the access log THESE probe attempts
+      # produce. What the procedure needs is target_service's own record of
+      # this run's attempts, which is HTTP-sourced like the attempts
+      # themselves -- so probe_exchanges carries both.
       required:
         - {name: probe_exchanges, kind: HTTP_PROBE}
-        - {name: access_logs, kind: DB_QUERY}
     clauses:
       - {ref: "R6(1)(c)", primary: true, rationale: "Rule 6(1)(c) requires visibility on accessing, through logs, monitoring and review."}
       - {ref: "A.8.15", framework: ISO27001}

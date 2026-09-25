@@ -16,7 +16,7 @@ Access date for all entries below: **2026-09-21**.
 - **Gazette PDF (bilingual):** https://www.meity.gov.in/static/uploads/2025/11/53450e6e5dc0bfa85ebd78686cadad39.pdf
 - **English working copy used for extraction:** https://www.dpdpa.com/DPDP_Rules_2025_English_only.pdf
 - **Note on date discrepancy:** the gazette notification itself is dated **13 November 2025**; the MeitY document library lists the publication year/date as **14.11.2025**. Secondary sources cite 13, 14 or 17 November. **The product uses 13 November 2025**, the date on the instrument, and states this note wherever the date is shown.
-- **Corrigendum:** a corrigendum to the Rules was published **16 December 2025** (MeitY document library). *Not yet reviewed in detail — see Open Items.*
+- **Corrigendum:** **G.S.R. 892(E)**, dated **11 December 2025** — corrects two typographical errors in Rule 1(3) and Rule 1(4) ("of this Gazette" → "in the Official Gazette"). No rule numbering, commencement period, or substantive text changed; the 13 May 2027 date and every other citation in this file are unaffected. **Reviewed 2026-09-25 — see D1, closed.** Confirmed via two independent secondary sources (a legal-industry aggregator and a corrigendum-text mirror); the raw e-Gazette PDF for this specific corrigendum could not be reached directly, so this entry carries the same `source_status: unverified` caveat as any secondary-only citation in this project, not a primary-source guarantee. An earlier draft of this entry recorded the corrigendum's date as 16 December 2025 (MeitY document library indexing), the same instrument-vs-library discrepancy already noted above for the Rules themselves; 11 December 2025 is the gazette's own date on G.S.R. 892(E).
 
 #### A1.1 Commencement schedule — verbatim from Rule 1
 > "(2) Rules 1, 2 and 17 to 21 shall come into force on the date of their publication in the Official Gazette.
@@ -97,6 +97,8 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 > s.8(7)(b) extends the same duty to processors, which is what makes the third-party suite a retention control and not only an access one.
 >
 > *Unverified:* the specific ten-year period comes from the Act's illustration, not from a provision of PMLA or an RBI Master Direction that this project has read. Controls cite the Act's illustration, never a banking-law period. See open item D7.
+>
+> **D7 partial finding, 2026-09-25 — still open, not closed.** Secondary sources on PMLA s.12 and the RBI KYC Master Direction converge on **five years** post-closure as the actual banking-law retention period, not ten — the Act's own Illustration (II) may be citing a longer period than the specific AML/KYC provision this project could find, possibly a different or superseded requirement, or a period this project has not correctly identified. This is left **unresolved rather than guessed at**: the discrepancy itself, not a resolution, is the honest state to record. Controls continue to cite only the Act's own illustration (ten years), never the PMLA/RBI figure, and `legal_hold`-based justification (not a hardcoded period) remains the actual test — so no control's correctness depends on which number is right. The e-Gazette/RBI primary text has not been read directly; this finding rests on secondary legal-industry sources only.
 
 **Rule 13 — Significant Data Fiduciary.** Verbatim obligations:
 - 13(1): "once in every period of twelve months … undertake a Data Protection Impact Assessment and an audit."
@@ -111,7 +113,7 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 
 ### A2. Digital Personal Data Protection Act, 2023
 - Act 22 of 2023, assented **11 August 2023**.
-- Penalty ceiling relied on: up to **₹250 crore** per the Schedule to the Act. *Verify the specific entry before displaying it against a named breach type — see Open Items.*
+- Penalty ceiling relied on: up to **₹250 crore** per the Schedule to the Act, for breach of section 8(5) — a Data Fiduciary's failure to implement reasonable security safeguards. A separate, lower ceiling of up to ₹200 crore applies to failure to notify the Board or affected Data Principals of a breach (section 8(6)); the two are not the same entry and are not interchangeable. **Reviewed 2026-09-25 — see D2, closed.** Confirmed via multiple converging secondary (legal-industry) sources rather than the Schedule's own gazette text directly, so this remains a secondary-source citation, not a primary-verified one. AssureLens does not currently display this figure against a named breach type anywhere in the product; if a future control cites it, it must cite section 8(5) specifically, not "the Schedule" generically.
 
 ---
 
@@ -142,6 +144,7 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 - **Press release URL:** https://www.ey.com/en_in/newsroom/2025/11/58-percent-gccs-in-india-investing-in-agentic-ai-two-third-creating-dedicated-innovation-teams-to-globalize-ideas-ey-gcc-pulse-survey-2025
 - **Report PDF:** https://www.ey.com/content/dam/ey-unified-site/ey-com/en-in/insights/consullting/global-capability-centers/documents/ey-global-capability-center-gcc-pulse-survey-november-2025.pdf
 - Dateline: **Bengaluru, 23 November 2025.**
+- **Reviewed 2026-09-25 — see D6, closed.** Read against the report PDF directly (not only the press release). GenAI (83%) and Agentic AI (58% current / 29% planning) figures, the only two of this table PRD.md currently cites, are confirmed verbatim on the PDF's technology-investment page. One correction found: this table's "Upskilling internal teams on GenAI" was recorded as 81%; the PDF's actual figure for that specific question (approach to building GenAI capability, page 14/15) is **86%** — 81% is a different figure, from a separate EVP-priorities question ("Upskilling" as a retention priority, page 17/18), not GenAI-specific. Corrected above; this row was not displayed anywhere in the product before the fix.
 
 | Claim | Figure |
 |---|---|
@@ -152,7 +155,7 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 | **Fully embedded cybersecurity Centre of Excellence** | **7%** |
 | Monitor third-party access to data (2025 vs 2024) | 60% vs 44% |
 | Report compliance complexity / data privacy concerns (2025 vs 2024) | 42% vs 32% |
-| Upskilling internal teams on GenAI | 81% |
+| Upskilling internal teams on GenAI (approach to building GenAI capability) | 86% |
 | Attrition (2025 vs 2023) | 9% vs 13% |
 | Transfer pricing cited as key regulatory concern | 63% |
 
@@ -183,12 +186,12 @@ The following were searched for and **no credible public source was found**. The
 
 | # | Item | Owner action |
 |---|---|---|
-| D1 | Review the **16 December 2025 corrigendum** and reconcile against the rule inventory in A1.2 | Read the corrigendum PDF; amend controls if rule numbering or text changed |
-| D2 | Confirm the **₹250 crore** penalty entry maps to the breach types AssureLens names | Read the Schedule to the Act, entry by entry |
+| ~~D1~~ | ~~Review the **corrigendum (G.S.R. 892(E), 11 December 2025)** and reconcile against the rule inventory in A1.2~~ | **CLOSED 2026-09-25.** Purely typographical (Rule 1(3)/(4) Gazette wording); no rule numbering or substantive text changed. No control amendment needed. See A1. |
+| ~~D2~~ | ~~Confirm the **₹250 crore** penalty entry maps to the breach types AssureLens names~~ | **CLOSED 2026-09-25.** ₹250cr = section 8(5) security safeguards; ₹200cr = section 8(6) breach notification, a separate entry. Not currently displayed against a named breach type in-product. See A2. |
 | ~~D3~~ | ~~Extract **Third Schedule** retention classes and periods in full~~ | **CLOSED Day 2.** All three classes extracted. Meridian matches none; Rules 8(1)/8(2) scoped N/A with a written reason. See A1.3. |
-| D4 | Extract **First Schedule Part B** Consent Manager obligations in full | Needed for the consent-manager control family |
-| D5 | Confirm whether any **Rule 15 special order** on cross-border transfer has been issued since notification | Affects control DPDP-15-01's testability |
-| D6 | Verify the GCC Pulse figures against the **report PDF**, not only the press release | Press release is a secondary rendering of the survey |
-| D7 | Confirm the statutory retention period applicable to an Indian bank (PMLA s.12 / RBI KYC Master Direction) | The Act's Illustration (II) says ten years; that is the Act illustrating itself, not a banking-law provision this project has read. No control cites a banking-law period until this is closed. |
+| D4 | Extract **First Schedule Part B** Consent Manager obligations in full | **Not extracted — remains genuinely open.** Verified 2026-09-25 that the dependent clause (R4) already carries `source_status: UNVERIFIED` with a `source_note` pointing here, and the Consent Manager control gates on G7 rather than asserting a result — satisfies the acceptance bar ("close, or flag with G7"), but the legal text itself is still unread. |
+| ~~D5~~ | ~~Confirm whether any **Rule 15 special order** on cross-border transfer has been issued since notification~~ | **CLOSED 2026-09-25.** As of September 2026, the Central Government has not notified an approved-country list or any general/special order under Rule 15; cross-border restrictions are not yet operative (commence 13 May 2027 with the rest of Rule 15). DPDP-15-01 correctly gates on G7 with nothing yet to test. |
+| ~~D6~~ | ~~Verify the GCC Pulse figures against the **report PDF**, not only the press release~~ | **CLOSED 2026-09-25.** Confirmed 83% GenAI / 58% Agentic AI (the two figures PRD.md cites) against the PDF directly. Found and corrected one unrelated table error: "upskilling on GenAI" was 81%, actually 86% (81% was a different, non-GenAI question). See B2. |
+| D7 | Confirm the statutory retention period applicable to an Indian bank (PMLA s.12 / RBI KYC Master Direction) | **Still open — a discrepancy found, not resolved.** Secondary sources put PMLA s.12 / RBI KYC retention at five years post-closure, not the Act illustration's ten. Left unresolved rather than guessed at; no control cites a banking-law period, only the Act's own illustration, and none depend on which number is correct. See A1.1. |
 
 Until an open item is closed, any control that depends on it ships with an explicit `source_status: unverified` flag, and the UI renders it as **Insufficient Evidence — source unverified** rather than asserting a result. The product's own honesty rule applies to the product's own claims.

@@ -62,10 +62,10 @@ export function RoadmapScatter({ items }: { items: RoadmapItem[] }) {
       </div>
 
       <figcaption className="mt-1 grid grid-cols-1 gap-x-4 gap-y-1 text-meta text-ink-2 sm:grid-cols-2">
-        <p className="m-0">Top-left: quick wins — high impact, low effort.</p>
-        <p className="m-0">Top-right: major projects — high impact, high effort.</p>
-        <p className="m-0">Bottom-left: fill-ins — low impact, low effort.</p>
-        <p className="m-0">Bottom-right: low priority — low impact, high effort.</p>
+        <p className="m-0">Top-left: quick wins (high impact, low effort).</p>
+        <p className="m-0">Top-right: major projects (high impact, high effort).</p>
+        <p className="m-0">Bottom-left: fill-ins (low impact, low effort).</p>
+        <p className="m-0">Bottom-right: low priority (low impact, high effort).</p>
       </figcaption>
     </figure>
   );

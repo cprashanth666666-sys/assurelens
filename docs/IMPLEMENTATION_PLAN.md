@@ -317,9 +317,11 @@ test_attestation_alone_gates # G4 — the questionnaire-tool failure mode
 
 **The resume bullet** is written last, from measured output:
 
-> *Built AssureLens, a DPDP + AI controls assurance workbench: 25 controls mapped to the DPDP Rules 2025, ISO 27001 and NIST AI RMF; 5 executable test suites detected 9/9 seeded defects across a live target service with zero false positives, while gating N controls as insufficient evidence rather than reporting unsupported conclusions.*
+> *Built AssureLens, a DPDP + AI controls assurance workbench: 25 controls mapped to the DPDP Rules 2025, ISO 27001 and NIST AI RMF; 5 executable test suites detected 10/10 seeded defects across a live target service with zero false positives, while gating 1 control as insufficient evidence rather than reporting an unsupported conclusion.*
 
-`N` is filled from the actual run. Not before.
+Filled from the actual run on 2026-09-25 (run 46, seed 42): 12 Fail, 1
+Insufficient Evidence, 1 Not Applicable, of 14 results — see README.md
+"What I found" for the full breakdown.
 
 ---
 

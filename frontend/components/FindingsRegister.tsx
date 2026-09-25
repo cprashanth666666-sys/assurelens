@@ -353,7 +353,7 @@ function ExpandedFinding({
             <ul className="m-0 flex flex-col gap-1 p-0 text-sm text-ink-2">
               {detail.history.map((h, i) => (
                 <li key={i} className="list-none font-mono text-xs">
-                  {new Date(h.changed_at).toLocaleString()} — {h.field}: {h.old_value ?? "—"} → {h.new_value ?? "—"}
+                  {new Date(h.changed_at).toLocaleString()} · {h.field}: {h.old_value ?? "–"} → {h.new_value ?? "–"}
                 </li>
               ))}
             </ul>

@@ -71,7 +71,7 @@ export default async function OverviewPage() {
           <p className="m-0 text-base text-ink-2 md:text-lg md:leading-prose">
             Readiness by domain, a 5×5 risk heatmap, and the evidence quality
             meter: what proportion of the estate has been graded, and what has
-            not. Deliberately no headline compliance percentage — a domain at
+            not. Deliberately no headline compliance percentage. A domain at
             40% coverage and one at 95% cannot be averaged into an honest
             number.
           </p>

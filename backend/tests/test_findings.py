@@ -192,7 +192,8 @@ def test_ref_allocation_continues_past_the_highest_existing_number(
 
 def _run(db: Session, engagement_id: int) -> None:
     run_suites(
-        db, engagement_id, ["consent", "pii_retention", "third_party", "ai_assurance"],
+        db, engagement_id,
+        ["consent", "pii_retention", "access_probes", "third_party", "ai_assurance"],
         seed=42, broker=default_broker(), engine_version="test",
     )
     db.flush()
@@ -208,11 +209,11 @@ def test_a_full_run_raises_findings_from_executed_tests_only(
     raised = seeded_estate.scalars(
         select(Finding).where(Finding.engagement_id == engagement.id)
     ).all()
-    # 8 today: 8 FAILs across the four suites currently built (consent,
-    # pii_retention, third_party, ai_assurance). access_probes -- S2/S3 --
-    # is not yet built, so this is short of the plan's >=9 bar; that gap is
-    # tracked separately and is not something this test should paper over.
-    assert len(raised) == 8
+    # 12 today: 12 FAILs across all five suites. DPDP-08-02 (the processor
+    # erasure cascade) stays INSUFFICIENT_EVIDENCE -- Meridian keeps no
+    # erasure-instruction record, so it genuinely has nothing to conclude
+    # from, and DPDP-08-04 is correctly NOT_APPLICABLE -- neither raises.
+    assert len(raised) == 12
     assert all(f.description for f in raised)
     for f in raised:
         assert 1 <= f.likelihood <= 5
@@ -227,9 +228,9 @@ def test_no_finding_is_raised_for_a_passing_or_gated_control(
     seeded_estate: Session,
 ) -> None:
     """Only a clean FAIL raises. A PASS raises nothing; an
-    INSUFFICIENT_EVIDENCE result (the unregistered access_probes controls,
-    the ungated erasure cascade) raises nothing either -- the gate's own
-    explanation is not re-narrated as a finding."""
+    INSUFFICIENT_EVIDENCE result (the erasure cascade, gated because
+    Meridian keeps no erasure-instruction record) raises nothing either --
+    the gate's own explanation is not re-narrated as a finding."""
     engagement = seeded_estate.scalar(select(Engagement).order_by(Engagement.id).limit(1))
     assert engagement is not None
     run_suites(

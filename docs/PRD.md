@@ -401,7 +401,7 @@ Stated here, in the README, and in the workpaper front matter. Not buried.
 1. **Synthetic data.** The estate is generated. It demonstrates that the tests work; it says nothing about any real organisation.
 2. **Not legal advice.** Clause mappings are the author's reading of the Rules. A qualified adviser should confirm scope before reliance.
 3. **Rules not fully in force.** Rules 3, 5–16, 22, 23 commence 13 May 2027. Controls are written against the notified text; interpretation will develop, and Board guidance may change it.
-4. **Corrigendum not fully reviewed.** A corrigendum was published 16 December 2025. [SOURCES D1]
+4. **Corrigendum reviewed.** G.S.R. 892(E), 11 December 2025 — purely typographical, no substantive change. [SOURCES D1, closed]
 5. **Partial control coverage.** ~25 controls authored, ~12 executable in v1. The rest are documented with evidence contracts and render as `INSUFFICIENT_EVIDENCE` under G4 — which is the honest state for a control that has not been tested.
 6. **Survey benchmarks are directional.** EY figures are self-reported from 150+ professionals, not a random sample of Indian enterprises. Shown as an external reference band, never as the user's position. [SOURCES B1]
 7. **Single fictional entity.** Control weighting is tuned for a BFSI GCC and would need rework for another sector.

@@ -26,6 +26,7 @@ from app.models.estate import (
     ProcessingActivity,
     ThirdParty,
 )
+from app.suites.access_probes import probe_access_exchanges
 from app.suites.consent import probe_downstream, probe_journey
 
 # Caps on what a single run pulls into memory. Large enough that coverage is
@@ -266,3 +267,16 @@ def probe_segment(context: dict[str, Any], client: httpx.Client) -> dict[str, An
     pinning it keeps runs reproducible.
     """
     return probe_downstream(client, "MFS001001")
+
+
+@register_probe("probe_exchanges")
+def probe_access_control(context: dict[str, Any], client: httpx.Client) -> dict[str, Any]:
+    """Every access-control adversarial exchange, in one HTTP_PROBE payload.
+
+    Four controls (ownership, input validation, log visibility, stale
+    credential) all read from this single run rather than each re-probing
+    the target: the log-visibility control specifically needs to see what
+    the *other* probes' attempts produced, so they have to share one
+    exchange rather than run independently.
+    """
+    return probe_access_exchanges(client)

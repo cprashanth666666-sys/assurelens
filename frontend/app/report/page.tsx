@@ -48,8 +48,8 @@ export default async function ReportPage() {
           buildsOn="Day 9"
         />
       ) : (
-        <div className="bg-inset px-4 py-8 md:px-8 md:py-12">
-          <article className="mx-auto max-w-[54rem] border border-rule-strong bg-surface px-8 py-10 shadow-sm md:px-14 md:py-14">
+        <div className="bg-inset px-4 py-8 md:px-8 md:py-7">
+          <article className="mx-auto max-w-[54rem] border border-rule-strong bg-surface px-8 py-10 md:px-8 md:py-8">
             <p className="label m-0">
               {role === "consultant" ? "Workpaper preview" : "Executive summary preview"}
             </p>
@@ -70,7 +70,7 @@ export default async function ReportPage() {
             <p className="m-0 max-w-prose text-sm leading-prose text-ink-2">
               {role === "consultant"
                 ? "One section per control tested: procedure performed, population and sample, evidence obtained, result, exception and recommendation. Front matter states scope, methodology and limitations. Appendices list the full control library and every threshold override."
-                : "Where the engagement stands by domain, the five things to fix first, what could not be concluded and why, and what changes before obligations commence — one page, drawn from the same live data as the overview."}
+                : "One page, drawn from the same live data as the overview: where the engagement stands by domain, the five things to fix first, what could not be concluded and why, and what changes before obligations commence."}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3 border-t border-rule pt-6">
