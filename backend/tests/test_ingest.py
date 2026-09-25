@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from app.ingest.classify import CATEGORY_UNRECOGNIZED, classify_text
+from app.ingest.extract import extract_text
 from app.ingest.sniff import sniff_mime
 from app.ingest.ssrf import UnsafeUrl, assert_safe_url
 
@@ -49,6 +50,95 @@ class TestSniff:
 
     def test_plain_text_falls_back(self) -> None:
         assert sniff_mime(b"just some plain text") == "text/plain"
+
+
+def _minimal_pdf(text: str) -> bytes:
+    """A valid one-page PDF with a text stream, built by hand so the test
+    needs no PDF-writing dependency. xref offsets are computed, not guessed."""
+    stream = f"BT /F1 12 Tf 72 720 Td ({text}) Tj ET".encode()
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+        b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream
+        + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for i, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += f"{i} 0 obj\n".encode() + body + b"\nendobj\n"
+    xref = len(out)
+    out += f"xref\n0 {len(objects) + 1}\n0000000000 65535 f \n".encode()
+    for off in offsets:
+        out += f"{off:010d} 00000 n \n".encode()
+    out += (
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+        f"startxref\n{xref}\n%%EOF\n"
+    ).encode()
+    return bytes(out)
+
+
+class TestExtractEachFormat:
+    """Every format the intake page advertises, through sniff -> extract."""
+
+    def test_pdf(self) -> None:
+        data = _minimal_pdf("Data Processing Agreement with sub-processor")
+        assert sniff_mime(data) == "application/pdf"
+        result = extract_text(data)
+        assert result.error is None
+        assert result.page_count == 1
+        assert "Data Processing Agreement" in (result.text or "")
+
+    def test_docx(self) -> None:
+        import io
+
+        from docx import Document
+
+        doc = Document()
+        doc.add_paragraph("Grievance Redressal procedure")
+        buf = io.BytesIO()
+        doc.save(buf)
+        data = buf.getvalue()
+
+        assert sniff_mime(data) == (
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+        result = extract_text(data)
+        assert result.error is None
+        assert "Grievance Redressal" in (result.text or "")
+
+    def test_xlsx(self) -> None:
+        import io
+
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        wb.active.append(["Retention schedule", "7 years"])  # type: ignore[union-attr]
+        buf = io.BytesIO()
+        wb.save(buf)
+        data = buf.getvalue()
+
+        assert sniff_mime(data) == (
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        result = extract_text(data)
+        assert result.error is None
+        assert "Retention schedule | 7 years" in (result.text or "")
+
+    def test_html_drops_script_content(self) -> None:
+        data = b"<html><body><h1>Privacy Policy</h1><script>evil()</script></body></html>"
+        result = extract_text(data)
+        assert result.error is None
+        assert "Privacy Policy" in (result.text or "")
+        assert "evil" not in (result.text or "")
+
+    def test_a_corrupt_pdf_is_a_recorded_failure_not_a_crash(self) -> None:
+        result = extract_text(b"%PDF-1.4\nthis is not a real pdf")
+        assert result.text is None
+        assert result.error is not None
 
 
 class TestClassify:

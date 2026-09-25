@@ -3,13 +3,20 @@
 Covers: upload -> stored, extracted and classified end to end; re-uploading
 identical bytes resolves to the same row rather than duplicating; a URL
 pointed at a private address is refused before any request is issued.
+
+Processing runs as a background task AFTER the response is sent, so the POST
+body always reports RECEIVED; the classification is read back afterwards.
+TestClient completes background tasks before `post()` returns, so one GET is
+enough -- no polling needed here.
 """
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.main import app
@@ -18,6 +25,35 @@ from app.models.control import Engagement
 pytestmark = pytest.mark.usefixtures("seeded_db")
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _empty_document_tables(seeded_db: Session) -> None:
+    # Upload dedups on content hash, so a row left by an earlier run would be
+    # returned as-is -- already CLASSIFIED -- and a test could pass without
+    # the pipeline ever running. That false pass hid a real bug once.
+    seeded_db.execute(
+        text(
+            "TRUNCATE document_classifications, document_extractions, documents "
+            "RESTART IDENTITY CASCADE"
+        )
+    )
+    seeded_db.commit()
+
+
+def _upload(engagement_id: int, name: str, data: bytes) -> dict[str, Any]:
+    response = client.post(
+        f"/api/engagements/{engagement_id}/documents",
+        files={"file": (name, data, "text/plain")},
+    )
+    assert response.status_code == 201, response.text
+    body: dict[str, Any] = response.json()
+    return body
+
+
+def _read_back(document_id: int) -> dict[str, Any]:
+    body: dict[str, Any] = client.get(f"/api/documents/{document_id}").json()
+    return body
 
 SAMPLE_PRIVACY_NOTICE = b"""
 This Privacy Notice describes the personal data we collect from each
@@ -33,16 +69,20 @@ def engagement_id(seeded_db: Session) -> int:
     return engagement.id
 
 
+def test_the_upload_response_is_received_not_yet_classified(engagement_id: int) -> None:
+    """The response is sent before processing starts. Claiming CLASSIFIED
+    here would be reporting a result nobody has computed yet."""
+    body = _upload(engagement_id, "notice.txt", SAMPLE_PRIVACY_NOTICE)
+    assert body["status"] == "RECEIVED"
+    assert body["classification"] is None
+
+
 def test_uploading_a_plain_text_document_is_extracted_and_classified(
     engagement_id: int,
 ) -> None:
-    response = client.post(
-        f"/api/engagements/{engagement_id}/documents",
-        files={"file": ("notice.txt", SAMPLE_PRIVACY_NOTICE, "text/plain")},
-    )
+    uploaded = _upload(engagement_id, "notice.txt", SAMPLE_PRIVACY_NOTICE)
+    body = _read_back(uploaded["id"])
 
-    assert response.status_code == 201
-    body = response.json()
     assert body["status"] == "CLASSIFIED"
     assert body["detected_mime"] == "text/plain"
     assert body["extraction"] is not None
@@ -79,12 +119,10 @@ def test_reuploading_identical_bytes_resolves_to_the_same_document(
 def test_a_document_unrecognised_by_the_classifier_says_so_rather_than_guessing(
     engagement_id: int,
 ) -> None:
-    response = client.post(
-        f"/api/engagements/{engagement_id}/documents",
-        files={"file": ("random.txt", b"the quick brown fox jumps", "text/plain")},
-    )
+    uploaded = _upload(engagement_id, "random.txt", b"the quick brown fox jumps")
+    body = _read_back(uploaded["id"])
 
-    body = response.json()
+    assert body["status"] == "CLASSIFIED"
     assert body["classification"]["category"] == "UNRECOGNIZED"
 
 

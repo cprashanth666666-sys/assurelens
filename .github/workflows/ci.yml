@@ -35,6 +35,11 @@ jobs:
       # 5432; locally docker-compose publishes 5433 to dodge a locally
       # installed PostgreSQL that usually owns 5432.
       TEST_DATABASE_URL: postgresql+psycopg://assurelens:ci@localhost:5432/assurelens
+      # The consent suite probes the deliberately-vulnerable target over HTTP,
+      # exactly as it does in production. Without it running, those controls
+      # correctly gate on G8_TARGET_UNREACHABLE -- and the findings tests that
+      # expect S1 to be found fail, which is how main went red on Day 8.
+      TARGET_SERVICE_URL: http://localhost:8001
 
     defaults:
       run:
@@ -62,6 +67,20 @@ jobs:
       # waiting to happen.
       - name: Migrate
         run: alembic upgrade head
+
+      # Started as a process over real HTTP, not imported in-process: a
+      # defect that is not network-reachable must not be found. [TRD 1.2]
+      # Its only dependencies (fastapi, uvicorn, pydantic) come with the
+      # backend install above.
+      - name: Start target service
+        working-directory: target_service
+        run: |
+          nohup uvicorn app:app --host 127.0.0.1 --port 8001 > /tmp/target.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8001/health && exit 0
+            sleep 1
+          done
+          echo "target service did not become healthy"; cat /tmp/target.log; exit 1
 
       - name: Test
         run: pytest -q

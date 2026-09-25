@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   DOCUMENT_CATEGORY_LABEL,
@@ -40,6 +40,22 @@ export function IntakePortal({
     const latest = await fetchDocuments(engagementId);
     if (latest) setDocuments(latest);
   }
+
+  // Extraction and classification run after the upload response returns, so
+  // a fresh row is RECEIVED/PROCESSING when first listed. Poll until every
+  // row settles; capped so a stuck document can't poll forever.
+  const pending = documents.some((d) => PENDING_STATUSES.includes(d.status));
+  useEffect(() => {
+    if (!pending) return;
+    let attempts = 0;
+    const timer = setInterval(async () => {
+      attempts += 1;
+      const latest = await fetchDocuments(engagementId);
+      if (latest) setDocuments(latest);
+      if (attempts >= MAX_POLLS) clearInterval(timer);
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [pending, engagementId]);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -161,6 +177,10 @@ export function IntakePortal({
     </div>
   );
 }
+
+const PENDING_STATUSES: DocumentStatus[] = ["RECEIVED", "PROCESSING", "EXTRACTED"];
+const POLL_INTERVAL_MS = 1500;
+const MAX_POLLS = 40;
 
 const STATUS_CHIP_CLASS: Record<DocumentStatus, string> = {
   RECEIVED: "border border-control text-ink-2",
