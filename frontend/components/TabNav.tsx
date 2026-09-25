@@ -17,6 +17,7 @@ import { useEffect, useRef } from "react";
 
 const TABS = [
   { href: "/", label: "Overview" },
+  { href: "/intake", label: "Intake" },
   { href: "/controls", label: "Controls" },
   { href: "/runs", label: "Test Runs" },
   { href: "/findings", label: "Findings" },

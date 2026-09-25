@@ -37,6 +37,28 @@
 
 ---
 
+## Step 1b — Cloudflare R2 (document storage)
+
+Only needed once the document-intake feature is in use. Skip it and leave
+`STORAGE_BACKEND` unset (defaults to `local`) for a Render deploy that never
+receives an upload — but set it before anyone actually submits a document,
+because `local` on Render's free plan loses every file on the next deploy or
+scale-to-zero cycle (no persistent-disk option exists on that plan). Same
+constraint, same fix as Neon vs. Render Postgres above.
+
+1. Sign up at [dash.cloudflare.com](https://dash.cloudflare.com) → **R2** →
+   create a bucket, e.g. `assurelens-documents`. The free tier is 10GB
+   storage with no egress fee and no expiry.
+2. **Manage R2 API Tokens** → create a token scoped to that bucket
+   (Object Read & Write). Note the **Access Key ID**, **Secret Access Key**,
+   and your **Account ID**.
+3. The R2 endpoint is `https://<account-id>.r2.cloudflarestorage.com`.
+4. These five values become Render environment variables in Step 2:
+   `STORAGE_BACKEND=s3`, `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_REGION=auto`,
+   `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`.
+
+---
+
 ## Step 2 — Render (backend and target service)
 
 Target: existing Render project **`assurelens`**, environment **`EY`**.
@@ -50,6 +72,7 @@ Target: existing Render project **`assurelens`**, environment **`EY`**.
    |---|---|
    | `DATABASE_URL` | the Neon string from Step 1 |
    | `CORS_ALLOW_ORIGINS` | `http://localhost:3000` — placeholder, replaced in Step 4 |
+   | `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | from Step 1b, once document intake is in use |
 
 5. **Set `region:` in [render.yaml](render.yaml) to match your Neon region** before applying, if it is not already. It ships pinned to `ohio` for a Neon project in `us-east-2`.
 6. Wait for the deploy. The start command runs `alembic upgrade head`, then `python -m app.seed`, then uvicorn. The control library is upserted every boot so edits ship with the deploy; the synthetic estate is skipped once present, because rebuilding 24,000 rows on every restart changes nothing and takes long enough to fail the health check.
