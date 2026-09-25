@@ -68,9 +68,14 @@ cd frontend && npm install && npm run dev
 ## Checks
 
 ```bash
+docker compose up -d postgres target_service   # the consent suite probes the target over HTTP
 cd backend && ruff check . && mypy app && pytest -q
 cd frontend && npm run lint && npm run typecheck && npm run build
 ```
+
+Without `target_service` running, the consent controls correctly gate on
+`G8_TARGET_UNREACHABLE` and the findings tests fail — that is the gate working,
+not a flaky test.
 
 `DATABASE_URL` is required with no default, and `NEXT_PUBLIC_API_BASE_URL` must
 be set at **build** time — Next.js inlines `NEXT_PUBLIC_*` into the bundle

@@ -33,6 +33,7 @@ services:
       CORS_ALLOW_ORIGINS: http://localhost:3000
       TARGET_SERVICE_URL: http://target_service:8001
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DOCUMENT_STORAGE_DIR: /data/documents
     ports:
       - "8000:8000"
     depends_on:
@@ -43,6 +44,9 @@ services:
       # Mounted at the path CONTROLS_DIR names, so an edit to the library is
       # picked up without a rebuild. The image also carries its own copy.
       - ./controls:/opt/assurelens/controls:ro
+      # Uploaded document bytes. Named, not bind-mounted to the repo, so they
+      # survive a container recreate without cluttering a git checkout.
+      - document_storage:/data/documents
     # Mirrors the Render start command, so local and deployed behave the same.
     command: >
       sh -c "alembic upgrade head &&
@@ -75,3 +79,4 @@ services:
 
 volumes:
   pgdata:
+  document_storage:
