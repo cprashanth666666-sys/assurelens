@@ -466,3 +466,141 @@ export type Readiness = {
 
 export const fetchReadiness = (engagementId: number) =>
   get<Readiness>(`/api/engagements/${engagementId}/readiness`);
+
+// --- Document intake ---------------------------------------------------------
+
+export type DocumentStatus =
+  | "RECEIVED"
+  | "PROCESSING"
+  | "EXTRACTED"
+  | "CLASSIFIED"
+  | "REJECTED"
+  | "FAILED";
+
+export const DOCUMENT_STATUS_LABEL: Record<DocumentStatus, string> = {
+  RECEIVED: "Received",
+  PROCESSING: "Processing",
+  EXTRACTED: "Extracted",
+  CLASSIFIED: "Classified",
+  REJECTED: "Rejected",
+  FAILED: "Failed",
+};
+
+export type DocumentCategory =
+  | "PRIVACY_NOTICE"
+  | "CONSENT_FORM"
+  | "DPIA"
+  | "VENDOR_DPA"
+  | "BREACH_RUNBOOK"
+  | "SECURITY_POLICY"
+  | "RETENTION_POLICY"
+  | "GRIEVANCE_PROCEDURE"
+  | "UNRECOGNIZED";
+
+export const DOCUMENT_CATEGORY_LABEL: Record<DocumentCategory, string> = {
+  PRIVACY_NOTICE: "Privacy notice",
+  CONSENT_FORM: "Consent form",
+  DPIA: "DPIA",
+  VENDOR_DPA: "Vendor DPA",
+  BREACH_RUNBOOK: "Breach runbook",
+  SECURITY_POLICY: "Security policy",
+  RETENTION_POLICY: "Retention policy",
+  GRIEVANCE_PROCEDURE: "Grievance procedure",
+  // Never silently forced into a category the heuristic wasn't sure of — the
+  // same posture as INSUFFICIENT_EVIDENCE elsewhere in this product.
+  UNRECOGNIZED: "Not recognised",
+};
+
+export type DocumentClassificationOut = {
+  category: DocumentCategory | string;
+  confidence: number;
+  method: string;
+  reasoning: string | null;
+  classified_at: string;
+};
+
+export type DocumentExtractionOut = {
+  page_count: number | null;
+  extraction_engine: string;
+  truncated: boolean;
+  extraction_error: string | null;
+  text_preview: string | null;
+};
+
+export type IntakeDocument = {
+  id: number;
+  source_type: "UPLOAD" | "URL";
+  original_name: string;
+  detected_mime: string | null;
+  size_bytes: number;
+  content_hash: string;
+  status: DocumentStatus;
+  rejection_reason: string | null;
+  created_at: string;
+  processed_at: string | null;
+  extraction: DocumentExtractionOut | null;
+  classification: DocumentClassificationOut | null;
+};
+
+export const fetchDocuments = (engagementId: number) =>
+  get<IntakeDocument[]>(`/api/engagements/${engagementId}/documents`);
+
+/** Distinguishes a validation rejection (4xx, with a message worth showing)
+ * from an unreachable API — the same three-state discipline as
+ * `fetchLatestResult`, so a cold backend never renders as "your file was
+ * invalid." */
+export type UploadOutcome =
+  | { kind: "ok"; document: IntakeDocument }
+  | { kind: "rejected"; detail: string }
+  | { kind: "unreachable" };
+
+export async function uploadDocument(
+  engagementId: number,
+  file: File,
+): Promise<UploadOutcome> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/engagements/${engagementId}/documents`,
+      { method: "POST", body: formData },
+    );
+    if (response.status >= 400 && response.status < 500) {
+      const body = (await response.json().catch(() => null)) as
+        | { detail?: string }
+        | null;
+      return { kind: "rejected", detail: body?.detail ?? "The file was rejected." };
+    }
+    if (!response.ok) return { kind: "unreachable" };
+    return { kind: "ok", document: (await response.json()) as IntakeDocument };
+  } catch {
+    return { kind: "unreachable" };
+  }
+}
+
+export async function submitDocumentUrl(
+  engagementId: number,
+  url: string,
+): Promise<UploadOutcome> {
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/engagements/${engagementId}/documents/from-url`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      },
+    );
+    if (response.status >= 400 && response.status < 500) {
+      const body = (await response.json().catch(() => null)) as
+        | { detail?: string }
+        | null;
+      return { kind: "rejected", detail: body?.detail ?? "The URL was rejected." };
+    }
+    if (!response.ok) return { kind: "unreachable" };
+    return { kind: "ok", document: (await response.json()) as IntakeDocument };
+  } catch {
+    return { kind: "unreachable" };
+  }
+}

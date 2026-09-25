@@ -40,6 +40,19 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     engine_version: str = "0.1.0"
 
+    # --- Document intake ----------------------------------------------------
+    # Local filesystem today; the interface in app/ingest/storage.py is shaped
+    # so an S3/R2 backend is a second implementation, not a rewrite. Raw bytes
+    # never go into Postgres — see migration 0006's docstring.
+    document_storage_dir: str = "/tmp/assurelens-documents"
+    # 25MB: generous for a policy PDF, small enough that a handful of
+    # concurrent uploads cannot exhaust a free-tier container's disk.
+    document_max_size_bytes: int = 25 * 1024 * 1024
+    # Extracted text kept inline in the database, matching the evidence
+    # payload pattern (small, queryable). Beyond this it is truncated and the
+    # full text goes to storage instead. [SCHEMA D4 precedent]
+    document_max_inline_text_chars: int = 200_000
+
     @field_validator("database_url")
     @classmethod
     def _normalise_driver(cls, value: str) -> str:

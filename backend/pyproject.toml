@@ -17,6 +17,9 @@ dependencies = [
     "python-docx>=1.1",
     "python-multipart>=0.0.12",
     "pyyaml>=6.0",
+    "pypdf>=5.1",
+    "openpyxl>=3.1",
+    "beautifulsoup4>=4.12",
 ]
 
 [build-system]
@@ -58,7 +61,7 @@ strict = true
 plugins = []
 # Third-party packages without stubs.
 [[tool.mypy.overrides]]
-module = ["docx.*"]
+module = ["docx.*", "openpyxl.*", "bs4.*", "pypdf.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
