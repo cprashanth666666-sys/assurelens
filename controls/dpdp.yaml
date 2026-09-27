@@ -108,12 +108,15 @@ clauses:
       A person who fulfils the conditions for registration of Consent Managers
       set out in Part A of First Schedule may apply to the Board for
       registration as a Consent Manager ... The Consent Manager shall have
-      obligations as specified in Part B of First Schedule.
-    source_status: UNVERIFIED
-    source_note: >-
-      First Schedule Parts A and B have not been extracted in full. See
-      SOURCES.md open item D4. Controls resting on this clause gate on
-      G7_SOURCE_UNVERIFIED rather than asserting a result.
+      obligations as specified in Part B of First Schedule. [First Schedule,
+      Part B, cl. 4(c)]: "shall maintain such record for at least seven years,
+      or for such longer period as the Data Principal and Consent Manager may
+      agree upon or as may be required by law." [cl. 2]: "shall ensure that
+      the manner of making available the personal data or its sharing is such
+      that the contents thereof are not readable by it."
+    source_status: VERIFIED
+    # First Schedule Part B extracted in full from the Gazette text (13
+    # numbered clauses) on 2026-09-27. See SOURCES.md A1.4 and closed item D4.
 
   - ref: "R6(1)(a)"
     title: Data security measures — encryption, obfuscation, masking, tokenisation
@@ -382,9 +385,11 @@ controls:
     is_executable: false
     clauses:
       - {ref: "R4", primary: true, rationale: "Rule 4 and First Schedule govern Consent Managers."}
-    # Rule 4 commences 2026-11-13, ahead of the main tranche. Its clause is
-    # UNVERIFIED pending extraction of First Schedule Part B, so this control
-    # gates on G7 rather than asserting a result.
+    # Rule 4 commences 2026-11-13, ahead of the main tranche. It remains
+    # is_executable: false — readiness against a not-yet-operative registration
+    # regime is a documentation review, not something to probe — so it still
+    # renders INSUFFICIENT_EVIDENCE under G4 (not tested), now without the
+    # G7 source-unverified qualifier: the underlying clause is confirmed.
 
   # --- Security safeguards ------------------------------------------------
   - ref: DPDP-06-01

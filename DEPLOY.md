@@ -74,7 +74,7 @@ Target: existing Render project **`assurelens`**, environment **`EY`**.
    | `CORS_ALLOW_ORIGINS` | `http://localhost:3000` — placeholder, replaced in Step 4 |
    | `S3_ENDPOINT_URL`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | from Step 1b, once document intake is in use |
 
-5. **Set `region:` in [render.yaml](render.yaml) to match your Neon region** before applying, if it is not already. It ships pinned to `ohio` for a Neon project in `us-east-2`.
+5. **No `region:` field in [render.yaml](render.yaml)**, deliberately — Render's blueprint spec says region can't be changed after a service exists, and adding it once these services already existed broke every subsequent blueprint sync (see the comment in render.yaml). Region is whatever the existing `assurelens` Render services were created with; co-locating with Neon's `us-east-2` would need deleting and recreating them, which isn't worth it for a demo idle most of the time.
 6. Wait for the deploy. The start command runs `alembic upgrade head`, then `python -m app.seed`, then uvicorn. The control library is upserted every boot so edits ship with the deploy; the synthetic estate is skipped once present, because rebuilding 24,000 rows on every restart changes nothing and takes long enough to fail the health check.
 7. Copy the API URL, roughly `https://assurelens-api.onrender.com`. Render appends a suffix if the name is taken, so **copy the real one**.
 8. Confirm:

@@ -52,6 +52,18 @@ The widely-quoted "13 May 2027" deadline is therefore **confirmed by arithmetic 
 
 Schedules referenced: First (Consent Manager conditions Part A / obligations Part B), Second (research/archiving/statistical standards), Third (retention classes and periods), Fourth (children's data — Part A classes, Part B purposes), Seventh (log retention purposes).
 
+#### A1.4 First Schedule, Part B — Obligations of Consent Manager
+
+**Closed 2026-09-27 — see D4.** Extracted directly from the Gazette PDF (page header confirms "THE GAZETTE OF INDIA : EXTRAORDINARY [PART II—SEC. 3(i)]", pp. 33–34), not a secondary paraphrase. Thirteen numbered clauses, verbatim on the two load-bearing ones:
+
+> **Clause 2.** "The Consent Manager shall ensure that the manner of making available the personal data or its sharing is such that the contents thereof are not readable by it."
+>
+> **Clause 4(c).** "[The Consent Manager] shall maintain such record for at least seven years, or for such longer period as the Data Principal and Consent Manager may agree upon or as may be required by law."
+
+The rest, summarised (full text held in the fetched PDF): (1) enable consent given directly or routed through another onboarded Data Fiduciary; (3) maintain a platform record of consents/notices/sharing; (4)(a)(b) give the Data Principal access to that record, machine-readable on request; (5) maintain a website or app as the primary access point; (6) no sub-contracting of its obligations; (7) reasonable security safeguards; (8) act in a fiduciary capacity toward the Data Principal; (9)–(10) avoid conflicts of interest with onboarded Data Fiduciaries; (11) publish promoter/director/≥2%-shareholder information; (12) periodic audit reported to the Board; (13) no change of control without prior Board approval.
+
+R4's `source_status` is now `VERIFIED`; DPDP-04-01 no longer carries the G7 source-unverified qualifier (it still renders `INSUFFICIENT_EVIDENCE` under G4, correctly — the control was never executable, since Rule 4's registration regime has no live system to test against before 13 Nov 2026).
+
 #### A1.3 Key operative text relied on
 **Rule 6(1) — reasonable security safeguards.** Verbatim, the minimum set:
 > "(a) appropriate data security measures, such as securing of personal data through encryption, obfuscation, masking or the use of virtual tokens mapped to that personal data;
@@ -96,9 +108,14 @@ This clause is the backbone of controls **DPDP-06-xx** — it is what makes encr
 >
 > s.8(7)(b) extends the same duty to processors, which is what makes the third-party suite a retention control and not only an access one.
 >
-> *Unverified:* the specific ten-year period comes from the Act's illustration, not from a provision of PMLA or an RBI Master Direction that this project has read. Controls cite the Act's illustration, never a banking-law period. See open item D7.
+> The ten-year period is the Act's own illustration, not a citation to PMLA or the RBI KYC Master Direction — the RBI's own period is five years (§46, confirmed 2026-09-27, see D7 below and A1.1). Controls cite the Act's illustration, never a banking-law period.
 >
-> **D7 partial finding, 2026-09-25 — still open, not closed.** Secondary sources on PMLA s.12 and the RBI KYC Master Direction converge on **five years** post-closure as the actual banking-law retention period, not ten — the Act's own Illustration (II) may be citing a longer period than the specific AML/KYC provision this project could find, possibly a different or superseded requirement, or a period this project has not correctly identified. This is left **unresolved rather than guessed at**: the discrepancy itself, not a resolution, is the honest state to record. Controls continue to cite only the Act's own illustration (ten years), never the PMLA/RBI figure, and `legal_hold`-based justification (not a hardcoded period) remains the actual test — so no control's correctness depends on which number is right. The e-Gazette/RBI primary text has not been read directly; this finding rests on secondary legal-industry sources only.
+> **D7 CLOSED 2026-09-27.** Confirmed directly against the RBI's own published text (rbi.org.in, Master Direction – Know Your Customer (KYC) Direction, 2016, as amended, Chapter VII, §46(a)–(b)) — not a secondary paraphrase:
+>
+> > §46(a): "preserve the records pertaining to the identification of the customers and their addresses obtained while opening the account and during the course of business relationship, for at least five years after the business relationship is ended."
+> > §46(b): "maintain all necessary records of transactions between the RE and the customer, both domestic and international, for at least five years from the date of transaction."
+>
+> So the RBI KYC period is confirmed at **five years** — identification records running from end-of-relationship, transaction records running from the transaction date — genuinely shorter than, and running on a different clock from, the Act's own Illustration (II) to s.8(7)(a) (ten years, from date of account/loan closure). This is **not an error in either instrument**: the Act's illustration is just that, an illustration of "a law requiring retention," not a restatement of the RBI period, and the two numbers were never meant to match. Controls continue to cite only the Act's own illustration, never the RBI figure, and `legal_hold`-based justification (not a hardcoded period) remains the actual test — so no control's correctness depended on which number was right. The discrepancy is now explained, not merely flagged.
 
 **Rule 13 — Significant Data Fiduciary.** Verbatim obligations:
 - 13(1): "once in every period of twelve months … undertake a Data Protection Impact Assessment and an audit."
@@ -189,9 +206,9 @@ The following were searched for and **no credible public source was found**. The
 | ~~D1~~ | ~~Review the **corrigendum (G.S.R. 892(E), 11 December 2025)** and reconcile against the rule inventory in A1.2~~ | **CLOSED 2026-09-25.** Purely typographical (Rule 1(3)/(4) Gazette wording); no rule numbering or substantive text changed. No control amendment needed. See A1. |
 | ~~D2~~ | ~~Confirm the **₹250 crore** penalty entry maps to the breach types AssureLens names~~ | **CLOSED 2026-09-25.** ₹250cr = section 8(5) security safeguards; ₹200cr = section 8(6) breach notification, a separate entry. Not currently displayed against a named breach type in-product. See A2. |
 | ~~D3~~ | ~~Extract **Third Schedule** retention classes and periods in full~~ | **CLOSED Day 2.** All three classes extracted. Meridian matches none; Rules 8(1)/8(2) scoped N/A with a written reason. See A1.3. |
-| D4 | Extract **First Schedule Part B** Consent Manager obligations in full | **Not extracted — remains genuinely open.** Verified 2026-09-25 that the dependent clause (R4) already carries `source_status: UNVERIFIED` with a `source_note` pointing here, and the Consent Manager control gates on G7 rather than asserting a result — satisfies the acceptance bar ("close, or flag with G7"), but the legal text itself is still unread. |
+| ~~D4~~ | ~~Extract **First Schedule Part B** Consent Manager obligations in full~~ | **CLOSED 2026-09-27.** Extracted directly from the Gazette PDF text (page header-confirmed), all 13 clauses. R4's `source_status` flipped to `VERIFIED`; DPDP-04-01 no longer carries the G7 qualifier. See A1.4. |
 | ~~D5~~ | ~~Confirm whether any **Rule 15 special order** on cross-border transfer has been issued since notification~~ | **CLOSED 2026-09-25.** As of September 2026, the Central Government has not notified an approved-country list or any general/special order under Rule 15; cross-border restrictions are not yet operative (commence 13 May 2027 with the rest of Rule 15). DPDP-15-01 correctly gates on G7 with nothing yet to test. |
 | ~~D6~~ | ~~Verify the GCC Pulse figures against the **report PDF**, not only the press release~~ | **CLOSED 2026-09-25.** Confirmed 83% GenAI / 58% Agentic AI (the two figures PRD.md cites) against the PDF directly. Found and corrected one unrelated table error: "upskilling on GenAI" was 81%, actually 86% (81% was a different, non-GenAI question). See B2. |
-| D7 | Confirm the statutory retention period applicable to an Indian bank (PMLA s.12 / RBI KYC Master Direction) | **Still open — a discrepancy found, not resolved.** Secondary sources put PMLA s.12 / RBI KYC retention at five years post-closure, not the Act illustration's ten. Left unresolved rather than guessed at; no control cites a banking-law period, only the Act's own illustration, and none depend on which number is correct. See A1.1. |
+| ~~D7~~ | ~~Confirm the statutory retention period applicable to an Indian bank (PMLA s.12 / RBI KYC Master Direction)~~ | **CLOSED 2026-09-27.** Confirmed directly against rbi.org.in's own text: five years (identification records from end-of-relationship; transaction records from transaction date), Ch. VII §46(a)–(b). Genuinely shorter than, and on a different clock from, the Act's own ten-year illustration — not a citation error in either instrument. No control cites the RBI figure, only the Act's illustration, so no control's correctness depended on this. See A1.1. |
 
 Until an open item is closed, any control that depends on it ships with an explicit `source_status: unverified` flag, and the UI renders it as **Insufficient Evidence — source unverified** rather than asserting a result. The product's own honesty rule applies to the product's own claims.
