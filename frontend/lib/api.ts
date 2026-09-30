@@ -100,9 +100,12 @@ export const FRAMEWORK_LABEL: Record<string, string> = {
  * regardless. Callers receive null and show a reachability notice rather than
  * a spinner or a crash. [TRD 1.4]
  */
-async function get<T>(path: string): Promise<T | null> {
+async function get<T>(path: string, revalidate?: number): Promise<T | null> {
   try {
-    const response = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+    const response = await fetch(
+      `${API_BASE}${path}`,
+      revalidate === undefined ? { cache: "no-store" } : { next: { revalidate } },
+    );
     if (!response.ok) return null;
     return (await response.json()) as T;
   } catch {
@@ -110,13 +113,22 @@ async function get<T>(path: string): Promise<T | null> {
   }
 }
 
+/**
+ * The control library and engagement header only change when the backend
+ * redeploys and reseeds, yet every page re-fetched them uncached on every
+ * navigation -- against a free-tier backend that is the slowest thing on the
+ * page. A short window keeps navigation instant without hiding a reseed for
+ * long. Run results, findings and readiness stay `no-store`.
+ */
+const STATIC_REVALIDATE_SECONDS = 60;
+
 export const fetchControls = (query = "") =>
-  get<ControlSummary[]>(`/api/controls${query}`);
+  get<ControlSummary[]>(`/api/controls${query}`, STATIC_REVALIDATE_SECONDS);
 
 export const fetchControl = (ref: string) =>
-  get<ControlDetail>(`/api/controls/${encodeURIComponent(ref)}`);
+  get<ControlDetail>(`/api/controls/${encodeURIComponent(ref)}`, STATIC_REVALIDATE_SECONDS);
 
-export const fetchEngagement = () => get<Engagement>("/api/engagement");
+export const fetchEngagement = () => get<Engagement>("/api/engagement", STATIC_REVALIDATE_SECONDS);
 
 
 // --- Runs ------------------------------------------------------------------

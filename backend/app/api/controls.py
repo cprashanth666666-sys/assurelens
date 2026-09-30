@@ -9,7 +9,13 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.schemas import ClauseRef, ControlDetail, ControlSummary, EngagementSummary
 from app.db import get_db
-from app.models.control import Control, Engagement, EngagementControl
+from app.models.control import (
+    Control,
+    ControlClauseMapping,
+    Engagement,
+    EngagementControl,
+    FrameworkClause,
+)
 from app.models.results import TestResult, TestRun
 
 router = APIRouter()
@@ -68,7 +74,13 @@ def list_controls(
     stmt = (
         select(Control)
         .options(
-            selectinload(Control.mappings),
+            # Chained through clause -> framework: _summary() reads
+            # m.clause.framework.code for every mapping, and left lazy that
+            # is two extra round trips per mapping -- a couple of hundred
+            # queries for the library, each one a network hop to Neon.
+            selectinload(Control.mappings)
+            .joinedload(ControlClauseMapping.clause)
+            .joinedload(FrameworkClause.framework),
             selectinload(Control.procedures),
         )
         .order_by(Control.ref)
@@ -97,7 +109,9 @@ def get_control(ref: str, db: Session = Depends(get_db)) -> ControlDetail:
         select(Control)
         .where(Control.ref == ref)
         .options(
-            selectinload(Control.mappings),
+            selectinload(Control.mappings)
+            .joinedload(ControlClauseMapping.clause)
+            .joinedload(FrameworkClause.framework),
             selectinload(Control.procedures),
         )
     )
