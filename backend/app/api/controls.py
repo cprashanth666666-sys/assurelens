@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.schemas import ClauseRef, ControlDetail, ControlSummary, EngagementSummary
 from app.db import get_db
