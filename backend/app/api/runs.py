@@ -13,7 +13,7 @@ import datetime as dt
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.config import Settings, get_settings
@@ -109,7 +109,7 @@ class ControlResult(ResultSummary):
     evidence: list[EvidenceOut]
 
 
-def _summarise(run: TestRun, results: list[TestResult]) -> RunSummary:
+def _summarise(run: TestRun, result_count: int) -> RunSummary:
     return RunSummary(
         id=run.id,
         engagement_id=run.engagement_id,
@@ -120,7 +120,7 @@ def _summarise(run: TestRun, results: list[TestResult]) -> RunSummary:
         completed_at=run.completed_at,
         engine_version=run.engine_version,
         error=run.error,
-        result_count=len(results),
+        result_count=result_count,
     )
 
 
@@ -192,7 +192,7 @@ def start_run(
     )
     db.commit()
 
-    return _summarise(run, _result_rows(db, run.id))
+    return _summarise(run, len(_result_rows(db, run.id)))
 
 
 @router.get("/engagements/{engagement_id}/runs", response_model=list[RunSummary])
@@ -205,7 +205,18 @@ def list_runs(
         .order_by(TestRun.id.desc())
         .limit(50)
     ).all()
-    return [_summarise(r, _result_rows(db, r.id)) for r in runs]
+
+    # One grouped count for the whole page of runs. Loading every run's full
+    # result rows just to take len() was up to 51 queries and pulled the JSONB
+    # detail columns across the wire for nothing.
+    counts = dict(
+        db.execute(
+            select(TestResult.run_id, func.count())
+            .where(TestResult.run_id.in_([r.id for r in runs] or [0]))
+            .group_by(TestResult.run_id)
+        ).all()
+    )
+    return [_summarise(r, counts.get(r.id, 0)) for r in runs]
 
 
 @router.get("/engagements/{engagement_id}/summary")
@@ -243,9 +254,7 @@ def get_summary(engagement_id: int, db: Session = Depends(get_db)) -> Response:
 
 @router.get("/runs/{run_id}", response_model=RunDetail)
 def get_run(run_id: int, db: Session = Depends(get_db)) -> RunDetail:
-    run = db.scalar(
-        select(TestRun).where(TestRun.id == run_id).options(selectinload(TestRun.results))
-    )
+    run = db.get(TestRun, run_id)
     if run is None:
         raise HTTPException(status_code=404, detail=f"No run {run_id}")
 
@@ -260,7 +269,7 @@ def get_run(run_id: int, db: Session = Depends(get_db)) -> RunDetail:
     }
 
     return RunDetail(
-        **_summarise(run, results).model_dump(),
+        **_summarise(run, len(results)).model_dump(),
         results=[_to_summary(r, controls) for r in results],
     )
 

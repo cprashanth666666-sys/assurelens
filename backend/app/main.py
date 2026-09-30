@@ -7,6 +7,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 # Imported for its side effect: registering every suite procedure and
 # evidence source. Without it the registry is empty and every executable
@@ -33,6 +34,10 @@ app = FastAPI(
     docs_url="/docs",
 )
 
+# JSON compresses ~5-10x; the findings/controls payloads are repetitive text.
+# Added before CORS so CORS stays outermost and its headers reach every
+# response, including compressed ones.
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
